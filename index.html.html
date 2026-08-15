@@ -1,0 +1,1675 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17191d">
+<title>Mon carnet de bord</title>
+<style>
+:root{
+  --bg:#17191d;
+  --panel:#23262c;
+  --panel2:#2b2f36;
+  --text:#f2f3f5;
+  --muted:#b7bdc8;
+  --line:#414753;
+  --accent:#5aa9ff;
+  --accent2:#f2b84b;
+  --danger:#ff6b6b;
+  --violet:#b08cff;
+  --cyan:#5ed6d6;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.45;
+}
+header{
+  position:sticky; top:0; z-index:20;
+  background:rgba(23,25,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 16px 12px;
+}
+h1{font-size:23px;margin:0 0 4px;font-weight:800}
+.subtitle{font-size:14px;color:var(--muted)}
+main{max-width:820px;margin:auto;padding:14px 14px 220px}
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:0 4px 18px rgba(0,0,0,.12);
+}
+.metric-title{font-size:13px;color:var(--muted)}
+.metric-value{font-size:25px;font-weight:800;margin-top:4px}
+.metric-note{font-size:12px;color:var(--muted);margin-top:2px}
+.section{
+  margin:10px 0;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--panel);
+}
+.section button.section-head{
+  touch-action:manipulation;
+  width:100%;
+  border:0;
+  background:var(--panel);
+  color:var(--text);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px;
+  font-size:18px;
+  font-weight:800;
+  text-align:left;
+}
+.section-head .left{display:flex;gap:10px;align-items:center}
+.icon{
+  width:34px;height:34px;border-radius:10px;
+  display:grid;place-items:center;
+  background:var(--panel2);
+  font-size:19px
+}
+.chev{transition:.2s; color:var(--muted)}
+.section.open .chev{transform:rotate(90deg)}
+.section-body{display:none;padding:0 14px 14px}
+.section.open .section-body{display:block}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+button, input, select, textarea{font:inherit}
+.action{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:12px;
+  padding:10px 13px;
+  font-weight:700;
+}
+.action.primary{background:var(--accent);color:#07111d;border-color:transparent}
+.action.warn{background:var(--accent2);color:#1d1400;border-color:transparent}
+.action.danger{background:transparent;color:#ff9b9b;border-color:#7c3a3a}
+form.entry{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin:8px 0 14px;
+}
+form.entry .full{grid-column:1/-1}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{
+  width:100%;
+  padding:11px 12px;
+  background:#111317;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:11px;
+}
+textarea{min-height:72px;resize:vertical}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{
+  background:#1d2025;
+  border:1px solid #383e49;
+  border-radius:13px;
+  padding:11px 12px;
+}
+.item-top{display:flex;justify-content:space-between;gap:8px}
+.item-title{font-weight:800}
+.item-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.item-text{margin-top:7px;white-space:pre-wrap}
+.badge{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#313742;
+  color:#dce2ea;
+  font-size:12px;
+}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+footer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(23,25,29,.97);
+  border-top:1px solid var(--line);
+  padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+  display:flex;gap:8px;justify-content:center;
+}
+footer button{max-width:260px;flex:1}
+.small{font-size:12px;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+@media(min-width:700px){
+  .dashboard{grid-template-columns:repeat(4,1fr)}
+}
+
+.chart-wrap{
+  margin-top:12px;
+  background:#1a1d22;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+}
+.chart-title{font-weight:800;margin-bottom:8px}
+.chart-legend{font-size:12px;color:var(--muted);margin-top:8px}
+canvas{width:100%;height:220px;display:block}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 12px}
+.quick{
+  background:#1c2026;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center
+}
+.quick b{display:block;font-size:18px}
+.quick span{font-size:11px;color:var(--muted)}
+.status-ok{color:#8dd8ff}
+.status-watch{color:#ffd479}
+.status-high{color:#ff9b9b}
+
+
+footer .action{font-size:13px;padding:9px 8px}
+@media(max-width:420px){footer .action{font-size:12px}}
+
+
+.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.compare-card{background:#1d2025;border:1px solid var(--line);border-radius:13px;padding:11px}
+.compare-card b{font-size:18px;display:block}
+.compare-card span{font-size:11px;color:var(--muted)}
+.trend-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.trend-table th,.trend-table td{padding:8px 6px;border-bottom:1px solid #363c46;text-align:left}
+.trend-table th{color:var(--muted);font-weight:700}
+.signal{display:inline-block;border-radius:999px;padding:3px 7px;font-size:11px;background:#303641}
+.signal.good{color:#9bdcff}.signal.mid{color:#ffd479}.signal.high{color:#ff9b9b}
+
+
+.exercise-card{background:#1b1f24;border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}
+.exercise-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.exercise-name{font-weight:800;font-size:16px}
+.exercise-desc{font-size:13px;color:var(--muted);margin-top:5px}
+.exercise-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.progressbar{height:9px;background:#101216;border:1px solid #343a43;border-radius:999px;overflow:hidden;margin-top:7px}
+.progressfill{height:100%;background:var(--accent);width:0}
+.checkline{display:flex;align-items:center;gap:8px;margin:7px 0}
+.checkline input{width:20px;height:20px}
+.exercise-status{font-size:11px;padding:3px 7px;border-radius:999px;background:#303641;color:#d8dde5}
+.exercise-status.validated{color:#9bdcff}
+.exercise-status.pause{color:#ffd479}
+.exercise-status.stop{color:#ff9b9b}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.range-row{display:grid;grid-template-columns:1fr 54px;gap:8px;align-items:center}
+.range-row input[type=range]{padding:0}
+
+
+.photo-preview{display:none;width:120px;height:120px;object-fit:cover;border-radius:12px;margin-top:8px;border:1px solid var(--line)}
+.photo-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.saved-thumb{width:110px;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--line);margin-top:8px}
+.integration-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.integration-card{background:#1d2025;border:1px solid #383e49;border-radius:13px;padding:12px}
+.integration-card b{display:block;margin-bottom:4px}
+.integration-card .small{line-height:1.45}
+@media(min-width:600px){.integration-grid{grid-template-columns:1fr 1fr}}
+
+.integration-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.integration-actions .action{flex:1;min-width:145px}
+.integration-status{margin-top:8px;padding:8px 10px;border-radius:10px;background:#171a1f;border:1px solid #343a43}
+
+
+.saved-photo-block{margin-top:10px}
+.saved-photo-block .saved-thumb{display:block;max-width:180px;max-height:180px;width:auto;height:auto;object-fit:cover;border-radius:12px;border:1px solid #3a414b}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>Mon carnet de bord</h1>
+  <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 15 AOÛT • V26</div>
+</header>
+
+<main>
+  <div class="dashboard">
+    <div class="card">
+      <div class="metric-title">Dernière glycémie</div>
+      <div class="metric-value" id="lastGlucose">—</div>
+      <div class="metric-note" id="lastGlucoseNote">Aucune donnée</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Mesures aujourd’hui</div>
+      <div class="metric-value" id="todayCount">0</div>
+      <div class="metric-note">glycémie</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Dernière note clavicule</div>
+      <div class="metric-value" style="font-size:17px" id="lastClavicle">—</div>
+      <div class="metric-note" id="lastClavicleNote">Aucune donnée</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Sommeil</div>
+      <div class="metric-value" id="lastSleep">—</div>
+      <div class="metric-note" id="lastSleepNote">Aucune donnée</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Dernière tension</div>
+      <div class="metric-value" id="lastBP">—</div>
+      <div class="metric-note" id="lastBPNote">Aucune donnée</div>
+    </div>
+  </div>
+
+  <section class="section open" id="todaySection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">☀️</span>Aujourd’hui</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title" id="todayDateTitle">Aujourd’hui</div>
+        <div class="small" id="todaySummary">Résumé de la journée</div>
+      </div>
+
+      <div class="dashboard" style="margin-bottom:10px">
+        <div class="card">
+          <div class="metric-title">Glycémie</div>
+          <div class="metric-value" id="todayGlucose">—</div>
+          <div class="metric-note" id="todayGlucoseNote">Aucune mesure</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Repas</div>
+          <div class="metric-value" id="todayMeals">0</div>
+          <div class="metric-note">notes alimentaires</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Médicaments</div>
+          <div class="metric-value" id="todayMeds">0</div>
+          <div class="metric-note">entrées du jour</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Clavicule</div>
+          <div class="metric-value" style="font-size:17px" id="todayClavicle">—</div>
+          <div class="metric-note" id="todayClavicleNote">Aucune note</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="action primary" onclick="quickAddGlucose()">+ Glycémie</button>
+        <button class="action" onclick="quickAddFood()">+ Repas</button>
+        <button class="action" onclick="quickAddMed()">+ Médicament</button>
+        <button class="action warn" onclick="quickAddNote()">+ Note rapide</button>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Chronologie du jour</div>
+        <div id="todayTimeline" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section open">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🩸</span>Glycémie & repas</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar">
+        <button class="action primary" onclick="toggleForm('glucoseForm')">+ Nouvelle mesure</button>
+        <button class="action" onclick="scrollGlucoseChart()">Voir le graphique</button>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick"><b id="gAvg">—</b><span>Moyenne 7 jours</span></div>
+        <div class="quick"><b id="gMin">—</b><span>Plus basse</span></div>
+        <div class="quick"><b id="gMax">—</b><span>Plus haute</span></div>
+      </div>
+
+      <form class="entry" id="glucoseForm" style="display:none" onsubmit="addGlucose(event)">
+        <div><label>Valeur (mg/dL)</label><input id="gValue" type="number" min="20" max="600" required></div>
+        <div><label>Moment</label>
+          <select id="gMoment">
+            <option>À jeun</option><option>Avant repas</option><option>1 h après repas</option>
+            <option selected>2 h après repas</option><option>3 h après repas</option><option>Autre</option>
+          </select>
+        </div>
+        <div><label>Date</label><input id="gDate" type="date" required></div>
+        <div><label>Heure</label><input id="gTime" type="time" required></div>
+        <div><label>Type de repas</label>
+          <select id="gMeal">
+            <option value="">—</option>
+            <option>Petit-déjeuner</option>
+            <option>Déjeuner</option>
+            <option>Dîner</option>
+            <option>Collation</option>
+          </select>
+        </div>
+        <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"></div>
+        <div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input id="gPhoto" type="file" accept="image/*" capture="environment" onchange="previewGlucosePhoto(this,'gPreview')"><img id="gPreview" class="photo-preview" alt="Aperçu glycémie"></div>
+        <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Analyse par moment de la journée</div>
+        <div class="compare-grid">
+          <div class="compare-card"><b id="avgFasting">—</b><span>À jeun</span></div>
+          <div class="compare-card"><b id="avgPremeal">—</b><span>Avant repas</span></div>
+          <div class="compare-card"><b id="avg2h">—</b><span>2 h après repas</span></div>
+          <div class="compare-card"><b id="avg3h">—</b><span>3 h après repas</span></div>
+        </div>
+        <div id="mealComparison"></div>
+      </div>
+
+      <div id="glucoseList" class="list"></div>
+
+      <div class="chart-wrap" id="glucoseChartBox">
+        <div class="chart-title">Évolution de la glycémie</div>
+        <canvas id="glucoseChart" width="760" height="220"></canvas>
+        <div class="chart-legend">Les points sont tracés dans l’ordre des mesures enregistrées. Le graphique sert au suivi de tendance, pas au diagnostic.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🦴</span>Clavicule / accident & kiné</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('clavicleForm')">+ Ajouter une note</button></div>
+      <form class="entry" id="clavicleForm" style="display:none" onsubmit="addClavicle(event)">
+        <div><label>Date</label><input id="cDate" type="date" required></div>
+        <div><label>Douleur (0–10)</label><input id="cPain" type="number" min="0" max="10" step="1"></div>
+        <div><label>Mobilité</label>
+          <select id="cMobility"><option>Très limitée</option><option>Limitée</option><option selected>En amélioration</option><option>Presque normale</option><option>Normale</option></select>
+        </div>
+        <div><label>Kiné</label><select id="cKine"><option>Non</option><option>Oui</option></select></div>
+        <div class="full"><label>Note</label><textarea id="cNote" placeholder="Douleur, mouvement du bras, radio, avis du médecin…"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="clavicleList" class="list"></div>
+    </div>
+  </section>
+
+
+  <section class="section" id="exerciseSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🤸</span>Exercices & évolution</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Programme de récupération</div>
+        <div class="small" style="margin-top:6px">
+          Les exercices proposés ici sont doux et servent de carnet de suivi. Avec une fracture déplacée en consolidation,
+          validez avec votre kinésithérapeute ou orthopédiste les mouvements d’épaule autorisés avant de progresser.
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="action primary" type="button" id="openExerciseLog">+ Enregistrer une séance</button>
+        <button class="action" type="button" id="openCustomExercise">+ Ajouter un exercice</button>
+      </div>
+
+      <form class="entry" id="exerciseLogForm" style="display:none" onsubmit="addExerciseLog(event)">
+        <div><label>Date</label><input id="exDate" type="date" required></div>
+        <div><label>Exercice</label><select id="exName" required></select></div>
+        <div><label>Répétitions / durée</label><input id="exDose" placeholder="Ex. 10 répétitions"></div>
+        <div><label>Amplitude</label>
+          <select id="exRange">
+            <option>Très petite</option><option>Petite</option><option selected>Confortable</option>
+            <option>Jusqu’à hauteur d’épaule</option><option>Plus haut — seulement si autorisé</option>
+          </select>
+        </div>
+        <div>
+          <label>Douleur avant (0–10)</label>
+          <div class="range-row"><input id="exPainBefore" type="range" min="0" max="10" value="0" oninput="exPainBeforeVal.value=this.value"><output id="exPainBeforeVal">0</output></div>
+        </div>
+        <div>
+          <label>Douleur après (0–10)</label>
+          <div class="range-row"><input id="exPainAfter" type="range" min="0" max="10" value="0" oninput="exPainAfterVal.value=this.value"><output id="exPainAfterVal">0</output></div>
+        </div>
+        <div><label>Facilité (0–10)</label>
+          <div class="range-row"><input id="exEase" type="range" min="0" max="10" value="5" oninput="exEaseVal.value=this.value"><output id="exEaseVal">5</output></div>
+        </div>
+        <div><label>Fait sans aide ?</label><select id="exHelp"><option>Oui</option><option>Non</option></select></div>
+        <div class="full"><label>Remarque</label><textarea id="exNote" placeholder="Raideur, douleur, mouvement plus facile qu’hier…"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer la séance</button></div>
+      </form>
+
+      <form class="entry" id="customExerciseForm" style="display:none" onsubmit="addCustomExercise(event)">
+        <div><label>Nom de l’exercice</label><input id="cxName" required></div>
+        <div><label>Statut</label>
+          <select id="cxStatus"><option>À valider avec le kiné</option><option>Validé par le kiné</option><option>En pause</option></select>
+        </div>
+        <div class="full"><label>Consigne</label><textarea id="cxDesc" placeholder="Écrivez ici la consigne donnée par votre kiné."></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Ajouter l’exercice</button></div>
+      </form>
+
+      <div id="exerciseLibrary"></div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Évolution des séances</div>
+        <div class="compare-grid">
+          <div class="compare-card"><b id="exSessionCount">0</b><span>Séances enregistrées</span></div>
+          <div class="compare-card"><b id="exAvgEase">—</b><span>Facilité moyenne</span></div>
+          <div class="compare-card"><b id="exAvgPain">—</b><span>Douleur après</span></div>
+          <div class="compare-card"><b id="exLastDate">—</b><span>Dernière séance</span></div>
+        </div>
+        <canvas id="exerciseChart" width="760" height="220"></canvas>
+        <div class="chart-legend">Le graphique suit la facilité et la douleur après chaque séance. Une progression lente et régulière est plus utile qu’une augmentation forcée.</div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Historique</div>
+        <div id="exerciseLogList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="bpSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">❤️</span>Tension artérielle</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button></div>
+      <form class="entry" id="bpForm" style="display:none" onsubmit="addBP(event)">
+        <div><label>Systolique</label><input id="bpSys" type="number" min="50" max="260" required placeholder="Ex. 125"></div>
+        <div><label>Diastolique</label><input id="bpDia" type="number" min="30" max="160" required placeholder="Ex. 78"></div>
+        <div><label>Pouls / min</label><input id="bpPulse" type="number" min="30" max="220" placeholder="Ex. 68"></div>
+        <div><label>Date</label><input id="bpDate" type="date" required></div>
+        <div><label>Heure</label><input id="bpTime" type="time" required></div>
+        <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
+        <div class="full"><label>Photo du tensiomètre (facultatif)</label><input id="bpPhoto" type="file" accept="image/*" capture="environment" onchange="previewPhoto(this,'bpPreview')"><img id="bpPreview" class="photo-preview" alt="Aperçu"></div>
+        <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div class="small" style="margin:6px 0 12px">La photo est conservée avec la mesure sur cet appareil comme repère visuel. La lecture automatique des chiffres depuis une photo n’est pas activée dans cette version hors ligne.</div>
+      <div id="bpList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">💊</span>Médicaments & compléments</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('medForm')">+ Ajouter</button></div>
+      <form class="entry" id="medForm" style="display:none" onsubmit="addMedication(event)">
+        <div><label>Nom</label><input id="medTitle" required></div>
+        <div><label>Dose</label><input id="medDose" placeholder="Ex. 1 comprimé"></div>
+        <div><label>Date</label><input id="medDate" type="date" required></div>
+        <div><label>Heure</label><input id="medTime" type="time"></div>
+        <div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
+        <div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input id="medPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'medPreview','med')"><div class="photo-tools"><img id="medPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')">Retirer la photo</button></div></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="medList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🧪</span>Analyses & examens</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('analysisForm')">+ Ajouter</button></div>
+      <form class="entry" id="analysisForm" style="display:none" onsubmit="addAnalysis(event)">
+        <div><label>Examen</label><input id="analysisTitle" required></div>
+        <div><label>Date</label><input id="analysisDate" type="date" required></div>
+        <div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input id="analysisPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'analysisPreview','analysis')"><div class="photo-tools"><img id="analysisPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')">Retirer la photo</button></div></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="analysisList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🍽️</span>Alimentation & recettes</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('foodForm')">+ Ajouter</button></div>
+      <form class="entry" id="foodForm" style="display:none" onsubmit="addFood(event)">
+        <div><label>Type</label><select id="foodType" onchange="foodTypeChanged()"><option>Repas</option><option>Recette TM7</option><option>Recette</option><option>Réaction alimentaire</option></select></div>
+        <div><label>Titre</label><input id="foodTitle" required></div>
+        <div><label>Date</label><input id="foodDate" type="date" required></div>
+        <div><label>Moment</label><select id="foodMoment"><option value="">—</option><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+        <div class="recipe-only" style="display:none"><label>Durée</label><input id="foodDuration" placeholder="Ex. 35 min"></div>
+        <div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"></div>
+        <div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
+        <div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
+        <div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input id="foodPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'foodPreview','food')"><div class="photo-tools"><img id="foodPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')">Retirer la photo</button></div></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="foodList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🌙</span>Sommeil</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button></div>
+      <form class="entry" id="sleepForm" style="display:none" onsubmit="addSleep(event)">
+        <div><label>Date</label><input id="sDate" type="date" required></div>
+        <div><label>Durée (heures)</label><input id="sHours" type="number" min="0" max="24" step="0.1" required></div>
+        <div><label>Qualité</label><select id="sQuality"><option>Mauvaise</option><option>Moyenne</option><option selected>Bonne</option><option>Très bonne</option></select></div>
+        <div><label>Réveils</label><input id="sWake" type="number" min="0" max="20"></div>
+        <div class="full"><label>Remarque</label><textarea id="sNote"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="sleepList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">📝</span>Notes & rendez-vous</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('noteForm')">+ Ajouter</button></div>
+      <form class="entry" id="noteForm" style="display:none" onsubmit="addNote(event)">
+        <div><label>Type</label><select id="noteType"><option>Note</option><option>Rendez-vous</option></select></div>
+        <div><label>Titre</label><input id="noteTitle" required></div>
+        <div><label>Date</label><input id="noteDate" type="date" required></div>
+        <div><label>Heure</label><input id="noteTime" type="time"></div>
+        <div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
+      <div id="noteList" class="list"></div>
+    </div>
+  </section>
+
+
+
+  <section class="section" id="calendarShareSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">📅</span>Calendrier / Partager</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Calendrier & partage</div>
+        <div class="small" style="margin-top:6px">
+          Ces boutons sont actifs. Vous pouvez ouvrir directement « Notes & rendez-vous », préparer un nouveau rendez-vous,
+          ou exporter la sauvegarde du carnet.
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="action primary" type="button" onclick="openNotesAppointments()">📝 Notes & rendez-vous</button>
+        <button class="action warn" type="button" onclick="newAppointment()">📅 Nouveau rendez-vous</button>
+        <button class="action" type="button" onclick="exportData()">↗️ Partager / sauvegarder</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🎯</span>Objectifs & repères</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Glycémie</div>
+        <div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet signale seulement les tendances pour faciliter le suivi. Les seuils affichés ne remplacent pas les objectifs personnalisés fixés avec votre médecin.</div>
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Clavicule</div>
+        <div class="small" style="margin-top:6px">Suivre surtout la douleur, la mobilité, la force et les consignes du kinésithérapeute / orthopédiste.</div>
+      </div>
+      <div class="card">
+        <div class="item-title">Sommeil</div>
+        <div class="small" style="margin-top:6px">Le carnet permet de voir les tendances de durée et de qualité sans interpréter une seule nuit isolément.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="healthConnectionsSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🔗</span>Connexions santé</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Connexions santé — V18</div>
+        <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
+      </div>
+      <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
+      <div class="integration-grid">
+        <div class="integration-card">
+          <b>Apple Santé</b>
+          <div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
+          <div class="integration-actions">
+            <button class="action" type="button" onclick="openHealthImport('Apple Santé',this)">Ajouter une donnée ici</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <b>HUAWEI Health</b>
+          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V25 corrige aussi les retours mal formés et propose un secours par presse-papiers.</div>
+          <div class="integration-actions">
+            <button class="action primary" type="button" onclick="startHuaweiImport()">Importer depuis HUAWEI</button>
+            <button class="action" type="button" onclick="importHuaweiClipboard()">Importer le total copié</button>
+            <button class="action" type="button" onclick="openHealthImport('HUAWEI Health',this)">Saisie manuelle</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <b>HUM Health</b>
+          <div class="small">Ajoutez ici les données choisies depuis HUM Health.</div>
+          <div class="integration-actions">
+            <button class="action" type="button" onclick="openHealthImport('HUM Health',this)">Ajouter une donnée ici</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <b>Quirónsalud</b>
+          <div class="small">Ajoutez ici les données ou résultats choisis depuis Quirónsalud.</div>
+          <div class="integration-actions">
+            <button class="action" type="button" onclick="openHealthImport('Quirónsalud',this)">Ajouter une donnée ici</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="shortcutHelp" class="integration-status" style="display:none;margin-bottom:10px"></div>
+
+      <form class="entry" id="healthImportForm" style="display:none" onsubmit="addHealthImport(event)">
+        <div><label>Source</label>
+          <select id="hiSource">
+            <option>Apple Santé</option>
+            <option>HUAWEI Health</option>
+            <option>HUM Health</option>
+            <option>Quirónsalud</option>
+          </select>
+        </div>
+        <div><label>Type de donnée</label><input id="hiType" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required></div>
+        <div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"></div>
+        <div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"></div>
+        <div><label>Date</label><input id="hiDate" type="date" required></div>
+        <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
+      </form>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Données santé ajoutées / importées</div>
+        <div id="healthImportList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="backupSection" style="margin-bottom:120px">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">⚙️</span>Sauvegarde</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <p class="small">Les données restent enregistrées dans ce navigateur sur cet appareil. Pour éviter toute perte, exportez régulièrement une sauvegarde JSON que vous pourrez réimporter plus tard.</p>
+      <div class="toolbar">
+        <button class="action" onclick="exportData()">Exporter mes données</button>
+        <label class="action" style="cursor:pointer">Importer
+          <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+        </label>
+        <button class="action danger" onclick="clearAll()">Effacer toutes les données</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <button class="action primary" onclick="openSectionByText('Aujourd’hui')">☀️ Aujourd’hui</button>
+  <button class="action" onclick="openSectionByText('Glycémie')">🩸 Glycémie</button>
+  <button class="action warn" onclick="openSectionByText('Notes')">📝 Note</button>
+</footer>
+
+<script>
+const KEY='monCarnetDeBord_v2';
+const OLD_KEY='monCarnetDeBord_v1';
+const defaultData={
+  glucose:[
+    {value:133,moment:'3 h après repas',date:'2026-08-08',time:'15:19',note:'3 h après le petit-déjeuner'}
+  ],
+  clavicle:[
+    {date:'2026-08-06',pain:'',mobility:'En amélioration',kine:'',note:'Radiographies de contrôle : fracture déplacée de la clavicule gauche, consolidation en cours à surveiller.'}
+  ],
+  exercises:[
+    {id:'hand',name:'Main et poignet',desc:'Ouvrir et fermer la main, puis bouger doucement le poignet. Mouvement sans charge.',status:'Validé par le kiné'},
+    {id:'elbow',name:'Flexion–extension du coude',desc:'Plier puis tendre doucement le coude en gardant l’épaule relâchée et soutenue si nécessaire.',status:'À valider avec le kiné'},
+    {id:'pendulum',name:'Pendulaire doux',desc:'Bras détendu, effectuer de très petits mouvements sans forcer ni chercher une grande amplitude.',status:'À valider avec le kiné'},
+    {id:'scapula',name:'Rapprochement doux des omoplates',desc:'Redresser le haut du dos et rapprocher doucement les omoplates, sans hausser les épaules.',status:'À valider avec le kiné'},
+    {id:'table',name:'Glissement sur table assisté',desc:'Faire glisser doucement les mains vers l’avant sur une table, seulement dans l’amplitude confortable autorisée.',status:'À valider avec le kiné'}
+  ],
+  exerciseLogs:[],
+  bp:[], meds:[], analyses:[], foods:[], sleep:[], notes:[], healthImports:[]
+};
+let data=loadData();
+
+function loadData(){
+  try{
+    let raw=localStorage.getItem(KEY);
+    if(!raw){
+      const oldRaw=localStorage.getItem(OLD_KEY);
+      if(oldRaw){
+        localStorage.setItem(KEY,oldRaw);
+        raw=oldRaw;
+      }
+    }
+    if(!raw) return structuredClone(defaultData);
+    const saved=JSON.parse(raw);
+    return {
+      ...structuredClone(defaultData),
+      ...saved,
+      exercises:saved.exercises||structuredClone(defaultData.exercises),
+      exerciseLogs:saved.exerciseLogs||[],
+      healthImports:saved.healthImports||[]
+    };
+  }catch(e){return structuredClone(defaultData)}
+}
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(data));
+    render();
+    return true;
+  }catch(err){
+    render();
+    alert('La photo est trop volumineuse pour le stockage du carnet. Essayez une photo plus légère.');
+    return false;
+  }
+}
+document.getElementById('openExerciseLog')?.addEventListener('click',()=>toggleForm('exerciseLogForm'));
+document.getElementById('openCustomExercise')?.addEventListener('click',()=>toggleForm('customExerciseForm'));
+document.querySelectorAll('.section-head').forEach(btn=>{
+  btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open'));
+});
+function toggleForm(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==='none'?'grid':'none';
+}
+function localDateString(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`;}
+function setTodayDefaults(){
+  const d=new Date();
+  const ds=localDateString(d);
+  const ts=d.toTimeString().slice(0,5);
+  ['gDate','cDate','exDate','bpDate','medDate','analysisDate','foodDate','sDate','noteDate','hiDate'].forEach(id=>{
+    const e=document.getElementById(id); if(e&&!e.value)e.value=ds;
+  });
+  const gt=document.getElementById('gTime'); if(gt&&!gt.value)gt.value=ts; const bt=document.getElementById('bpTime'); if(bt&&!bt.value)bt.value=ts; const nt=document.getElementById('noteTime'); if(nt&&!nt.value)nt.value=ts; const mt=document.getElementById('medTime'); if(mt&&!mt.value)mt.value=ts;
+}
+let pendingGlucosePhoto='';
+function previewGlucosePhoto(input,imgId){
+  const img=document.getElementById(imgId);
+  const file=input.files && input.files[0];
+  if(!file){pendingGlucosePhoto='';img.removeAttribute('src');img.style.display='none';return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const source=new Image();
+    source.onload=()=>{
+      const maxW=900,maxH=900;
+      const scale=Math.min(1,maxW/source.width,maxH/source.height);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(source.width*scale));
+      canvas.height=Math.max(1,Math.round(source.height*scale));
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(source,0,0,canvas.width,canvas.height);
+      pendingGlucosePhoto=canvas.toDataURL('image/jpeg',0.72);
+      img.src=pendingGlucosePhoto; img.style.display='block';
+    };
+    source.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addGlucose(e){
+  e.preventDefault();
+  data.glucose.unshift({
+    value:Number(gValue.value),moment:gMoment.value,date:gDate.value,time:gTime.value,
+    meal:gMeal.value,mealTag:gMealTag.value.trim(),note:gNote.value.trim(),photo:pendingGlucosePhoto||''
+  });
+  pendingGlucosePhoto='';
+  e.target.reset(); const gprev=document.getElementById('gPreview'); if(gprev){gprev.removeAttribute('src');gprev.style.display='none';} e.target.style.display='none'; setTodayDefaults(); save();
+}
+function addClavicle(e){
+  e.preventDefault();
+  data.clavicle.unshift({date:cDate.value,pain:cPain.value,mobility:cMobility.value,kine:cKine.value,note:cNote.value.trim()});
+  e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
+}
+let pendingBPPhoto='';
+function previewPhoto(input,imgId){
+  const img=document.getElementById(imgId);
+  const file=input.files && input.files[0];
+  if(!file){pendingBPPhoto='';img.removeAttribute('src');img.style.display='none';return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const source=new Image();
+    source.onload=()=>{
+      const maxW=900,maxH=900;
+      const scale=Math.min(1,maxW/source.width,maxH/source.height);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(source.width*scale));
+      canvas.height=Math.max(1,Math.round(source.height*scale));
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(source,0,0,canvas.width,canvas.height);
+      pendingBPPhoto=canvas.toDataURL('image/jpeg',0.72);
+      img.src=pendingBPPhoto; img.style.display='block';
+    };
+    source.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function addBP(e){
+  e.preventDefault();
+  data.bp.unshift({sys:Number(bpSys.value),dia:Number(bpDia.value),pulse:bpPulse.value?Number(bpPulse.value):'',date:bpDate.value,time:bpTime.value,context:bpContext.value,note:bpNote.value.trim(),photo:pendingBPPhoto||''});
+  pendingBPPhoto='';
+  e.target.reset(); const prev=document.getElementById('bpPreview');prev.removeAttribute('src');prev.style.display='none'; e.target.style.display='none'; setTodayDefaults(); save();
+}
+function addSleep(e){
+  e.preventDefault();
+  data.sleep.unshift({date:sDate.value,hours:Number(sHours.value),quality:sQuality.value,wake:sWake.value,note:sNote.value.trim()});
+  e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
+}
+let pendingGenericPhotos={med:'',analysis:'',food:''};
+function genericPhoto(input,imgId,key){
+  const f=input.files&&input.files[0];
+  if(!f)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const source=new Image();
+    source.onload=()=>{
+      const maxW=900,maxH=900;
+      const scale=Math.min(1,maxW/source.width,maxH/source.height);
+      const w=Math.max(1,Math.round(source.width*scale));
+      const h=Math.max(1,Math.round(source.height*scale));
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(source,0,0,w,h);
+      const dataUrl=canvas.toDataURL('image/jpeg',0.72);
+      pendingGenericPhotos[key]=dataUrl;
+      const im=document.getElementById(imgId);
+      if(im){im.src=dataUrl;im.style.display='block';}
+    };
+    source.onerror=()=>alert('Impossible de lire cette photo.');
+    source.src=reader.result;
+  };
+  reader.onerror=()=>alert('Impossible de lire cette photo.');
+  reader.readAsDataURL(f);
+}
+function addMedication(e){
+  e.preventDefault();
+  const title=document.getElementById('medTitle').value.trim();
+  const dose=document.getElementById('medDose').value.trim();
+  const date=document.getElementById('medDate').value;
+  const time=document.getElementById('medTime').value;
+  const taken=document.getElementById('medTaken').value;
+  const text=document.getElementById('medText').value.trim();
+  if(!title){ alert('Indiquez le nom du médicament ou complément.'); return; }
+  if(!Array.isArray(data.meds)) data.meds=[];
+  const entry={title,date,time,dose,taken,text,photo:pendingGenericPhotos.med||''};
+  data.meds.unshift(entry);
+  const ok=save();
+  if(!ok){
+    data.meds.shift();
+    return;
+  }
+  pendingGenericPhotos.med='';
+  const input=document.getElementById('medPhoto');
+  if(input) input.value='';
+  const preview=document.getElementById('medPreview');
+  if(preview){preview.removeAttribute('src');preview.style.display='none';}
+  e.target.reset();
+  e.target.style.display='none';
+  setTodayDefaults();
+}
+function foodTypeChanged(){
+  const isRecipe=['Recette TM7','Recette'].includes(foodType.value);
+  document.querySelectorAll('.recipe-only').forEach(el=>el.style.display=isRecipe?'block':'none');
+}
+function addFood(e){
+  e.preventDefault();
+  data.foods.unshift({
+    title:foodTitle.value.trim(),date:foodDate.value,type:foodType.value,moment:foodMoment.value,
+    duration:(document.getElementById('foodDuration')?.value||'').trim(),
+    portions:(document.getElementById('foodPortions')?.value||'').trim(),
+    ingredients:(document.getElementById('foodIngredients')?.value||'').trim(),
+    steps:(document.getElementById('foodSteps')?.value||'').trim(),
+    text:foodText.value.trim(),photo:pendingGenericPhotos.food||''
+  }); pendingGenericPhotos.food='';
+  e.target.reset(); foodTypeChanged(); e.target.style.display='none'; setTodayDefaults(); save();
+}
+function addNote(e){
+  e.preventDefault();
+  data.notes.unshift({title:noteTitle.value.trim(),date:noteDate.value,time:noteTime.value,type:noteType.value,text:noteText.value.trim()});
+  e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
+}
+function runShortcut(name,inputText=''){
+  const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+(inputText?'&input=text&text='+encodeURIComponent(inputText):'');
+  const a=document.createElement('a');
+  a.href=url; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+function healthImportStatus(message){
+  const box=document.getElementById('shortcutHelp');
+  if(!box) return;
+  box.textContent=message;
+  box.style.display='block';
+}
+function startHuaweiImport(){
+  // Envoie au raccourci l'adresse de retour du carnet.
+  // Le raccourci pourra rouvrir cette adresse avec les paramètres healthSource,
+  // healthType, healthValue, healthUnit, healthDate et healthNote.
+  const callback=window.location.href.split(/[?#]/)[0];
+  healthImportStatus('Ouverture de « HUAWEI vers CARNET »…');
+  runShortcut('HUAWEI vers CARNET',callback);
+}
+
+function extractHuaweiNumber(value){
+  if(value===null || value===undefined) return '';
+  let s=String(value).trim();
+  try{s=decodeURIComponent(s)}catch(_){}
+  // Accepte "8 776", "8776", "8776healthSource=...", etc.
+  const m=s.match(/-?\d[\d\s\u00A0.,]*/);
+  if(!m) return '';
+  let n=m[0].replace(/[\s\u00A0]/g,'');
+  // Pour les pas, les séparateurs de milliers sont supprimés.
+  if(/^\d{1,3}([.,]\d{3})+$/.test(n)) n=n.replace(/[.,]/g,'');
+  return n;
+}
+function saveHuaweiImport(value, note){
+  const clean=extractHuaweiNumber(value);
+  if(!clean) return false;
+  data.healthImports=data.healthImports||[];
+  const today=localDateString();
+
+  // Une seule entrée HUAWEI « Pas » par jour :
+  // si elle existe déjà, on la remplace au lieu de créer un doublon.
+  const existingIndex=data.healthImports.findIndex(item=>
+    item &&
+    item.source==='HUAWEI Health' &&
+    item.type==='Pas' &&
+    item.date===today
+  );
+
+  const entry={
+    source:'HUAWEI Health',
+    type:'Pas',
+    value:clean,
+    unit:'pas',
+    date:today,
+    note:note||'Import automatique via HUAWEI vers CARNET'
+  };
+
+  if(existingIndex>=0){
+    data.healthImports[existingIndex]=entry;
+    // Nettoie d'éventuels anciens doublons HUAWEI du même jour.
+    data.healthImports=data.healthImports.filter((item,index)=>
+      index===existingIndex ||
+      !(item && item.source==='HUAWEI Health' && item.type==='Pas' && item.date===today)
+    );
+  }else{
+    data.healthImports.unshift(entry);
+  }
+
+  save();
+  const sec=document.getElementById('healthConnectionsSection');
+  if(sec) sec.classList.add('open');
+  healthImportStatus((existingIndex>=0?'Donnée HUAWEI mise à jour : ':'Donnée HUAWEI importée : ')+clean+' pas.');
+  setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
+  return true;
+}
+async function importHuaweiClipboard(){
+  try{
+    if(!navigator.clipboard || !navigator.clipboard.readText){
+      healthImportStatus('Lecture du presse-papiers indisponible ici. Utilisez « Saisie manuelle ».');
+      return;
+    }
+    const txt=await navigator.clipboard.readText();
+    if(!saveHuaweiImport(txt,'Import HUAWEI depuis le presse-papiers')){
+      healthImportStatus('Aucun nombre exploitable trouvé dans le presse-papiers.');
+    }
+  }catch(err){
+    healthImportStatus('Autorisez la lecture du presse-papiers, puis retouchez « Importer le total copié ».');
+  }
+}
+
+function importHealthFromUrl(){
+  try{
+    const params=new URLSearchParams(window.location.search);
+    const hashParams=new URLSearchParams((window.location.hash||'').replace(/^#/,''));
+    const hasDirect=params.has('healthValue') || params.has('healthPayload') ||
+                    hashParams.has('healthValue') || hashParams.has('healthPayload');
+    if(!hasDirect) return false;
+
+    let rawValue=params.get('healthValue');
+    if(!rawValue) rawValue=hashParams.get('healthValue')||'';
+
+    // V25 : récupère aussi les anciens retours où le séparateur "&" avait disparu,
+    // par exemple "8776healthSource=HUAWEI...".
+    let value=extractHuaweiNumber(rawValue);
+
+    const rawPayload=params.get('healthPayload') || hashParams.get('healthPayload');
+    if(!value && rawPayload){
+      try{
+        const parsed=JSON.parse(rawPayload);
+        if(parsed && typeof parsed==='object') value=extractHuaweiNumber(parsed.value);
+      }catch(_){
+        const parts=String(rawPayload).split('|').map(x=>x.trim());
+        if(parts.length>=3) value=extractHuaweiNumber(parts[2]);
+        if(!value) value=extractHuaweiNumber(rawPayload);
+      }
+    }
+
+    // Dernier filet de sécurité : inspecte la requête brute autour de healthValue.
+    if(!value){
+      const rawSearch=String(window.location.search||'');
+      const m=rawSearch.match(/[?&]healthValue=([^&]*)/i);
+      if(m) value=extractHuaweiNumber(m[1]);
+    }
+
+    if(!value){
+      healthImportStatus('Retour HUAWEI reçu, mais la valeur des pas est vide. La V25 peut aussi utiliser « Importer le total copié ».');
+      return false;
+    }
+
+    const ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
+    if(ok && window.history && history.replaceState){
+      history.replaceState({},document.title,window.location.pathname);
+    }
+    return ok;
+  }catch(err){
+    healthImportStatus('Import HUAWEI impossible : '+(err && err.message ? err.message : err));
+    return false;
+  }
+}
+function calendarFile(i){
+  const x=data.notes[i]; if(!x || x.type!=='Rendez-vous') return;
+  // V23 : passage direct par le raccourci iPhone « Ajouter au calendrier ».
+  // Le texte transmis contient les quatre informations du rendez-vous.
+  const payload=[
+    x.title||'Rendez-vous',
+    x.date||localDateString(),
+    x.time||'09:00',
+    x.text||''
+  ].join(' | ');
+  runShortcut('Ajouter au calendrier',payload);
+}
+
+function downloadICS(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+function addAnalysis(e){
+  e.preventDefault();
+  const title=document.getElementById('analysisTitle').value.trim();
+  const date=document.getElementById('analysisDate').value;
+  const text=document.getElementById('analysisText').value.trim();
+  if(!title){ alert('Indiquez le nom de l’examen.'); return; }
+  if(!Array.isArray(data.analyses)) data.analyses=[];
+  data.analyses.unshift({title,date,text,photo:pendingGenericPhotos.analysis||''});
+  pendingGenericPhotos.analysis='';
+  const input=document.getElementById('analysisPhoto'); if(input) input.value='';
+  const preview=document.getElementById('analysisPreview');
+  if(preview){preview.removeAttribute('src');preview.style.display='none';}
+  e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
+}
+function addGeneric(e,arr,prefix){
+  e.preventDefault();
+  const title=document.getElementById(prefix+'Title').value.trim();
+  const date=document.getElementById(prefix+'Date').value;
+  const text=document.getElementById(prefix+'Text').value.trim();
+  data[arr].unshift({title,date,text,photo:(arr==='analyses'?pendingGenericPhotos.analysis:'')}); if(arr==='analyses')pendingGenericPhotos.analysis='';
+  e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
+}
+function esc(s=''){
+  return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function removePhoto(arr,i){
+  if(data[arr] && data[arr][i]){
+    data[arr][i].photo='';
+    save();
+  }
+}
+function photoBlock(x,arr,i){
+  if(!x || !x.photo) return '';
+  return `<div class="saved-photo-block">
+    <img class="saved-thumb" src="${x.photo}" alt="Photo enregistrée">
+    <div>
+      <button class="action danger" type="button" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('${arr}',${i})">Retirer la photo</button>
+    </div>
+  </div>`;
+}
+function itemHtml(title,meta,text,arr,index){
+  return `<div class="item">
+    <div class="item-top"><div><div class="item-title">${esc(title)}</div><div class="item-meta">${esc(meta)}</div></div>
+    <button class="action danger" style="padding:5px 8px" onclick="delItem('${arr}',${index},this)">Suppr.</button></div>
+    ${text?`<div class="item-text">${esc(text)}</div>`:''}
+  </div>`;
+}
+function delItem(arr,i,btn){
+  if(!btn) return;
+  if(btn.dataset.confirmDelete==='1'){
+    data[arr].splice(i,1); save(); return;
+  }
+  btn.dataset.confirmDelete='1';
+  btn.textContent='Confirmer';
+  btn.style.minWidth='105px';
+  setTimeout(()=>{
+    if(document.body.contains(btn)){btn.dataset.confirmDelete='';btn.textContent='Suppr.';}
+  },5000);
+}
+function render(){
+  glucoseList.innerHTML=data.glucose.length?data.glucose.map((x,i)=>`<div class="item">
+    <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
+    <button class="action danger" style="padding:5px 8px" onclick="delItem('glucose',${i},this)">Suppr.</button></div>
+    ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
+    ${x.photo?`<img src="${x.photo}" alt="Photo du lecteur de glycémie" class="saved-thumb"><div><button class="action danger" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('glucose',${i})">Supprimer la photo</button></div>`:''}
+  </div>`).join(''):'<div class="empty">Aucune mesure.</div>';
+  clavicleList.innerHTML=data.clavicle.length?data.clavicle.map((x,i)=>itemHtml(
+    `Clavicule${x.pain!==''?' • douleur '+x.pain+'/10':''}`,
+    `${x.date} • ${x.mobility||''}${x.kine?' • Kiné: '+x.kine:''}`,x.note,'clavicle',i)).join(''):'<div class="empty">Aucune note.</div>';
+  bpList.innerHTML=(data.bp||[]).length?(data.bp||[]).map((x,i)=>`<div class="item">
+    <div class="item-top"><div><div class="item-title">${esc(`${x.sys}/${x.dia} mmHg${x.pulse!==''?' • '+x.pulse+'/min':''}`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.context||''}`)}</div></div>
+    <button class="action danger" style="padding:5px 8px" onclick="delItem('bp',${i},this)">Suppr.</button></div>
+    ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
+    ${x.photo?`<img src="${x.photo}" alt="Photo du tensiomètre" class="saved-thumb"><div><button class="action danger" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('bp',${i})">Supprimer la photo</button></div>`:''}
+  </div>`).join(''):'<div class="empty">Aucune mesure.</div>';
+  medList.innerHTML=data.meds.length?data.meds.map((x,i)=>itemHtml(x.title,`${x.date}${x.time?' • '+x.time:''}${x.dose?' • '+x.dose:''}${x.taken?' • '+x.taken:''}`,x.text,'meds',i)+photoBlock(x,'meds',i)).join(''):'<div class="empty">Aucune entrée.</div>';
+  renderGeneric('analyses','analysisList');
+  const hil=document.getElementById('healthImportList');
+  if(hil){
+    hil.innerHTML=(data.healthImports||[]).length
+      ? (data.healthImports||[]).map((x,i)=>itemHtml(
+          `${x.source} • ${x.type}`,
+          `${x.date}${x.value?` • ${x.value}${x.unit?' '+x.unit:''}`:''}`,
+          x.note||'','healthImports',i
+        )).join('')
+      : '<div class="empty">Aucune donnée importée.</div>';
+  }
+
+  foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}`; return itemHtml(x.title,meta,details,'foods',i)+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
+  noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
+  sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
+    `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+
+  if(data.glucose.length){
+    const g=data.glucose[0];
+    const [st,cls]=glucoseStatus(Number(g.value));
+    lastGlucose.textContent=g.value+' mg/dL';
+    lastGlucoseNote.innerHTML=esc(g.moment+' • '+g.date)+' • <span class="'+cls+'">'+st+'</span>';
+  }else{lastGlucose.textContent='—';lastGlucoseNote.textContent='Aucune donnée'}
+  const today=localDateString();
+  todayCount.textContent=data.glucose.filter(x=>x.date===today).length;
+  if(data.clavicle.length){
+    const c=data.clavicle[0];lastClavicle.textContent=c.mobility||'Suivi';lastClavicleNote.textContent=c.date;
+  }else{lastClavicle.textContent='—';lastClavicleNote.textContent='Aucune donnée'}
+  if(data.sleep.length){
+    const s=data.sleep[0];lastSleep.textContent=s.hours+' h';lastSleepNote.textContent=s.quality+' • '+s.date;
+  }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
+  if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
+  renderGlucoseStats();
+  renderGlucoseIntelligence();
+  renderExercises();
+  renderToday();
+  requestAnimationFrame(drawGlucoseChart);
+}
+function renderGeneric(arr,listId){
+  const el=document.getElementById(listId);
+  el.innerHTML=data[arr].length?data[arr].map((x,i)=>itemHtml(x.title,x.date,x.text,arr,i)+photoBlock(x,arr,i)).join(''):'<div class="empty">Aucune entrée.</div>';
+}
+async function exportData(){
+  const json=JSON.stringify(data,null,2);
+  try{
+    const file=new File([json],'mon_carnet_de_bord_sauvegarde.json',{type:'application/json'});
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({title:'Sauvegarde du carnet',files:[file]}); return;
+    }
+  }catch(err){ if(err && err.name==='AbortError') return; }
+  const uri='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  const a=document.createElement('a'); a.href=uri; a.download='mon_carnet_de_bord_sauvegarde.json'; a.target='_blank';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function importData(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const obj=JSON.parse(r.result);
+      data={...defaultData,...obj}; save(); alert('Import terminé.');
+    }catch(err){alert('Fichier non valide.')}
+  };
+  r.readAsText(f);
+}
+let clearArmed=false;
+function clearAll(){
+  const btn=document.querySelector('#backupSection .action.danger');
+  if(!clearArmed){
+    clearArmed=true; if(btn) btn.textContent='Confirmer effacement';
+    setTimeout(()=>{clearArmed=false;if(btn)btn.textContent='Effacer toutes les données';},5000);
+    return;
+  }
+  data={...structuredClone(defaultData),glucose:[],clavicle:[],exerciseLogs:[],bp:[],meds:[],analyses:[],foods:[],sleep:[],notes:[],healthImports:[]};
+  clearArmed=false; save();
+}
+function openSectionByText(txt){
+  const sec=[...document.querySelectorAll('.section')].find(s=>s.innerText.includes(txt));
+  if(sec){sec.classList.add('open');sec.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+
+
+function openNotesAppointments(){
+  openSectionByText('Notes & rendez-vous');
+}
+function newAppointment(){
+  openSectionByText('Notes & rendez-vous');
+  const f=document.getElementById('noteForm');
+  if(f){
+    f.style.display='grid';
+    const t=document.getElementById('noteType'); if(t)t.value='Rendez-vous';
+    setTodayDefaults();
+    setTimeout(()=>document.getElementById('noteTitle')?.focus(),250);
+  }
+}
+function openExternal(url){
+  try{
+    window.open(url,'_blank');
+  }catch(e){
+    window.location.href=url;
+  }
+}
+function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
+function openHealthImport(source,btn){
+  const f=document.getElementById('healthImportForm');
+  if(!f){ alert('Formulaire indisponible.'); return; }
+  const card=btn && btn.closest ? btn.closest('.integration-card') : null;
+  if(card) card.insertAdjacentElement('afterend',f);
+  const src=document.getElementById('hiSource');
+  if(src) src.value=source;
+  f.style.display='grid';
+  setTodayDefaults();
+  requestAnimationFrame(()=>{
+    f.scrollIntoView({behavior:'smooth',block:'center'});
+    const type=document.getElementById('hiType');
+    if(type) type.focus();
+  });
+}
+function addHealthImport(e){
+  e.preventDefault();
+  data.healthImports=data.healthImports||[];
+  data.healthImports.unshift({
+    source:hiSource.value,
+    type:hiType.value.trim(),
+    value:hiValue.value.trim(),
+    unit:hiUnit.value.trim(),
+    date:hiDate.value,
+    note:hiNote.value.trim()
+  });
+  e.target.reset();
+  e.target.style.display='none';
+  setTodayDefaults();
+  save();
+}
+
+
+
+function frDate(dateStr){
+  try{
+    return new Date(dateStr+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  }catch(e){return dateStr}
+}
+function quickAddGlucose(){
+  openSectionByText('Glycémie');
+  const f=document.getElementById('glucoseForm');
+  f.style.display='grid';
+  setTodayDefaults();
+  setTimeout(()=>document.getElementById('gValue').focus(),300);
+}
+function quickAddFood(){
+  openSectionByText('Alimentation');
+  const f=document.getElementById('foodForm');
+  f.style.display='grid';
+  setTodayDefaults();
+  setTimeout(()=>document.getElementById('foodTitle').focus(),300);
+}
+function quickAddMed(){
+  openSectionByText('Médicaments');
+  const f=document.getElementById('medForm');
+  f.style.display='grid';
+  setTodayDefaults();
+  setTimeout(()=>document.getElementById('medTitle').focus(),300);
+}
+function quickAddNote(){
+  openSectionByText('Notes');
+  const f=document.getElementById('noteForm');
+  f.style.display='grid';
+  setTodayDefaults();
+  setTimeout(()=>document.getElementById('noteTitle').focus(),300);
+}
+function renderToday(){
+  const today=localDateString();
+  todayDateTitle.textContent=frDate(today);
+
+  const gs=data.glucose.filter(x=>x.date===today);
+  const fs=data.foods.filter(x=>x.date===today);
+  const ms=data.meds.filter(x=>x.date===today);
+  const cs=data.clavicle.filter(x=>x.date===today);
+  const ns=data.notes.filter(x=>x.date===today);
+  const es=(data.exerciseLogs||[]).filter(x=>x.date===today);
+
+  if(gs.length){
+    const latest=gs[0];
+    todayGlucose.textContent=latest.value+' mg/dL';
+    todayGlucoseNote.textContent=latest.moment+(latest.time?' • '+latest.time:'');
+  }else{
+    todayGlucose.textContent='—'; todayGlucoseNote.textContent='Aucune mesure';
+  }
+  todayMeals.textContent=fs.length;
+  todayMeds.textContent=ms.length;
+
+  if(cs.length){
+    const c=cs[0];
+    todayClavicle.textContent=c.mobility||'Suivi';
+    todayClavicleNote.textContent=c.pain!==''?'Douleur '+c.pain+'/10':c.date;
+  }else{
+    todayClavicle.textContent='—'; todayClavicleNote.textContent='Aucune note';
+  }
+
+  const events=[];
+  data.glucose.forEach((x,i)=>{if(x.date===today)events.push({
+    time:x.time||'', title:'🩸 '+x.value+' mg/dL', meta:x.moment, text:x.note||'', arr:'glucose', index:i
+  })});
+  data.foods.forEach((x,i)=>{if(x.date===today)events.push({
+    time:'', title:'🍽️ '+x.title, meta:'Alimentation', text:x.text||'', arr:'foods', index:i
+  })});
+  data.meds.forEach((x,i)=>{if(x.date===today)events.push({
+    time:'', title:'💊 '+x.title, meta:'Médicament / complément', text:x.text||'', arr:'meds', index:i
+  })});
+  data.clavicle.forEach((x,i)=>{if(x.date===today)events.push({
+    time:'', title:'🦴 Clavicule', meta:cMeta(x), text:x.note||'', arr:'clavicle', index:i
+  })});
+  data.notes.forEach((x,i)=>{if(x.date===today)events.push({
+    time:'', title:'📝 '+x.title, meta:x.type||'Note', text:x.text||'', arr:'notes', index:i
+  })});
+  (data.exerciseLogs||[]).forEach((x,i)=>{if(x.date===today)events.push({
+    time:'', title:'🤸 '+x.name, meta:'Exercice • facilité '+x.ease+'/10 • douleur après '+x.painAfter+'/10',
+    text:x.note||'', arr:'exerciseLogs', index:i
+  })});
+
+  events.sort((a,b)=>(b.time||'').localeCompare(a.time||''));
+  todayTimeline.innerHTML=events.length
+    ? events.map(e=>`<div class="item">
+        <div class="item-top">
+          <div>
+            <div class="item-title">${esc(e.title)}</div>
+            <div class="item-meta">${esc((e.time?e.time+' • ':'')+e.meta)}</div>
+          </div>
+          <button class="action danger" style="padding:5px 8px" onclick="delItem('${e.arr}',${e.index},this)">Suppr.</button>
+        </div>
+        ${e.text?`<div class="item-text">${esc(e.text)}</div>`:''}
+      </div>`).join('')
+    : '<div class="empty">Aucune activité enregistrée aujourd’hui.</div>';
+
+  const parts=[];
+  if(gs.length) parts.push(gs.length+' mesure'+(gs.length>1?'s':'')+' de glycémie');
+  if(fs.length) parts.push(fs.length+' repas/note alimentaire');
+  if(ms.length) parts.push(ms.length+' entrée médicament');
+  if(cs.length) parts.push('suivi clavicule');
+  if(es.length) parts.push(es.length+' exercice'+(es.length>1?'s':''));
+  todaySummary.textContent=parts.length?parts.join(' • '):'Aucune donnée enregistrée pour le moment';
+}
+function cMeta(x){
+  let s=x.mobility||'Suivi';
+  if(x.pain!=='') s+=' • douleur '+x.pain+'/10';
+  if(x.kine) s+=' • kiné '+x.kine;
+  return s;
+}
+
+
+function statusClass(status){
+  if((status||'').includes('Validé')) return 'validated';
+  if((status||'').includes('pause')) return 'pause';
+  return '';
+}
+function populateExerciseSelect(){
+  const s=document.getElementById('exName'); if(!s)return;
+  const current=s.value;
+  s.innerHTML=(data.exercises||[]).map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');
+  if(current) s.value=current;
+}
+function setExerciseStatus(index,status){
+  data.exercises[index].status=status; save();
+}
+function addCustomExercise(e){
+  e.preventDefault();
+  data.exercises.push({id:'custom_'+Date.now(),name:cxName.value.trim(),desc:cxDesc.value.trim(),status:cxStatus.value});
+  e.target.reset(); e.target.style.display='none'; save();
+}
+function removeExercise(index){
+  if(confirm('Supprimer cet exercice de la bibliothèque ?')){
+    data.exercises.splice(index,1); save();
+  }
+}
+function addExerciseLog(e){
+  e.preventDefault();
+  data.exerciseLogs.unshift({
+    date:exDate.value,
+    name:exName.value,
+    dose:exDose.value.trim(),
+    range:exRange.value,
+    painBefore:Number(exPainBefore.value),
+    painAfter:Number(exPainAfter.value),
+    ease:Number(exEase.value),
+    help:exHelp.value,
+    note:exNote.value.trim()
+  });
+  e.target.reset();
+  document.getElementById('exPainBefore').value=0; document.getElementById('exPainBeforeVal').textContent='0';
+  document.getElementById('exPainAfter').value=0; document.getElementById('exPainAfterVal').textContent='0';
+  document.getElementById('exEase').value=5; document.getElementById('exEaseVal').textContent='5';
+  e.target.style.display='none';
+  setTodayDefaults(); save();
+}
+function deleteExerciseLog(index){
+  if(confirm('Supprimer cette séance ?')){data.exerciseLogs.splice(index,1);save();}
+}
+function renderExerciseLibrary(){
+  const box=document.getElementById('exerciseLibrary'); if(!box)return;
+  box.innerHTML=(data.exercises||[]).map((x,i)=>`
+    <div class="exercise-card">
+      <div class="exercise-head">
+        <div>
+          <div class="exercise-name">${esc(x.name)}</div>
+          <div class="exercise-desc">${esc(x.desc||'')}</div>
+        </div>
+        <span class="exercise-status ${statusClass(x.status)}">${esc(x.status||'À valider')}</span>
+      </div>
+      <div class="exercise-actions">
+        <button class="action" onclick="document.getElementById('exName').value='${String(x.name).replace(/'/g,"\\'")}';toggleForm('exerciseLogForm');document.getElementById('exerciseLogForm').scrollIntoView({behavior:'smooth',block:'center'})">Enregistrer</button>
+        <button class="action" onclick="setExerciseStatus(${i},'Validé par le kiné')">Marquer validé</button>
+        <button class="action" onclick="setExerciseStatus(${i},'En pause')">Mettre en pause</button>
+        ${String(x.id).startsWith('custom_')?`<button class="action danger" onclick="removeExercise(${i})">Supprimer</button>`:''}
+      </div>
+    </div>`).join('');
+}
+function renderExerciseLogs(){
+  const box=document.getElementById('exerciseLogList'); if(!box)return;
+  const logs=data.exerciseLogs||[];
+  box.innerHTML=logs.length?logs.map((x,i)=>`
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(x.name)}</div>
+          <div class="item-meta">${esc(x.date)} • ${esc(x.dose||'séance')} • amplitude: ${esc(x.range||'')}</div>
+        </div>
+        <button class="action danger" style="padding:5px 8px" onclick="deleteExerciseLog(${i})">Suppr.</button>
+      </div>
+      <div class="item-text">Douleur ${x.painBefore}/10 → ${x.painAfter}/10 • Facilité ${x.ease}/10${x.note?'\n'+esc(x.note):''}</div>
+    </div>`).join(''):'<div class="empty">Aucune séance enregistrée.</div>';
+
+  exSessionCount.textContent=logs.length;
+  if(logs.length){
+    exAvgEase.textContent=(logs.reduce((a,b)=>a+Number(b.ease||0),0)/logs.length).toFixed(1)+'/10';
+    exAvgPain.textContent=(logs.reduce((a,b)=>a+Number(b.painAfter||0),0)/logs.length).toFixed(1)+'/10';
+    exLastDate.textContent=logs[0].date.slice(5);
+  }else{
+    exAvgEase.textContent='—'; exAvgPain.textContent='—'; exLastDate.textContent='—';
+  }
+}
+function drawExerciseChart(){
+  const canvas=document.getElementById('exerciseChart'); if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.clientWidth||760, cssH=220;
+  canvas.width=Math.floor(cssW*dpr);canvas.height=Math.floor(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssW,cssH);
+  const logs=[...(data.exerciseLogs||[])].reverse().slice(-20);
+  if(!logs.length){ctx.fillStyle='#b7bdc8';ctx.font='14px -apple-system,Arial';ctx.fillText('Enregistrez une séance pour voir votre évolution.',14,28);return;}
+  const padL=36,padR=12,padT=16,padB=28,W=cssW-padL-padR,H=cssH-padT-padB;
+  const x=i=>padL+(logs.length===1?W/2:i*W/(logs.length-1));
+  const y=v=>padT+(10-v)*H/10;
+  ctx.strokeStyle='#3c424c';ctx.lineWidth=1;ctx.fillStyle='#aeb5c0';ctx.font='10px -apple-system,Arial';
+  [0,5,10].forEach(v=>{ctx.beginPath();ctx.moveTo(padL,y(v));ctx.lineTo(cssW-padR,y(v));ctx.stroke();ctx.fillText(String(v),8,y(v)+3)});
+  function line(key,stroke){
+    ctx.strokeStyle=stroke;ctx.lineWidth=2.5;ctx.beginPath();
+    logs.forEach((p,i)=>{const xx=x(i),yy=y(Number(p[key]||0));i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});ctx.stroke();
+    logs.forEach((p,i)=>{ctx.fillStyle=stroke;ctx.beginPath();ctx.arc(x(i),y(Number(p[key]||0)),4,0,Math.PI*2);ctx.fill()});
+  }
+  line('ease','#5aa9ff');
+  line('painAfter','#f2b84b');
+  ctx.fillStyle='#aeb5c0';ctx.font='10px -apple-system,Arial';
+  ctx.fillText('Facilité',padL,cssH-8);ctx.fillText('Douleur après',padL+65,cssH-8);
+}
+function renderExercises(){
+  populateExerciseSelect();
+  renderExerciseLibrary();
+  renderExerciseLogs();
+  requestAnimationFrame(drawExerciseChart);
+}
+
+function glucoseStatus(v){
+  if(!Number.isFinite(v)) return ['À interpréter',''];
+  return ['Selon le moment de mesure',''];
+}
+
+function averageForMoment(labelPart){
+  const vals=data.glucose.filter(x=>(x.moment||'').toLowerCase().includes(labelPart.toLowerCase()))
+    .map(x=>Number(x.value)).filter(Number.isFinite);
+  if(!vals.length) return null;
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+function renderGlucoseIntelligence(){
+  const set=(id,val)=>document.getElementById(id).textContent=(val===null?'—':val+' mg/dL');
+  set('avgFasting',averageForMoment('jeun'));
+  set('avgPremeal',averageForMoment('avant repas'));
+  set('avg2h',averageForMoment('2 h'));
+  set('avg3h',averageForMoment('3 h'));
+
+  const tagged=data.glucose.filter(x=>x.mealTag && Number.isFinite(Number(x.value)));
+  const groups={};
+  tagged.forEach(x=>{
+    const k=x.mealTag.trim().toLowerCase();
+    if(!groups[k]) groups[k]={name:x.mealTag, vals:[]};
+    groups[k].vals.push(Number(x.value));
+  });
+  const rows=Object.values(groups).map(g=>({
+    name:g.name,
+    n:g.vals.length,
+    avg:Math.round(g.vals.reduce((a,b)=>a+b,0)/g.vals.length),
+    min:Math.min(...g.vals),
+    max:Math.max(...g.vals)
+  })).sort((a,b)=>a.avg-b.avg).slice(0,8);
+
+  const box=document.getElementById('mealComparison');
+  if(!rows.length){
+    box.innerHTML='<div class="empty">Ajoutez une “Étiquette repas” aux prochaines mesures pour comparer automatiquement vos réactions.</div>';
+    return;
+  }
+  const signal=v=>'<span class="signal">comparatif</span>';
+  box.innerHTML=`<table class="trend-table">
+    <thead><tr><th>Repas</th><th>Moy.</th><th>Min–Max</th><th>Repère</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${esc(r.name)}<div class="small">${r.n} mesure(s)</div></td>
+    <td><b>${r.avg}</b></td><td>${r.min}–${r.max}</td><td>${signal(r.avg)}</td></tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function renderGlucoseStats(){
+  const vals=data.glucose.map(x=>Number(x.value)).filter(Number.isFinite);
+  if(!vals.length){gAvg.textContent=gMin.textContent=gMax.textContent='—';return;}
+  const seven=data.glucose
+    .filter(x=>{
+      const d=new Date(x.date+'T12:00:00');
+      return (Date.now()-d.getTime()) <= 7*24*3600*1000;
+    })
+    .map(x=>Number(x.value)).filter(Number.isFinite);
+  const arr=seven.length?seven:vals;
+  gAvg.textContent=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
+  gMin.textContent=Math.min(...arr);
+  gMax.textContent=Math.max(...arr);
+}
+function drawGlucoseChart(){
+  const canvas=document.getElementById('glucoseChart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.clientWidth||760, cssH=220;
+  canvas.width=Math.floor(cssW*dpr); canvas.height=Math.floor(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const points=[...data.glucose].reverse().slice(-20);
+  if(points.length===0){
+    ctx.fillStyle='#b7bdc8'; ctx.font='14px -apple-system,Arial';
+    ctx.fillText('Aucune donnée à afficher.',14,28); return;
+  }
+  const vals=points.map(x=>Number(x.value));
+  let min=Math.min(...vals,70), max=Math.max(...vals,180);
+  min=Math.floor((min-10)/10)*10; max=Math.ceil((max+10)/10)*10;
+  if(max-min<60) max=min+60;
+
+  const padL=42,padR=12,padT=14,padB=32;
+  const W=cssW-padL-padR,H=cssH-padT-padB;
+  const x=i=>padL+(points.length===1?W/2:i*W/(points.length-1));
+  const y=v=>padT+(max-v)*H/(max-min);
+
+  ctx.strokeStyle='#3c424c'; ctx.lineWidth=1;
+  ctx.fillStyle='#aeb5c0'; ctx.font='11px -apple-system,Arial';
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const val=Math.round(min+i*(max-min)/ticks);
+    const yy=y(val);
+    ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(cssW-padR,yy);ctx.stroke();
+    ctx.fillText(String(val),4,yy+4);
+  }
+
+  // soft reference bands at 70 and 180
+  [70,180].forEach(v=>{
+    if(v>=min&&v<=max){
+      ctx.strokeStyle=v===70?'#c9b36b':'#7c6f4b';
+      ctx.setLineDash([5,5]);
+      ctx.beginPath();ctx.moveTo(padL,y(v));ctx.lineTo(cssW-padR,y(v));ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
+
+  ctx.strokeStyle='#5aa9ff'; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  points.forEach((p,i)=>{const xx=x(i),yy=y(Number(p.value)); if(i===0)ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);});
+  ctx.stroke();
+
+  points.forEach((p,i)=>{
+    const v=Number(p.value), xx=x(i), yy=y(v);
+    ctx.fillStyle = v<70 ? '#f2b84b' : (v>180 ? '#ff6b6b' : '#5aa9ff');
+    ctx.beginPath();ctx.arc(xx,yy,4.5,0,Math.PI*2);ctx.fill();
+  });
+
+  // X labels: first and last
+  ctx.fillStyle='#aeb5c0'; ctx.font='10px -apple-system,Arial';
+  const first=points[0], last=points[points.length-1];
+  ctx.fillText((first.date||'').slice(5),padL,cssH-10);
+  const lastText=(last.date||'').slice(5);
+  const tw=ctx.measureText(lastText).width;
+  ctx.fillText(lastText,cssW-padR-tw,cssH-10);
+}
+function scrollGlucoseChart(){
+  document.getElementById('glucoseChartBox').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+setTodayDefaults();
+foodTypeChanged();
+render();
+importHealthFromUrl();
+window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();});
+</script>
+</body>
+</html>
