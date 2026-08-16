@@ -222,7 +222,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 16 AOÛT • V28</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 17 AOÛT • V29</div>
 </header>
 
 <main>
@@ -1046,28 +1046,53 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   return true;
 }
 
+function readHealthParam(name){
+  // Lecture robuste des paramètres, même si Raccourcis/iOS laisse des espaces
+  // ou des caractères accentués non encodés dans l’URL.
+  try{
+    const q=new URLSearchParams(window.location.search||'');
+    const h=new URLSearchParams((window.location.hash||'').replace(/^#/,''));
+    const normal=q.get(name) ?? h.get(name);
+    if(normal!==null && normal!==undefined && String(normal).trim()!=='') return String(normal).trim();
+  }catch(_){}
+  const href=String(window.location.href||'');
+  const re=new RegExp('[?&#]'+name+'=([^&#]*)','i');
+  const m=href.match(re);
+  if(!m) return '';
+  let v=m[1].replace(/\+/g,' ').trim();
+  try{v=decodeURIComponent(v)}catch(_){}
+  return v.trim();
+}
+function canonicalHealthType(type){
+  const raw=String(type||'').trim();
+  const simple=raw.normalize ? raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\s_\-]+/g,'') : raw.toLowerCase().replace(/[\s_\-]+/g,'');
+  if(simple==='frequencecardiaque' || simple==='heartrate' || simple==='pouls') return 'Fréquence cardiaque';
+  if(simple==='poids' || simple==='weight') return 'Poids';
+  if(simple==='sommeil' || simple==='sleep') return 'Sommeil';
+  if(simple==='pas' || simple==='steps' || simple==='nombredepas') return 'Pas';
+  if(simple==='tension' || simple==='tensionarterielle' || simple==='bloodpressure') return 'Tension artérielle';
+  return raw || 'Donnée Santé';
+}
 function importHealthFromUrl(){
   try{
-    const params=new URLSearchParams(window.location.search);
-    const hashParams=new URLSearchParams((window.location.hash||'').replace(/^#/,''));
-    const hasDirect=params.has('healthValue') || params.has('healthPayload') ||
-                    hashParams.has('healthValue') || hashParams.has('healthPayload');
+    const directSource=readHealthParam('healthSource');
+    let directType=canonicalHealthType(readHealthParam('healthType'));
+    let directUnit=readHealthParam('healthUnit');
+    const directDate=readHealthParam('healthDate')||localDateString();
+    const directNote=readHealthParam('healthNote');
+    let rawValue=readHealthParam('healthValue');
+    const rawPayload=readHealthParam('healthPayload');
+    const hasDirect=!!(rawValue || rawPayload);
     if(!hasDirect) return false;
 
-    const directSource=params.get('healthSource')||hashParams.get('healthSource')||'';
-    const directType=params.get('healthType')||hashParams.get('healthType')||'';
-    const directUnit=params.get('healthUnit')||hashParams.get('healthUnit')||'';
-    const directDate=params.get('healthDate')||hashParams.get('healthDate')||localDateString();
-    const directNote=params.get('healthNote')||hashParams.get('healthNote')||'';
-    let rawValue=params.get('healthValue');
-    if(!rawValue) rawValue=hashParams.get('healthValue')||'';
-
     let value=extractHuaweiNumber(rawValue);
-    const rawPayload=params.get('healthPayload') || hashParams.get('healthPayload');
     if(!value && rawPayload){
       try{
         const parsed=JSON.parse(rawPayload);
-        if(parsed && typeof parsed==='object') value=extractHuaweiNumber(parsed.value);
+        if(parsed && typeof parsed==='object'){
+          value=extractHuaweiNumber(parsed.value);
+          if(!directType && parsed.type) directType=canonicalHealthType(parsed.type);
+        }
       }catch(_){
         const parts=String(rawPayload).split('|').map(x=>x.trim());
         if(parts.length>=3) value=extractHuaweiNumber(parts[2]);
@@ -1075,8 +1100,8 @@ function importHealthFromUrl(){
       }
     }
     if(!value){
-      const rawSearch=String(window.location.search||'');
-      const m=rawSearch.match(/[?&]healthValue=([^&]*)/i);
+      // Dernier secours : cherche healthValue directement dans toute l’URL.
+      const m=String(window.location.href||'').match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?)/i);
       if(m) value=extractHuaweiNumber(m[1]);
     }
     if(!value){
@@ -1084,10 +1109,19 @@ function importHealthFromUrl(){
       return false;
     }
 
+    // Normalise les unités les plus courantes lorsque Raccourcis ne les transmet pas.
+    if(!directUnit){
+      if(directType==='Poids') directUnit='kg';
+      else if(directType==='Fréquence cardiaque') directUnit='bpm';
+      else if(directType==='Sommeil') directUnit='h';
+      else if(directType==='Pas') directUnit='pas';
+      else if(directType==='Tension artérielle') directUnit='mmHg';
+    }
+
     let ok=false;
-    if(/huawei/i.test(directSource) || (!directSource && (!directType || /pas|steps/i.test(directType)))){
+    if(/huawei/i.test(directSource) || (!directSource && directType==='Pas')){
       ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
-    }else if(/apple/i.test(directSource) && /sommeil|sleep/i.test(directType)){
+    }else if(/apple/i.test(directSource) && directType==='Sommeil'){
       const hours=Number(String(value).replace(',','.'));
       if(Number.isFinite(hours)){
         data.sleep=data.sleep||[];
@@ -1099,7 +1133,7 @@ function importHealthFromUrl(){
         ok=true;
       }
     }else{
-      ok=saveDirectHealthImport(directSource,directType,value,directUnit,directDate,directNote);
+      ok=saveDirectHealthImport(directSource||'Apple Santé',directType,value,directUnit,directDate,directNote);
     }
     if(ok && window.history && history.replaceState){
       history.replaceState({},document.title,window.location.pathname);
