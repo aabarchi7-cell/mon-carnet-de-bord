@@ -222,7 +222,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 16 AOÛT • V27</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 16 AOÛT • V28</div>
 </header>
 
 <main>
@@ -653,7 +653,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>HUAWEI Health</b>
-          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V27 conserve l’import par raccourci et le secours par presse-papiers.</div>
+          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V28 conserve l’import par raccourci et le secours par presse-papiers.</div>
           <div class="integration-actions">
             <button class="action primary" type="button" onclick="startHuaweiImport()">Importer depuis HUAWEI</button>
             <button class="action" type="button" onclick="importHuaweiClipboard()">Importer le total copié</button>
@@ -662,7 +662,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>HUM Health</b>
-          <div class="small">Choisissez un type pour préremplir le formulaire, puis saisissez la valeur lue dans HUM Health.</div>
+          <div class="small">Choisissez un type pour préremplir le formulaire. La V28 accepte aussi les imports envoyés par un raccourci Apple Santé (par exemple Poids depuis Hume).</div>
           <div class="integration-actions">
             <button class="action" type="button" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)">Tension</button>
             <button class="action" type="button" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)">Fréquence cardiaque</button>
@@ -672,7 +672,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>Quirónsalud</b>
-          <div class="small">Choisissez le document ou résultat à noter, puis complétez le résumé ou la valeur.</div>
+          <div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
           <div class="integration-actions">
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)">Analyse sanguine</button>
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)">Radio / scanner / IRM</button>
@@ -698,7 +698,10 @@ footer .action{font-size:13px;padding:9px 8px}
         <div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"></div>
         <div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"></div>
         <div><label>Date</label><input id="hiDate" type="date" required></div>
+        <div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"></div>
         <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
+        <div class="full"><label>Photo / capture (facultatif)</label><input id="hiPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'hiPhotoPreview','health')"><div class="photo-tools"><img id="hiPhotoPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')">Retirer la photo</button></div></div>
+        <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" type="button" onclick="healthAppointmentToCalendar()">📅 Ajouter au calendrier</button></div>
         <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
       </form>
 
@@ -879,7 +882,7 @@ function addSleep(e){
   data.sleep.unshift({date:sDate.value,hours:Number(sHours.value),quality:sQuality.value,wake:sWake.value,note:sNote.value.trim()});
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
-let pendingGenericPhotos={med:'',analysis:'',food:''};
+let pendingGenericPhotos={med:'',analysis:'',food:'',health:''};
 function genericPhoto(input,imgId,key){
   const f=input.files&&input.files[0];
   if(!f)return;
@@ -1018,6 +1021,31 @@ async function importHuaweiClipboard(){
   }
 }
 
+function saveDirectHealthImport(source,type,value,unit,date,note){
+  const clean=extractHuaweiNumber(value);
+  if(!clean) return false;
+  data.healthImports=data.healthImports||[];
+  const src=(source||'Apple Santé').trim();
+  const typ=(type||'Donnée Santé').trim();
+  const d=(date||localDateString()).trim();
+  let u=(unit||'').trim();
+  if(!u && /poids|weight/i.test(typ)) u='kg';
+  else if(!u && /fréquence cardiaque|heart rate|pouls/i.test(typ)) u='bpm';
+  else if(!u && /tension|blood pressure/i.test(typ)) u='mmHg';
+  else if(!u && /pas|steps/i.test(typ)) u='pas';
+  else if(!u && /sommeil|sleep/i.test(typ)) u='h';
+  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||'Import automatique via Apple Santé',photo:''};
+  const existing=data.healthImports.findIndex(x=>x && x.source===src && x.type===typ && x.date===d);
+  if(existing>=0) data.healthImports.splice(existing,1,entry);
+  else data.healthImports.unshift(entry);
+  save();
+  const sec=document.getElementById('healthConnectionsSection');
+  if(sec) sec.classList.add('open');
+  healthImportStatus('Donnée importée : '+src+' • '+typ+' • '+clean+(u?' '+u:''));
+  setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
+  return true;
+}
+
 function importHealthFromUrl(){
   try{
     const params=new URLSearchParams(window.location.search);
@@ -1028,13 +1056,13 @@ function importHealthFromUrl(){
 
     const directSource=params.get('healthSource')||hashParams.get('healthSource')||'';
     const directType=params.get('healthType')||hashParams.get('healthType')||'';
+    const directUnit=params.get('healthUnit')||hashParams.get('healthUnit')||'';
+    const directDate=params.get('healthDate')||hashParams.get('healthDate')||localDateString();
+    const directNote=params.get('healthNote')||hashParams.get('healthNote')||'';
     let rawValue=params.get('healthValue');
     if(!rawValue) rawValue=hashParams.get('healthValue')||'';
 
-    // V25 : récupère aussi les anciens retours où le séparateur "&" avait disparu,
-    // par exemple "8776healthSource=HUAWEI...".
     let value=extractHuaweiNumber(rawValue);
-
     const rawPayload=params.get('healthPayload') || hashParams.get('healthPayload');
     if(!value && rawPayload){
       try{
@@ -1046,38 +1074,39 @@ function importHealthFromUrl(){
         if(!value) value=extractHuaweiNumber(rawPayload);
       }
     }
-
-    // Dernier filet de sécurité : inspecte la requête brute autour de healthValue.
     if(!value){
       const rawSearch=String(window.location.search||'');
       const m=rawSearch.match(/[?&]healthValue=([^&]*)/i);
       if(m) value=extractHuaweiNumber(m[1]);
     }
-
     if(!value){
-      healthImportStatus('Retour HUAWEI reçu, mais la valeur des pas est vide. La V27 peut aussi utiliser « Importer le total copié ».');
+      healthImportStatus('Import reçu, mais aucune valeur exploitable n’a été trouvée.');
       return false;
     }
 
     let ok=false;
-    if(/apple/i.test(directSource) && /sommeil|sleep/i.test(directType)){
+    if(/huawei/i.test(directSource) || (!directSource && (!directType || /pas|steps/i.test(directType)))){
+      ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
+    }else if(/apple/i.test(directSource) && /sommeil|sleep/i.test(directType)){
       const hours=Number(String(value).replace(',','.'));
       if(Number.isFinite(hours)){
         data.sleep=data.sleep||[];
-        data.sleep.unshift({date:params.get('healthDate')||localDateString(),hours,quality:'Bonne',wake:'',note:'Import Apple Santé'});
+        const entry={date:directDate,hours,quality:'Bonne',wake:'',note:directNote||'Import Apple Santé'};
+        const existing=data.sleep.findIndex(x=>x && x.date===directDate && /Import Apple Santé/i.test(x.note||''));
+        if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
         save();
         const st=document.getElementById('sleepImportStatus'); if(st)st.textContent='Sommeil importé depuis Apple Santé : '+hours+' h.';
         ok=true;
       }
     }else{
-      ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
+      ok=saveDirectHealthImport(directSource,directType,value,directUnit,directDate,directNote);
     }
     if(ok && window.history && history.replaceState){
       history.replaceState({},document.title,window.location.pathname);
     }
     return ok;
   }catch(err){
-    healthImportStatus('Import HUAWEI impossible : '+(err && err.message ? err.message : err));
+    healthImportStatus('Import Santé impossible : '+(err && err.message ? err.message : err));
     return false;
   }
 }
@@ -1185,11 +1214,17 @@ function render(){
   const hil=document.getElementById('healthImportList');
   if(hil){
     hil.innerHTML=(data.healthImports||[]).length
-      ? (data.healthImports||[]).map((x,i)=>itemHtml(
-          `${x.source} • ${x.type}`,
-          `${x.date}${x.value?` • ${x.value}${x.unit?' '+x.unit:''}`:''}`,
-          x.note||'','healthImports',i
-        )).join('')
+      ? (data.healthImports||[]).map((x,i)=>{
+          const base=itemHtml(
+            `${x.source} • ${x.type}`,
+            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${x.value}${x.unit?' '+x.unit:''}`:''}`,
+            x.note||'','healthImports',i
+          );
+          const photo=photoBlock(x,'healthImports',i);
+          const cal=(/quir[oó]n/i.test(x.source||'') && /rendez-vous|consultation/i.test(x.type||''))
+            ? `<div class="toolbar"><button class="action warn" type="button" onclick="savedHealthAppointmentToCalendar(${i})">📅 Ajouter au calendrier</button></div>`:'';
+          return base+photo+cal;
+        }).join('')
       : '<div class="empty">Aucune donnée importée.</div>';
   }
 
@@ -1302,6 +1337,27 @@ function presetHealth(source,type,unit,btn){
   if(t)t.value=type;
   if(u)u.value=unit||'';
   if(v){v.placeholder=type==='Tension artérielle'?'Ex. 128/78':type==='Sommeil'?'Ex. 7.5':'Valeur ou résumé';v.focus();}
+  updateHealthAppointmentUI();
+}
+function updateHealthAppointmentUI(){
+  const src=document.getElementById('hiSource')?.value||'';
+  const typ=document.getElementById('hiType')?.value||'';
+  const isAppt=/quir[oó]n/i.test(src) && /rendez-vous|consultation/i.test(typ);
+  const tw=document.getElementById('hiTimeWrap'),cw=document.getElementById('hiCalendarWrap');
+  if(tw)tw.style.display=isAppt?'block':'none';
+  if(cw)cw.style.display=isAppt?'block':'none';
+}
+function healthAppointmentToCalendar(){
+  const title=(document.getElementById('hiValue')?.value||'Consultation Quirónsalud').trim()||'Consultation Quirónsalud';
+  const date=document.getElementById('hiDate')?.value||localDateString();
+  const time=document.getElementById('hiTime')?.value||'09:00';
+  const note=(document.getElementById('hiNote')?.value||'').trim();
+  runShortcut('Ajouter au calendrier',[title,date,time,note].join(' | '));
+}
+function savedHealthAppointmentToCalendar(i){
+  const x=(data.healthImports||[])[i]; if(!x)return;
+  const title=(x.value||x.type||'Consultation Quirónsalud');
+  runShortcut('Ajouter au calendrier',[title,x.date||localDateString(),x.time||'09:00',x.note||''].join(' | '));
 }
 function openCookidooFromField(){
   const url=(document.getElementById('foodCookidooUrl')?.value||'').trim();
@@ -1338,6 +1394,7 @@ function openHealthImport(source,btn){
   if(src) src.value=source;
   f.style.display='grid';
   setTodayDefaults();
+  updateHealthAppointmentUI();
   requestAnimationFrame(()=>{
     f.scrollIntoView({behavior:'smooth',block:'center'});
     const type=document.getElementById('hiType');
@@ -1347,17 +1404,24 @@ function openHealthImport(source,btn){
 function addHealthImport(e){
   e.preventDefault();
   data.healthImports=data.healthImports||[];
-  data.healthImports.unshift({
+  const entry={
     source:hiSource.value,
     type:hiType.value.trim(),
     value:hiValue.value.trim(),
     unit:hiUnit.value.trim(),
     date:hiDate.value,
-    note:hiNote.value.trim()
-  });
+    time:(document.getElementById('hiTime')?.value||''),
+    note:hiNote.value.trim(),
+    photo:pendingGenericPhotos.health||''
+  };
+  data.healthImports.unshift(entry);
+  pendingGenericPhotos.health='';
+  const inp=document.getElementById('hiPhoto'); if(inp)inp.value='';
+  const prev=document.getElementById('hiPhotoPreview'); if(prev){prev.removeAttribute('src');prev.style.display='none';}
   e.target.reset();
   e.target.style.display='none';
   setTodayDefaults();
+  updateHealthAppointmentUI();
   save();
 }
 
@@ -1727,6 +1791,8 @@ function scrollGlucoseChart(){
 
 setTodayDefaults();
 foodTypeChanged();
+document.getElementById('hiType')?.addEventListener('input',updateHealthAppointmentUI);
+document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();});
