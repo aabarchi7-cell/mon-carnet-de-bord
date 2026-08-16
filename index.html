@@ -222,7 +222,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 15 AOÛT • V26</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 16 AOÛT • V27</div>
 </header>
 
 <main>
@@ -530,6 +530,8 @@ footer .action{font-size:13px;padding:9px 8px}
         <div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"></div>
         <div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
         <div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
+        <div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" type="url" placeholder="Collez ici le lien de la recette Cookidoo"></div>
+        <div class="full recipe-only" style="display:none"><button class="action" type="button" onclick="openCookidooFromField()">↗️ Ouvrir la recette Cookidoo</button></div>
         <div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input id="foodPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'foodPreview','food')"><div class="photo-tools"><img id="foodPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')">Retirer la photo</button></div></div>
         <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
       </form>
@@ -542,7 +544,11 @@ footer .action{font-size:13px;padding:9px 8px}
       <span class="left"><span class="icon">🌙</span>Sommeil</span><span class="chev">›</span>
     </button>
     <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button></div>
+      <div class="toolbar">
+        <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
+        <button class="action" type="button" onclick="startSleepAppleImport()">🍎 Importer via Apple Santé</button>
+      </div>
+      <div id="sleepImportStatus" class="small" style="margin:0 0 10px"></div>
       <form class="entry" id="sleepForm" style="display:none" onsubmit="addSleep(event)">
         <div><label>Date</label><input id="sDate" type="date" required></div>
         <div><label>Durée (heures)</label><input id="sHours" type="number" min="0" max="24" step="0.1" required></div>
@@ -603,16 +609,27 @@ footer .action{font-size:13px;padding:9px 8px}
     <div class="section-body">
       <div class="card" style="margin-bottom:10px">
         <div class="item-title">Glycémie</div>
-        <div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet signale seulement les tendances pour faciliter le suivi. Les seuils affichés ne remplacent pas les objectifs personnalisés fixés avec votre médecin.</div>
+        <div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet sert à les noter et à suivre les tendances.</div>
+        <div id="objGlucoseText" class="item-text" style="margin-top:8px"></div>
+        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('glucose')">Ajouter / modifier mon repère</button></div>
       </div>
       <div class="card" style="margin-bottom:10px">
         <div class="item-title">Clavicule</div>
-        <div class="small" style="margin-top:6px">Suivre surtout la douleur, la mobilité, la force et les consignes du kinésithérapeute / orthopédiste.</div>
+        <div class="small" style="margin-top:6px">Notez ici les repères personnels donnés par le kinésithérapeute / orthopédiste.</div>
+        <div id="objClavicleText" class="item-text" style="margin-top:8px"></div>
+        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('clavicle')">Ajouter / modifier mon repère</button></div>
       </div>
-      <div class="card">
+      <div class="card" style="margin-bottom:10px">
         <div class="item-title">Sommeil</div>
-        <div class="small" style="margin-top:6px">Le carnet permet de voir les tendances de durée et de qualité sans interpréter une seule nuit isolément.</div>
+        <div class="small" style="margin-top:6px">Notez ici vos propres repères de durée, qualité ou régularité.</div>
+        <div id="objSleepText" class="item-text" style="margin-top:8px"></div>
+        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('sleep')">Ajouter / modifier mon repère</button></div>
       </div>
+      <form class="entry" id="objectiveForm" style="display:none" onsubmit="saveObjective(event)">
+        <input id="objCategory" type="hidden">
+        <div class="full"><label>Mon objectif / repère</label><textarea id="objValue" placeholder="Écrivez ici votre objectif ou la consigne reçue"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer le repère</button></div>
+      </form>
     </div>
   </section>
 
@@ -636,7 +653,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>HUAWEI Health</b>
-          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V25 corrige aussi les retours mal formés et propose un secours par presse-papiers.</div>
+          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V27 conserve l’import par raccourci et le secours par presse-papiers.</div>
           <div class="integration-actions">
             <button class="action primary" type="button" onclick="startHuaweiImport()">Importer depuis HUAWEI</button>
             <button class="action" type="button" onclick="importHuaweiClipboard()">Importer le total copié</button>
@@ -645,16 +662,23 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>HUM Health</b>
-          <div class="small">Ajoutez ici les données choisies depuis HUM Health.</div>
+          <div class="small">Choisissez un type pour préremplir le formulaire, puis saisissez la valeur lue dans HUM Health.</div>
           <div class="integration-actions">
-            <button class="action" type="button" onclick="openHealthImport('HUM Health',this)">Ajouter une donnée ici</button>
+            <button class="action" type="button" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)">Tension</button>
+            <button class="action" type="button" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)">Fréquence cardiaque</button>
+            <button class="action" type="button" onclick="presetHealth('HUM Health','Sommeil','h',this)">Sommeil</button>
+            <button class="action" type="button" onclick="openHealthImport('HUM Health',this)">Autre donnée</button>
           </div>
         </div>
         <div class="integration-card">
           <b>Quirónsalud</b>
-          <div class="small">Ajoutez ici les données ou résultats choisis depuis Quirónsalud.</div>
+          <div class="small">Choisissez le document ou résultat à noter, puis complétez le résumé ou la valeur.</div>
           <div class="integration-actions">
-            <button class="action" type="button" onclick="openHealthImport('Quirónsalud',this)">Ajouter une donnée ici</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)">Analyse sanguine</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)">Radio / scanner / IRM</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Compte rendu','',this)">Compte rendu</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Ordonnance','',this)">Ordonnance</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Rendez-vous / consultation','',this)">Consultation</button>
           </div>
         </div>
       </div>
@@ -726,7 +750,8 @@ const defaultData={
     {id:'table',name:'Glissement sur table assisté',desc:'Faire glisser doucement les mains vers l’avant sur une table, seulement dans l’amplitude confortable autorisée.',status:'À valider avec le kiné'}
   ],
   exerciseLogs:[],
-  bp:[], meds:[], analyses:[], foods:[], sleep:[], notes:[], healthImports:[]
+  bp:[], meds:[], analyses:[], foods:[], sleep:[], notes:[], healthImports:[],
+  objectives:{glucose:'',clavicle:'',sleep:''}
 };
 let data=loadData();
 
@@ -747,7 +772,8 @@ function loadData(){
       ...saved,
       exercises:saved.exercises||structuredClone(defaultData.exercises),
       exerciseLogs:saved.exerciseLogs||[],
-      healthImports:saved.healthImports||[]
+      healthImports:saved.healthImports||[],
+      objectives:{...structuredClone(defaultData.objectives),...(saved.objectives||{})}
     };
   }catch(e){return structuredClone(defaultData)}
 }
@@ -918,6 +944,7 @@ function addFood(e){
     portions:(document.getElementById('foodPortions')?.value||'').trim(),
     ingredients:(document.getElementById('foodIngredients')?.value||'').trim(),
     steps:(document.getElementById('foodSteps')?.value||'').trim(),
+    cookidooUrl:(document.getElementById('foodCookidooUrl')?.value||'').trim(),
     text:foodText.value.trim(),photo:pendingGenericPhotos.food||''
   }); pendingGenericPhotos.food='';
   e.target.reset(); foodTypeChanged(); e.target.style.display='none'; setTodayDefaults(); save();
@@ -965,40 +992,14 @@ function saveHuaweiImport(value, note){
   if(!clean) return false;
   data.healthImports=data.healthImports||[];
   const today=localDateString();
-
-  // Une seule entrée HUAWEI « Pas » par jour :
-  // si elle existe déjà, on la remplace au lieu de créer un doublon.
-  const existingIndex=data.healthImports.findIndex(item=>
-    item &&
-    item.source==='HUAWEI Health' &&
-    item.type==='Pas' &&
-    item.date===today
-  );
-
-  const entry={
-    source:'HUAWEI Health',
-    type:'Pas',
-    value:clean,
-    unit:'pas',
-    date:today,
-    note:note||'Import automatique via HUAWEI vers CARNET'
-  };
-
-  if(existingIndex>=0){
-    data.healthImports[existingIndex]=entry;
-    // Nettoie d'éventuels anciens doublons HUAWEI du même jour.
-    data.healthImports=data.healthImports.filter((item,index)=>
-      index===existingIndex ||
-      !(item && item.source==='HUAWEI Health' && item.type==='Pas' && item.date===today)
-    );
-  }else{
-    data.healthImports.unshift(entry);
-  }
-
+  const existing=data.healthImports.findIndex(x=>x && x.source==='HUAWEI Health' && x.type==='Pas' && x.date===today);
+  const entry={source:'HUAWEI Health',type:'Pas',value:clean,unit:'pas',date:today,note:note||'Import automatique via HUAWEI vers CARNET'};
+  if(existing>=0) data.healthImports.splice(existing,1,entry);
+  else data.healthImports.unshift(entry);
   save();
   const sec=document.getElementById('healthConnectionsSection');
   if(sec) sec.classList.add('open');
-  healthImportStatus((existingIndex>=0?'Donnée HUAWEI mise à jour : ':'Donnée HUAWEI importée : ')+clean+' pas.');
+  healthImportStatus('Donnée HUAWEI importée : '+clean+' pas.');
   setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
   return true;
 }
@@ -1025,6 +1026,8 @@ function importHealthFromUrl(){
                     hashParams.has('healthValue') || hashParams.has('healthPayload');
     if(!hasDirect) return false;
 
+    const directSource=params.get('healthSource')||hashParams.get('healthSource')||'';
+    const directType=params.get('healthType')||hashParams.get('healthType')||'';
     let rawValue=params.get('healthValue');
     if(!rawValue) rawValue=hashParams.get('healthValue')||'';
 
@@ -1052,11 +1055,23 @@ function importHealthFromUrl(){
     }
 
     if(!value){
-      healthImportStatus('Retour HUAWEI reçu, mais la valeur des pas est vide. La V25 peut aussi utiliser « Importer le total copié ».');
+      healthImportStatus('Retour HUAWEI reçu, mais la valeur des pas est vide. La V27 peut aussi utiliser « Importer le total copié ».');
       return false;
     }
 
-    const ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
+    let ok=false;
+    if(/apple/i.test(directSource) && /sommeil|sleep/i.test(directType)){
+      const hours=Number(String(value).replace(',','.'));
+      if(Number.isFinite(hours)){
+        data.sleep=data.sleep||[];
+        data.sleep.unshift({date:params.get('healthDate')||localDateString(),hours,quality:'Bonne',wake:'',note:'Import Apple Santé'});
+        save();
+        const st=document.getElementById('sleepImportStatus'); if(st)st.textContent='Sommeil importé depuis Apple Santé : '+hours+' h.';
+        ok=true;
+      }
+    }else{
+      ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
+    }
     if(ok && window.history && history.replaceState){
       history.replaceState({},document.title,window.location.pathname);
     }
@@ -1178,10 +1193,16 @@ function render(){
       : '<div class="empty">Aucune donnée importée.</div>';
   }
 
-  foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}`; return itemHtml(x.title,meta,details,'foods',i)+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
+  foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}`; const link=x.cookidooUrl?`<div class="toolbar"><button class="action" type="button" onclick="openSavedCookidoo(${i})">↗️ Ouvrir Cookidoo</button></div>`:''; return itemHtml(x.title,meta,details,'foods',i)+link+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
   sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
     `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+
+  data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
+  const og=document.getElementById('objGlucoseText'),oc=document.getElementById('objClavicleText'),os=document.getElementById('objSleepText');
+  if(og)og.textContent=data.objectives.glucose||'Aucun repère personnel enregistré.';
+  if(oc)oc.textContent=data.objectives.clavicle||'Aucun repère personnel enregistré.';
+  if(os)os.textContent=data.objectives.sleep||'Aucun repère personnel enregistré.';
 
   if(data.glucose.length){
     const g=data.glucose[0];
@@ -1239,7 +1260,7 @@ function clearAll(){
     setTimeout(()=>{clearArmed=false;if(btn)btn.textContent='Effacer toutes les données';},5000);
     return;
   }
-  data={...structuredClone(defaultData),glucose:[],clavicle:[],exerciseLogs:[],bp:[],meds:[],analyses:[],foods:[],sleep:[],notes:[],healthImports:[]};
+  data={...structuredClone(defaultData),glucose:[],clavicle:[],exerciseLogs:[],bp:[],meds:[],analyses:[],foods:[],sleep:[],notes:[],healthImports:[],objectives:{glucose:'',clavicle:'',sleep:''}};
   clearArmed=false; save();
 }
 function openSectionByText(txt){
@@ -1269,6 +1290,45 @@ function openExternal(url){
   }
 }
 function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
+function startSleepAppleImport(){
+  const st=document.getElementById('sleepImportStatus');
+  if(st) st.textContent='Ouverture du raccourci Apple Santé pour récupérer le sommeil…';
+  const callback=window.location.href.split(/[?#]/)[0];
+  runShortcut('Carnet - Apple Santé','Sommeil | '+callback);
+}
+function presetHealth(source,type,unit,btn){
+  openHealthImport(source,btn);
+  const t=document.getElementById('hiType'),u=document.getElementById('hiUnit'),v=document.getElementById('hiValue');
+  if(t)t.value=type;
+  if(u)u.value=unit||'';
+  if(v){v.placeholder=type==='Tension artérielle'?'Ex. 128/78':type==='Sommeil'?'Ex. 7.5':'Valeur ou résumé';v.focus();}
+}
+function openCookidooFromField(){
+  const url=(document.getElementById('foodCookidooUrl')?.value||'').trim();
+  if(!url){alert('Collez d’abord le lien Cookidoo de la recette.');return;}
+  openExternal(url);
+}
+function openSavedCookidoo(i){
+  const x=(data.foods||[])[i];
+  if(x&&x.cookidooUrl)openExternal(x.cookidooUrl);
+}
+function openObjectiveForm(category){
+  data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
+  const f=document.getElementById('objectiveForm');
+  document.getElementById('objCategory').value=category;
+  document.getElementById('objValue').value=data.objectives[category]||'';
+  f.style.display='grid';
+  f.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('objValue')?.focus(),200);
+}
+function saveObjective(e){
+  e.preventDefault();
+  const cat=document.getElementById('objCategory').value;
+  data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
+  data.objectives[cat]=(document.getElementById('objValue').value||'').trim();
+  e.target.style.display='none';
+  save();
+}
 function openHealthImport(source,btn){
   const f=document.getElementById('healthImportForm');
   if(!f){ alert('Formulaire indisponible.'); return; }
