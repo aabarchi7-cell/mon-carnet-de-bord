@@ -222,7 +222,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 17 AOÛT • V30</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 17 AOÛT • V31</div>
 </header>
 
 <main>
@@ -662,7 +662,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>HUM Health</b>
-          <div class="small">Choisissez un type pour préremplir le formulaire. La V28 accepte aussi les imports envoyés par un raccourci Apple Santé (par exemple Poids depuis Hume).</div>
+          <div class="small">Choisissez un type pour préremplir le formulaire. La V31 accepte les imports envoyés par Raccourcis Apple Santé, notamment Poids et Fréquence cardiaque depuis Hume.</div>
           <div class="integration-actions">
             <button class="action" type="button" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)">Tension</button>
             <button class="action" type="button" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)">Fréquence cardiaque</button>
@@ -1076,6 +1076,49 @@ function canonicalHealthType(type){
 function importHealthFromUrl(){
   try{
     const href=String(window.location.href||'');
+
+    // V31 : voie d'import prioritaire, volontairement simple et tolérante.
+    // Elle lit directement l'URL complète avant URLSearchParams. Ceci évite
+    // les pertes de valeur observées avec Raccourcis lorsque healthType
+    // contient des accents ou des espaces (ex. "Fréquence cardiaque").
+    let decodedHref=href;
+    try{decodedHref=decodeURIComponent(href.replace(/\+/g,' '));}catch(_){decodedHref=href.replace(/\+/g,' ');}
+    const fastValue=decodedHref.match(/[?&#]healthValue\s*=\s*([-+]?\d+(?:[.,]\d+)?)/i);
+    if(fastValue){
+      const getRaw=(key)=>{
+        const re=new RegExp('[?&#]'+key+'\\s*=\\s*([^&#]*)','i');
+        const m=decodedHref.match(re);
+        return m ? String(m[1]||'').trim() : '';
+      };
+      let fastSource=getRaw('healthSource') || 'Apple Santé';
+      let fastType=canonicalHealthType(getRaw('healthType'));
+      let fastUnit=getRaw('healthUnit');
+      const fastDate=getRaw('healthDate') || localDateString();
+      const fastNote=getRaw('healthNote');
+      const fastClean=extractHuaweiNumber(fastValue[1]);
+
+      // Si le type a été mal transmis mais que l'unité identifie clairement
+      // la mesure, on privilégie l'unité. C'est le cas du rythme cardiaque.
+      if(/^(bpm|nombre\s*\/\s*min)$/i.test(fastUnit)) fastType='Fréquence cardiaque';
+      if(/^kg$/i.test(fastUnit) && (!fastType || fastType==='Donnée Santé')) fastType='Poids';
+      if(!fastUnit && fastType==='Fréquence cardiaque') fastUnit='bpm';
+      if(!fastUnit && fastType==='Poids') fastUnit='kg';
+
+      if(fastClean){
+        let fastOk=false;
+        if(/huawei/i.test(fastSource) || (!fastSource && fastType==='Pas')){
+          fastOk=saveHuaweiImport(fastClean,'Import automatique via HUAWEI vers CARNET');
+        }else{
+          fastOk=saveDirectHealthImport(fastSource,fastType||'Donnée Santé',fastClean,fastUnit,fastDate,fastNote);
+        }
+        if(fastOk){
+          if(window.history && history.replaceState){
+            try{history.replaceState({},document.title,window.location.pathname);}catch(_){}
+          }
+          return true;
+        }
+      }
+    }
     const directSource=readHealthParam('healthSource');
     let directType=canonicalHealthType(readHealthParam('healthType'));
     let directUnit=readHealthParam('healthUnit');
