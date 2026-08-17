@@ -222,7 +222,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 17 AOÛT • V31</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 18 AOÛT • V32</div>
 </header>
 
 <main>
@@ -1021,6 +1021,24 @@ async function importHuaweiClipboard(){
   }
 }
 
+function formatHealthImportValue(type,value,unit){
+  const typ=String(type||'').trim();
+  const val=String(value||'').trim();
+  const u=String(unit||'').trim();
+  if(/sommeil|sleep/i.test(typ) && /^(seconds?|secondes?|sec|s)$/i.test(u)){
+    const n=Number(val.replace(',','.'));
+    if(Number.isFinite(n) && n>=0){
+      const totalMinutes=Math.round(n/60);
+      const h=Math.floor(totalMinutes/60);
+      const m=totalMinutes%60;
+      if(h>0 && m>0) return `${h} h ${m} min`;
+      if(h>0) return `${h} h`;
+      return `${m} min`;
+    }
+  }
+  return val+(u?' '+u:'');
+}
+
 function saveDirectHealthImport(source,type,value,unit,date,note){
   const clean=extractHuaweiNumber(value);
   if(!clean) return false;
@@ -1041,7 +1059,7 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   save();
   const sec=document.getElementById('healthConnectionsSection');
   if(sec) sec.classList.add('open');
-  healthImportStatus('Donnée importée : '+src+' • '+typ+' • '+clean+(u?' '+u:''));
+  healthImportStatus('Donnée importée : '+src+' • '+typ+' • '+formatHealthImportValue(typ,clean,u));
   setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
   return true;
 }
@@ -1315,7 +1333,7 @@ function render(){
       ? (data.healthImports||[]).map((x,i)=>{
           const base=itemHtml(
             `${x.source} • ${x.type}`,
-            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${x.value}${x.unit?' '+x.unit:''}`:''}`,
+            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${formatHealthImportValue(x.type,x.value,x.unit)}`:''}`,
             x.note||'','healthImports',i
           );
           const photo=photoBlock(x,'healthImports',i);
