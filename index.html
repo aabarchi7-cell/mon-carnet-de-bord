@@ -222,7 +222,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 17 AOÛT • V29</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 17 AOÛT • V30</div>
 </header>
 
 <main>
@@ -1075,12 +1075,33 @@ function canonicalHealthType(type){
 }
 function importHealthFromUrl(){
   try{
+    const href=String(window.location.href||'');
     const directSource=readHealthParam('healthSource');
     let directType=canonicalHealthType(readHealthParam('healthType'));
     let directUnit=readHealthParam('healthUnit');
     const directDate=readHealthParam('healthDate')||localDateString();
     const directNote=readHealthParam('healthNote');
     let rawValue=readHealthParam('healthValue');
+
+    // V30 : secours spécial Raccourcis/iOS. Certaines URL contenant des accents
+    // ou des espaces arrivent partiellement décodées. Si l'unité est bpm et la
+    // source Hume, on force le type Fréquence cardiaque et on récupère la valeur
+    // directement depuis l'URL brute si nécessaire.
+    if(!directUnit){
+      const um=href.match(/[?&#]healthUnit=([^&#]*)/i);
+      if(um){
+        let uv=um[1].replace(/\+/g,' ').trim();
+        try{uv=decodeURIComponent(uv)}catch(_){}
+        directUnit=uv.trim();
+      }
+    }
+    if(!rawValue){
+      const vm=href.match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?)/i);
+      if(vm) rawValue=vm[1];
+    }
+    if(/hume/i.test(directSource) && /^(bpm|nombre\s*\/\s*min)$/i.test(String(directUnit||'').trim())){
+      directType='Fréquence cardiaque';
+    }
     const rawPayload=readHealthParam('healthPayload');
     const hasDirect=!!(rawValue || rawPayload);
     if(!hasDirect) return false;
