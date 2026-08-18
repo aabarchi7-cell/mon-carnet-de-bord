@@ -1,9 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#17191d">
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#17191d" name="theme-color"/>
 <title>Mon carnet de bord</title>
 <style>
 :root{
@@ -216,525 +217,563 @@ footer .action{font-size:13px;padding:9px 8px}
 .saved-photo-block{margin-top:10px}
 .saved-photo-block .saved-thumb{display:block;max-width:180px;max-height:180px;width:auto;height:auto;object-fit:cover;border-radius:12px;border:1px solid #3a414b}
 
+
+/* V33 couleurs renforcées — chaque rubrique possède une identité visuelle nette.
+   La couleur reste accompagnée d'une icône et d'un titre pour un repérage non dépendant de la couleur seule. */
+.section{
+  --sectAccent:#6aa8ff;--sectBg:#20324a;--sectBg2:#172433;--sectBorder:#5279a8;
+  border:2px solid var(--sectBorder);
+  background:linear-gradient(180deg,var(--sectBg2),#20242a 96px);
+  box-shadow:0 5px 16px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.025)
+}
+.section .section-head{
+  background:linear-gradient(105deg,var(--sectBg) 0%,var(--sectBg2) 72%,#1c2026 100%);
+  border-left:9px solid var(--sectAccent);
+  min-height:66px;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.07)
+}
+.section .section-head .left{gap:12px}
+.section .section-head .icon{
+  width:38px;height:38px;display:inline-grid;place-items:center;border-radius:11px;
+  background:var(--sectAccent);color:#0d1117;border:2px solid rgba(255,255,255,.28);
+  box-shadow:0 2px 7px rgba(0,0,0,.24);font-size:20px
+}
+.section .section-body{border-top:1px solid rgba(255,255,255,.06);padding-top:12px}
+.section.tone-today{--sectAccent:#79A7FF;--sectBg:#263E68;--sectBg2:#1C2B47;--sectBorder:#648DD0}
+.section.tone-glucose{--sectAccent:#FF7CA7;--sectBg:#5A2638;--sectBg2:#3A1D29;--sectBorder:#A64E70}
+.section.tone-rehab{--sectAccent:#A6ADB8;--sectBg:#343941;--sectBg2:#282C32;--sectBorder:#626A75}
+.section.tone-sport{--sectAccent:#4CA7FF;--sectBg:#174B76;--sectBg2:#17344F;--sectBorder:#3F7DB0}
+.section.tone-pressure{--sectAccent:#53D3E7;--sectBg:#155362;--sectBg2:#183943;--sectBorder:#3D8593}
+.section.tone-meds{--sectAccent:#C08BFF;--sectBg:#51306A;--sectBg2:#352244;--sectBorder:#79569A}
+.section.tone-analyses{--sectAccent:#F08B63;--sectBg:#613528;--sectBg2:#40251E;--sectBorder:#995941}
+.section.tone-food{--sectAccent:#FFC25A;--sectBg:#674B19;--sectBg2:#463416;--sectBorder:#9B7834}
+.section.tone-sleep{--sectAccent:#8E94FF;--sectBg:#343A79;--sectBg2:#252953;--sectBorder:#5E65AA}
+.section.tone-notes{--sectAccent:#63B8FF;--sectBg:#205074;--sectBg2:#1A374F;--sectBorder:#4D7FA5}
+.section.tone-calendar{--sectAccent:#FFD166;--sectBg:#65501E;--sectBg2:#443718;--sectBorder:#967B3A}
+.section.tone-objectives{--sectAccent:#E184FF;--sectBg:#653271;--sectBg2:#43234B;--sectBorder:#9653A1}
+.section.tone-connections{--sectAccent:#57CFE3;--sectBg:#18535E;--sectBg2:#183A41;--sectBorder:#41838D}
+.section.tone-backup{--sectAccent:#B0BAC8;--sectBg:#3A424D;--sectBg2:#2B3139;--sectBorder:#687480}
+.section.open .section-head{filter:brightness(1.10)}
+.section.secondary{opacity:.76;margin-top:20px;border-style:dashed;transform:scale(.985);transform-origin:center top}
+.section.secondary .section-head{font-size:.94em;min-height:58px}
+.section.secondary .section-head:after{content:'secondaire';font-size:10px;letter-spacing:.45px;text-transform:uppercase;color:#d3d7dd;background:#171a1f;border:1px solid #606773;border-radius:999px;padding:3px 7px;margin-left:auto;margin-right:8px}
+.recipe-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.recipe-actions .action{min-height:38px}
+.recipe-badge{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:999px;background:#171b20;border:1px solid #46505e;color:#d7dbe2;font-size:11px}
+.feature-note{background:#1a1e24;border:1px solid #3b4653;border-radius:12px;padding:10px;margin:8px 0;color:#cfd5dd;font-size:12px;line-height:1.45}
+
+
+/* V33 — titres de rubriques colorés individuellement */
+.section .section-head .left{color:var(--sectAccent)}
+.section .section-head .left .icon{color:#0d1117}
+.section .section-head .chev{color:var(--sectAccent)}
+
 </style>
-</head>
+<style>
+/* V33b — titres statiquement différenciés, même si JavaScript n'est pas exécuté */
+.section .section-head .left{font-weight:800;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.section.tone-today .section-head .left{color:#9DBBFF!important}
+.section.tone-glucose .section-head .left{color:#FF8DB5!important}
+.section.tone-rehab .section-head .left{color:#C3C8D0!important}
+.section.tone-sport .section-head .left{color:#61B5FF!important}
+.section.tone-pressure .section-head .left{color:#65E0F0!important}
+.section.tone-meds .section-head .left{color:#D09CFF!important}
+.section.tone-analyses .section-head .left{color:#FF9B73!important}
+.section.tone-food .section-head .left{color:#FFD06A!important}
+.section.tone-sleep .section-head .left{color:#A2A7FF!important}
+.section.tone-notes .section-head .left{color:#7CC6FF!important}
+.section.tone-calendar .section-head .left{color:#FFE07A!important}
+.section.tone-objectives .section-head .left{color:#ED9AFF!important}
+.section.tone-connections .section-head .left{color:#6EDDEB!important}
+.section.tone-backup .section-head .left{color:#C7D0DC!important}
+.section .section-head .chev{color:currentColor}
+</style><style>
+/* V33c: titres multicolores réellement forcés, y compris Safari/iOS */
+.section-title-text{font-weight:900!important;text-shadow:0 1px 1px rgba(0,0,0,.5)!important}
+.section-head .left{color:inherit!important}
+</style></head>
 <body>
 <header>
-  <h1>Mon carnet de bord</h1>
-  <div class="subtitle">Santé • alimentation • suivi quotidien • version corrigée</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION MODIFIÉE • 18 AOÛT • V32</div>
+<h1>Mon carnet de bord</h1>
+<div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION TITRES MULTICOLORES • 18 AOÛT • V33c</div>
 </header>
-
 <main>
-  <div class="dashboard">
-    <div class="card">
-      <div class="metric-title">Dernière glycémie</div>
-      <div class="metric-value" id="lastGlucose">—</div>
-      <div class="metric-note" id="lastGlucoseNote">Aucune donnée</div>
-    </div>
-    <div class="card">
-      <div class="metric-title">Mesures aujourd’hui</div>
-      <div class="metric-value" id="todayCount">0</div>
-      <div class="metric-note">glycémie</div>
-    </div>
-    <div class="card">
-      <div class="metric-title">Dernière note clavicule</div>
-      <div class="metric-value" style="font-size:17px" id="lastClavicle">—</div>
-      <div class="metric-note" id="lastClavicleNote">Aucune donnée</div>
-    </div>
-    <div class="card">
-      <div class="metric-title">Sommeil</div>
-      <div class="metric-value" id="lastSleep">—</div>
-      <div class="metric-note" id="lastSleepNote">Aucune donnée</div>
-    </div>
-    <div class="card">
-      <div class="metric-title">Dernière tension</div>
-      <div class="metric-value" id="lastBP">—</div>
-      <div class="metric-note" id="lastBPNote">Aucune donnée</div>
-    </div>
-  </div>
-
-  <section class="section open" id="todaySection">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">☀️</span>Aujourd’hui</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title" id="todayDateTitle">Aujourd’hui</div>
-        <div class="small" id="todaySummary">Résumé de la journée</div>
-      </div>
-
-      <div class="dashboard" style="margin-bottom:10px">
-        <div class="card">
-          <div class="metric-title">Glycémie</div>
-          <div class="metric-value" id="todayGlucose">—</div>
-          <div class="metric-note" id="todayGlucoseNote">Aucune mesure</div>
-        </div>
-        <div class="card">
-          <div class="metric-title">Repas</div>
-          <div class="metric-value" id="todayMeals">0</div>
-          <div class="metric-note">notes alimentaires</div>
-        </div>
-        <div class="card">
-          <div class="metric-title">Médicaments</div>
-          <div class="metric-value" id="todayMeds">0</div>
-          <div class="metric-note">entrées du jour</div>
-        </div>
-        <div class="card">
-          <div class="metric-title">Clavicule</div>
-          <div class="metric-value" style="font-size:17px" id="todayClavicle">—</div>
-          <div class="metric-note" id="todayClavicleNote">Aucune note</div>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <button class="action primary" onclick="quickAddGlucose()">+ Glycémie</button>
-        <button class="action" onclick="quickAddFood()">+ Repas</button>
-        <button class="action" onclick="quickAddMed()">+ Médicament</button>
-        <button class="action warn" onclick="quickAddNote()">+ Note rapide</button>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Chronologie du jour</div>
-        <div id="todayTimeline" class="list"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section open">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🩸</span>Glycémie & repas</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar">
-        <button class="action primary" onclick="toggleForm('glucoseForm')">+ Nouvelle mesure</button>
-        <button class="action" onclick="scrollGlucoseChart()">Voir le graphique</button>
-      </div>
-
-      <div class="quick-grid">
-        <div class="quick"><b id="gAvg">—</b><span>Moyenne 7 jours</span></div>
-        <div class="quick"><b id="gMin">—</b><span>Plus basse</span></div>
-        <div class="quick"><b id="gMax">—</b><span>Plus haute</span></div>
-      </div>
-
-      <form class="entry" id="glucoseForm" style="display:none" onsubmit="addGlucose(event)">
-        <div><label>Valeur (mg/dL)</label><input id="gValue" type="number" min="20" max="600" required></div>
-        <div><label>Moment</label>
-          <select id="gMoment">
-            <option>À jeun</option><option>Avant repas</option><option>1 h après repas</option>
-            <option selected>2 h après repas</option><option>3 h après repas</option><option>Autre</option>
-          </select>
-        </div>
-        <div><label>Date</label><input id="gDate" type="date" required></div>
-        <div><label>Heure</label><input id="gTime" type="time" required></div>
-        <div><label>Type de repas</label>
-          <select id="gMeal">
-            <option value="">—</option>
-            <option>Petit-déjeuner</option>
-            <option>Déjeuner</option>
-            <option>Dîner</option>
-            <option>Collation</option>
-          </select>
-        </div>
-        <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"></div>
-        <div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input id="gPhoto" type="file" accept="image/*" capture="environment" onchange="previewGlucosePhoto(this,'gPreview')"><img id="gPreview" class="photo-preview" alt="Aperçu glycémie"></div>
-        <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Analyse par moment de la journée</div>
-        <div class="compare-grid">
-          <div class="compare-card"><b id="avgFasting">—</b><span>À jeun</span></div>
-          <div class="compare-card"><b id="avgPremeal">—</b><span>Avant repas</span></div>
-          <div class="compare-card"><b id="avg2h">—</b><span>2 h après repas</span></div>
-          <div class="compare-card"><b id="avg3h">—</b><span>3 h après repas</span></div>
-        </div>
-        <div id="mealComparison"></div>
-      </div>
-
-      <div id="glucoseList" class="list"></div>
-
-      <div class="chart-wrap" id="glucoseChartBox">
-        <div class="chart-title">Évolution de la glycémie</div>
-        <canvas id="glucoseChart" width="760" height="220"></canvas>
-        <div class="chart-legend">Les points sont tracés dans l’ordre des mesures enregistrées. Le graphique sert au suivi de tendance, pas au diagnostic.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🦴</span>Clavicule / accident & kiné</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('clavicleForm')">+ Ajouter une note</button></div>
-      <form class="entry" id="clavicleForm" style="display:none" onsubmit="addClavicle(event)">
-        <div><label>Date</label><input id="cDate" type="date" required></div>
-        <div><label>Douleur (0–10)</label><input id="cPain" type="number" min="0" max="10" step="1"></div>
-        <div><label>Mobilité</label>
-          <select id="cMobility"><option>Très limitée</option><option>Limitée</option><option selected>En amélioration</option><option>Presque normale</option><option>Normale</option></select>
-        </div>
-        <div><label>Kiné</label><select id="cKine"><option>Non</option><option>Oui</option></select></div>
-        <div class="full"><label>Note</label><textarea id="cNote" placeholder="Douleur, mouvement du bras, radio, avis du médecin…"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div id="clavicleList" class="list"></div>
-    </div>
-  </section>
-
-
-  <section class="section" id="exerciseSection">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🤸</span>Exercices & évolution</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Programme de récupération</div>
-        <div class="small" style="margin-top:6px">
+<div class="dashboard">
+<div class="card">
+<div class="metric-title">Dernière glycémie</div>
+<div class="metric-value" id="lastGlucose">—</div>
+<div class="metric-note" id="lastGlucoseNote">Aucune donnée</div>
+</div>
+<div class="card">
+<div class="metric-title">Mesures aujourd’hui</div>
+<div class="metric-value" id="todayCount">0</div>
+<div class="metric-note">glycémie</div>
+</div>
+<div class="card">
+<div class="metric-title">Dernière note clavicule</div>
+<div class="metric-value" id="lastClavicle" style="font-size:17px">—</div>
+<div class="metric-note" id="lastClavicleNote">Aucune donnée</div>
+</div>
+<div class="card">
+<div class="metric-title">Sommeil</div>
+<div class="metric-value" id="lastSleep">—</div>
+<div class="metric-note" id="lastSleepNote">Aucune donnée</div>
+</div>
+<div class="card">
+<div class="metric-title">Dernière tension</div>
+<div class="metric-value" id="lastBP">—</div>
+<div class="metric-note" id="lastBPNote">Aucune donnée</div>
+</div>
+</div>
+<section class="section open tone-today" id="todaySection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">☀️</span><span class="section-title-text" style="color:#FFD166!important;-webkit-text-fill-color:#FFD166!important;border-bottom:3px solid #FFD166;padding-bottom:2px;letter-spacing:.15px">Aujourd’hui</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title" id="todayDateTitle">Aujourd’hui</div>
+<div class="small" id="todaySummary">Résumé de la journée</div>
+</div>
+<div class="dashboard" style="margin-bottom:10px">
+<div class="card">
+<div class="metric-title">Glycémie</div>
+<div class="metric-value" id="todayGlucose">—</div>
+<div class="metric-note" id="todayGlucoseNote">Aucune mesure</div>
+</div>
+<div class="card">
+<div class="metric-title">Repas</div>
+<div class="metric-value" id="todayMeals">0</div>
+<div class="metric-note">notes alimentaires</div>
+</div>
+<div class="card">
+<div class="metric-title">Médicaments</div>
+<div class="metric-value" id="todayMeds">0</div>
+<div class="metric-note">entrées du jour</div>
+</div>
+<div class="card">
+<div class="metric-title">Clavicule</div>
+<div class="metric-value" id="todayClavicle" style="font-size:17px">—</div>
+<div class="metric-note" id="todayClavicleNote">Aucune note</div>
+</div>
+</div>
+<div class="toolbar">
+<button class="action primary" onclick="quickAddGlucose()">+ Glycémie</button>
+<button class="action" onclick="quickAddFood()">+ Repas</button>
+<button class="action" onclick="quickAddMed()">+ Médicament</button>
+<button class="action warn" onclick="quickAddNote()">+ Note rapide</button>
+</div>
+<div class="chart-wrap">
+<div class="chart-title">Chronologie du jour</div>
+<div class="list" id="todayTimeline"></div>
+</div>
+</div>
+</section>
+<section class="section open tone-glucose">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🩸</span><span class="section-title-text" style="color:#FF6B8A!important;-webkit-text-fill-color:#FF6B8A!important;border-bottom:3px solid #FF6B8A;padding-bottom:2px;letter-spacing:.15px">Glycémie &amp; repas</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar">
+<button class="action primary" onclick="toggleForm('glucoseForm')">+ Nouvelle mesure</button>
+<button class="action" onclick="scrollGlucoseChart()">Voir le graphique</button>
+</div>
+<div class="quick-grid">
+<div class="quick"><b id="gAvg">—</b><span>Moyenne 7 jours</span></div>
+<div class="quick"><b id="gMin">—</b><span>Plus basse</span></div>
+<div class="quick"><b id="gMax">—</b><span>Plus haute</span></div>
+</div>
+<form class="entry" id="glucoseForm" onsubmit="addGlucose(event)" style="display:none">
+<div><label>Valeur (mg/dL)</label><input id="gValue" max="600" min="20" required="" type="number"/></div>
+<div><label>Moment</label>
+<select id="gMoment">
+<option>À jeun</option><option>Avant repas</option><option>1 h après repas</option>
+<option selected="">2 h après repas</option><option>3 h après repas</option><option>Autre</option>
+</select>
+</div>
+<div><label>Date</label><input id="gDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="gTime" required="" type="time"/></div>
+<div><label>Type de repas</label>
+<select id="gMeal">
+<option value="">—</option>
+<option>Petit-déjeuner</option>
+<option>Déjeuner</option>
+<option>Dîner</option>
+<option>Collation</option>
+</select>
+</div>
+<div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
+<div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" capture="environment" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="small">Astuce photo : après la prise, utilisez « Texte en direct » de l’iPhone si disponible pour copier le chiffre, puis collez-le dans Valeur.</div></div>
+<div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="chart-wrap">
+<div class="chart-title">Analyse par moment de la journée</div>
+<div class="compare-grid">
+<div class="compare-card"><b id="avgFasting">—</b><span>À jeun</span></div>
+<div class="compare-card"><b id="avgPremeal">—</b><span>Avant repas</span></div>
+<div class="compare-card"><b id="avg2h">—</b><span>2 h après repas</span></div>
+<div class="compare-card"><b id="avg3h">—</b><span>3 h après repas</span></div>
+</div>
+<div id="mealComparison"></div>
+</div>
+<div class="list" id="glucoseList"></div>
+<div class="chart-wrap" id="glucoseChartBox">
+<div class="chart-title">Évolution de la glycémie</div>
+<canvas height="220" id="glucoseChart" width="760"></canvas>
+<div class="chart-legend">Les points sont tracés dans l’ordre des mesures enregistrées. Le graphique sert au suivi de tendance, pas au diagnostic.</div>
+</div>
+</div>
+</section>
+<section class="section tone-rehab secondary">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🦴</span><span class="section-title-text" style="color:#C2C8D0!important;-webkit-text-fill-color:#C2C8D0!important;border-bottom:3px solid #C2C8D0;padding-bottom:2px;letter-spacing:.15px">Rééducation / récupération</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('clavicleForm')">+ Ajouter une note</button></div>
+<form class="entry" id="clavicleForm" onsubmit="addClavicle(event)" style="display:none">
+<div><label>Date</label><input id="cDate" required="" type="date"/></div>
+<div><label>Douleur (0–10)</label><input id="cPain" max="10" min="0" step="1" type="number"/></div>
+<div><label>Mobilité</label>
+<select id="cMobility"><option>Très limitée</option><option>Limitée</option><option selected="">En amélioration</option><option>Presque normale</option><option>Normale</option></select>
+</div>
+<div><label>Kiné</label><select id="cKine"><option>Non</option><option>Oui</option></select></div>
+<div class="full"><label>Note</label><textarea id="cNote" placeholder="Douleur, mouvement du bras, radio, avis du médecin…"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="clavicleList"></div>
+</div>
+</section>
+<section class="section tone-sport" id="exerciseSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🏃</span><span class="section-title-text" style="color:#7DFF9B!important;-webkit-text-fill-color:#7DFF9B!important;border-bottom:3px solid #7DFF9B;padding-bottom:2px;letter-spacing:.15px">Sport &amp; activité physique</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Programme de récupération</div>
+<div class="small" style="margin-top:6px">
           Les exercices proposés ici sont doux et servent de carnet de suivi. Avec une fracture déplacée en consolidation,
           validez avec votre kinésithérapeute ou orthopédiste les mouvements d’épaule autorisés avant de progresser.
         </div>
-      </div>
-
-      <div class="toolbar">
-        <button class="action primary" type="button" id="openExerciseLog">+ Enregistrer une séance</button>
-        <button class="action" type="button" id="openCustomExercise">+ Ajouter un exercice</button>
-      </div>
-
-      <form class="entry" id="exerciseLogForm" style="display:none" onsubmit="addExerciseLog(event)">
-        <div><label>Date</label><input id="exDate" type="date" required></div>
-        <div><label>Exercice</label><select id="exName" required></select></div>
-        <div><label>Répétitions / durée</label><input id="exDose" placeholder="Ex. 10 répétitions"></div>
-        <div><label>Amplitude</label>
-          <select id="exRange">
-            <option>Très petite</option><option>Petite</option><option selected>Confortable</option>
-            <option>Jusqu’à hauteur d’épaule</option><option>Plus haut — seulement si autorisé</option>
-          </select>
-        </div>
-        <div>
-          <label>Douleur avant (0–10)</label>
-          <div class="range-row"><input id="exPainBefore" type="range" min="0" max="10" value="0" oninput="exPainBeforeVal.value=this.value"><output id="exPainBeforeVal">0</output></div>
-        </div>
-        <div>
-          <label>Douleur après (0–10)</label>
-          <div class="range-row"><input id="exPainAfter" type="range" min="0" max="10" value="0" oninput="exPainAfterVal.value=this.value"><output id="exPainAfterVal">0</output></div>
-        </div>
-        <div><label>Facilité (0–10)</label>
-          <div class="range-row"><input id="exEase" type="range" min="0" max="10" value="5" oninput="exEaseVal.value=this.value"><output id="exEaseVal">5</output></div>
-        </div>
-        <div><label>Fait sans aide ?</label><select id="exHelp"><option>Oui</option><option>Non</option></select></div>
-        <div class="full"><label>Remarque</label><textarea id="exNote" placeholder="Raideur, douleur, mouvement plus facile qu’hier…"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer la séance</button></div>
-      </form>
-
-      <form class="entry" id="customExerciseForm" style="display:none" onsubmit="addCustomExercise(event)">
-        <div><label>Nom de l’exercice</label><input id="cxName" required></div>
-        <div><label>Statut</label>
-          <select id="cxStatus"><option>À valider avec le kiné</option><option>Validé par le kiné</option><option>En pause</option></select>
-        </div>
-        <div class="full"><label>Consigne</label><textarea id="cxDesc" placeholder="Écrivez ici la consigne donnée par votre kiné."></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Ajouter l’exercice</button></div>
-      </form>
-
-      <div id="exerciseLibrary"></div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Évolution des séances</div>
-        <div class="compare-grid">
-          <div class="compare-card"><b id="exSessionCount">0</b><span>Séances enregistrées</span></div>
-          <div class="compare-card"><b id="exAvgEase">—</b><span>Facilité moyenne</span></div>
-          <div class="compare-card"><b id="exAvgPain">—</b><span>Douleur après</span></div>
-          <div class="compare-card"><b id="exLastDate">—</b><span>Dernière séance</span></div>
-        </div>
-        <canvas id="exerciseChart" width="760" height="220"></canvas>
-        <div class="chart-legend">Le graphique suit la facilité et la douleur après chaque séance. Une progression lente et régulière est plus utile qu’une augmentation forcée.</div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Historique</div>
-        <div id="exerciseLogList" class="list"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="bpSection">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">❤️</span>Tension artérielle</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button></div>
-      <form class="entry" id="bpForm" style="display:none" onsubmit="addBP(event)">
-        <div><label>Systolique</label><input id="bpSys" type="number" min="50" max="260" required placeholder="Ex. 125"></div>
-        <div><label>Diastolique</label><input id="bpDia" type="number" min="30" max="160" required placeholder="Ex. 78"></div>
-        <div><label>Pouls / min</label><input id="bpPulse" type="number" min="30" max="220" placeholder="Ex. 68"></div>
-        <div><label>Date</label><input id="bpDate" type="date" required></div>
-        <div><label>Heure</label><input id="bpTime" type="time" required></div>
-        <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-        <div class="full"><label>Photo du tensiomètre (facultatif)</label><input id="bpPhoto" type="file" accept="image/*" capture="environment" onchange="previewPhoto(this,'bpPreview')"><img id="bpPreview" class="photo-preview" alt="Aperçu"></div>
-        <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div class="small" style="margin:6px 0 12px">La photo est conservée avec la mesure sur cet appareil comme repère visuel. La lecture automatique des chiffres depuis une photo n’est pas activée dans cette version hors ligne.</div>
-      <div id="bpList" class="list"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">💊</span>Médicaments & compléments</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('medForm')">+ Ajouter</button></div>
-      <form class="entry" id="medForm" style="display:none" onsubmit="addMedication(event)">
-        <div><label>Nom</label><input id="medTitle" required></div>
-        <div><label>Dose</label><input id="medDose" placeholder="Ex. 1 comprimé"></div>
-        <div><label>Date</label><input id="medDate" type="date" required></div>
-        <div><label>Heure</label><input id="medTime" type="time"></div>
-        <div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
-        <div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input id="medPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'medPreview','med')"><div class="photo-tools"><img id="medPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')">Retirer la photo</button></div></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div id="medList" class="list"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🧪</span>Analyses & examens</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('analysisForm')">+ Ajouter</button></div>
-      <form class="entry" id="analysisForm" style="display:none" onsubmit="addAnalysis(event)">
-        <div><label>Examen</label><input id="analysisTitle" required></div>
-        <div><label>Date</label><input id="analysisDate" type="date" required></div>
-        <div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input id="analysisPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'analysisPreview','analysis')"><div class="photo-tools"><img id="analysisPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')">Retirer la photo</button></div></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div id="analysisList" class="list"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🍽️</span>Alimentation & recettes</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('foodForm')">+ Ajouter</button></div>
-      <form class="entry" id="foodForm" style="display:none" onsubmit="addFood(event)">
-        <div><label>Type</label><select id="foodType" onchange="foodTypeChanged()"><option>Repas</option><option>Recette TM7</option><option>Recette</option><option>Réaction alimentaire</option></select></div>
-        <div><label>Titre</label><input id="foodTitle" required></div>
-        <div><label>Date</label><input id="foodDate" type="date" required></div>
-        <div><label>Moment</label><select id="foodMoment"><option value="">—</option><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
-        <div class="recipe-only" style="display:none"><label>Durée</label><input id="foodDuration" placeholder="Ex. 35 min"></div>
-        <div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"></div>
-        <div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
-        <div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
-        <div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" type="url" placeholder="Collez ici le lien de la recette Cookidoo"></div>
-        <div class="full recipe-only" style="display:none"><button class="action" type="button" onclick="openCookidooFromField()">↗️ Ouvrir la recette Cookidoo</button></div>
-        <div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input id="foodPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'foodPreview','food')"><div class="photo-tools"><img id="foodPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')">Retirer la photo</button></div></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div id="foodList" class="list"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🌙</span>Sommeil</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar">
-        <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
-        <button class="action" type="button" onclick="startSleepAppleImport()">🍎 Importer via Apple Santé</button>
-      </div>
-      <div id="sleepImportStatus" class="small" style="margin:0 0 10px"></div>
-      <form class="entry" id="sleepForm" style="display:none" onsubmit="addSleep(event)">
-        <div><label>Date</label><input id="sDate" type="date" required></div>
-        <div><label>Durée (heures)</label><input id="sHours" type="number" min="0" max="24" step="0.1" required></div>
-        <div><label>Qualité</label><select id="sQuality"><option>Mauvaise</option><option>Moyenne</option><option selected>Bonne</option><option>Très bonne</option></select></div>
-        <div><label>Réveils</label><input id="sWake" type="number" min="0" max="20"></div>
-        <div class="full"><label>Remarque</label><textarea id="sNote"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div id="sleepList" class="list"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">📝</span>Notes & rendez-vous</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="toolbar"><button class="action primary" onclick="toggleForm('noteForm')">+ Ajouter</button></div>
-      <form class="entry" id="noteForm" style="display:none" onsubmit="addNote(event)">
-        <div><label>Type</label><select id="noteType"><option>Note</option><option>Rendez-vous</option></select></div>
-        <div><label>Titre</label><input id="noteTitle" required></div>
-        <div><label>Date</label><input id="noteDate" type="date" required></div>
-        <div><label>Heure</label><input id="noteTime" type="time"></div>
-        <div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-      </form>
-      <div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
-      <div id="noteList" class="list"></div>
-    </div>
-  </section>
-
-
-
-  <section class="section" id="calendarShareSection">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">📅</span>Calendrier / Partager</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Calendrier & partage</div>
-        <div class="small" style="margin-top:6px">
-          Ces boutons sont actifs. Vous pouvez ouvrir directement « Notes & rendez-vous », préparer un nouveau rendez-vous,
+</div>
+<div class="toolbar">
+<button class="action primary" id="openExerciseLog" type="button">+ Enregistrer une séance</button>
+<button class="action" id="openCustomExercise" type="button">+ Ajouter un exercice</button>
+</div>
+<form class="entry" id="exerciseLogForm" onsubmit="addExerciseLog(event)" style="display:none">
+<div><label>Date</label><input id="exDate" required="" type="date"/></div>
+<div><label>Exercice</label><select id="exName" required=""></select></div>
+<div><label>Répétitions / durée</label><input id="exDose" placeholder="Ex. 10 répétitions"/></div>
+<div><label>Amplitude</label>
+<select id="exRange">
+<option>Très petite</option><option>Petite</option><option selected="">Confortable</option>
+<option>Jusqu’à hauteur d’épaule</option><option>Plus haut — seulement si autorisé</option>
+</select>
+</div>
+<div>
+<label>Douleur avant (0–10)</label>
+<div class="range-row"><input id="exPainBefore" max="10" min="0" oninput="exPainBeforeVal.value=this.value" type="range" value="0"/><output id="exPainBeforeVal">0</output></div>
+</div>
+<div>
+<label>Douleur après (0–10)</label>
+<div class="range-row"><input id="exPainAfter" max="10" min="0" oninput="exPainAfterVal.value=this.value" type="range" value="0"/><output id="exPainAfterVal">0</output></div>
+</div>
+<div><label>Facilité (0–10)</label>
+<div class="range-row"><input id="exEase" max="10" min="0" oninput="exEaseVal.value=this.value" type="range" value="5"/><output id="exEaseVal">5</output></div>
+</div>
+<div><label>Fait sans aide ?</label><select id="exHelp"><option>Oui</option><option>Non</option></select></div>
+<div class="full"><label>Remarque</label><textarea id="exNote" placeholder="Raideur, douleur, mouvement plus facile qu’hier…"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer la séance</button></div>
+</form>
+<form class="entry" id="customExerciseForm" onsubmit="addCustomExercise(event)" style="display:none">
+<div><label>Nom de l’exercice</label><input id="cxName" required=""/></div>
+<div><label>Statut</label>
+<select id="cxStatus"><option>À valider avec le kiné</option><option>Validé par le kiné</option><option>En pause</option></select>
+</div>
+<div class="full"><label>Consigne</label><textarea id="cxDesc" placeholder="Écrivez ici la consigne donnée par votre kiné."></textarea></div>
+<div class="full"><button class="action primary" type="submit">Ajouter l’exercice</button></div>
+</form>
+<div id="exerciseLibrary"></div>
+<div class="chart-wrap">
+<div class="chart-title">Évolution des séances</div>
+<div class="compare-grid">
+<div class="compare-card"><b id="exSessionCount">0</b><span>Séances enregistrées</span></div>
+<div class="compare-card"><b id="exAvgEase">—</b><span>Facilité moyenne</span></div>
+<div class="compare-card"><b id="exAvgPain">—</b><span>Douleur après</span></div>
+<div class="compare-card"><b id="exLastDate">—</b><span>Dernière séance</span></div>
+</div>
+<canvas height="220" id="exerciseChart" width="760"></canvas>
+<div class="chart-legend">Le graphique suit la facilité et la douleur après chaque séance. Une progression lente et régulière est plus utile qu’une augmentation forcée.</div>
+</div>
+<div class="chart-wrap">
+<div class="chart-title">Historique</div>
+<div class="list" id="exerciseLogList"></div>
+</div>
+</div>
+</section>
+<section class="section tone-pressure" id="bpSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">❤️</span><span class="section-title-text" style="color:#55D6FF!important;-webkit-text-fill-color:#55D6FF!important;border-bottom:3px solid #55D6FF;padding-bottom:2px;letter-spacing:.15px">Tension artérielle</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button></div>
+<form class="entry" id="bpForm" onsubmit="addBP(event)" style="display:none">
+<div><label>Systolique</label><input id="bpSys" max="260" min="50" placeholder="Ex. 125" required="" type="number"/></div>
+<div><label>Diastolique</label><input id="bpDia" max="160" min="30" placeholder="Ex. 78" required="" type="number"/></div>
+<div><label>Pouls / min</label><input id="bpPulse" max="220" min="30" placeholder="Ex. 68" type="number"/></div>
+<div><label>Date</label><input id="bpDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
+<div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
+<div class="full"><label>Photo du tensiomètre (facultatif)</label><input accept="image/*" capture="environment" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="small">Astuce photo : « Texte en direct » peut aider à copier les chiffres du tensiomètre avant confirmation.</div></div>
+<div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="small" style="margin:6px 0 12px">La photo est conservée avec la mesure sur cet appareil comme repère visuel. La lecture automatique des chiffres depuis une photo n’est pas activée dans cette version hors ligne.</div>
+<div class="list" id="bpList"></div>
+</div>
+</section>
+<section class="section tone-meds">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">💊</span><span class="section-title-text" style="color:#D98CFF!important;-webkit-text-fill-color:#D98CFF!important;border-bottom:3px solid #D98CFF;padding-bottom:2px;letter-spacing:.15px">Médicaments &amp; compléments</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('medForm')">+ Ajouter</button></div>
+<form class="entry" id="medForm" onsubmit="addMedication(event)" style="display:none">
+<div><label>Nom</label><input id="medTitle" required=""/></div>
+<div><label>Dose</label><input id="medDose" placeholder="Ex. 1 comprimé"/></div>
+<div><label>Date</label><input id="medDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="medTime" type="time"/></div>
+<div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
+<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" capture="environment" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="medList"></div>
+</div>
+</section>
+<section class="section tone-analyses">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🧪</span><span class="section-title-text" style="color:#FF9F5A!important;-webkit-text-fill-color:#FF9F5A!important;border-bottom:3px solid #FF9F5A;padding-bottom:2px;letter-spacing:.15px">Analyses &amp; examens</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('analysisForm')">+ Ajouter</button></div>
+<form class="entry" id="analysisForm" onsubmit="addAnalysis(event)" style="display:none">
+<div><label>Examen</label><input id="analysisTitle" required=""/></div>
+<div><label>Date</label><input id="analysisDate" required="" type="date"/></div>
+<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" capture="environment" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="analysisList"></div>
+</div>
+</section>
+<section class="section tone-food">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🍽️</span><span class="section-title-text" style="color:#FFE066!important;-webkit-text-fill-color:#FFE066!important;border-bottom:3px solid #FFE066;padding-bottom:2px;letter-spacing:.15px">Alimentation &amp; recettes</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('foodForm')">+ Ajouter</button></div>
+<form class="entry" id="foodForm" onsubmit="addFood(event)" style="display:none">
+<div><label>Type</label><select id="foodType" onchange="foodTypeChanged()"><option>Repas</option><option>Recette TM7</option><option>Recette</option><option>Réaction alimentaire</option></select></div>
+<div><label>Titre</label><input id="foodTitle" required=""/></div>
+<div><label>Date</label><input id="foodDate" required="" type="date"/></div>
+<div><label>Moment</label><select id="foodMoment"><option value="">—</option><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+<div class="recipe-only" style="display:none"><label>Durée</label><input id="foodDuration" placeholder="Ex. 35 min"/></div>
+<div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"/></div>
+<div class="recipe-only" style="display:none"><label>Calories estimées / portion</label><input id="foodCalories" inputmode="decimal" placeholder="Ex. 225 kcal"/><div class="small">Valeur indicative : vous pouvez la corriger à tout moment avec « Modifier ».</div></div>
+<div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
+<div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
+<div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" placeholder="Collez ici le lien de la recette Cookidoo" type="url"/></div>
+<div class="full recipe-only" style="display:none"><button class="action" onclick="openCookidooFromField()" type="button">↗️ Ouvrir la recette Cookidoo</button></div>
+<div class="full recipe-only feature-note" style="display:none">Après enregistrement : <b>Modifier</b>, <b>Programmer 📅</b>, <b>Liste de courses 🛒</b> et <b>Partager</b> sont disponibles directement sur la fiche.</div>
+<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" capture="environment" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" id="foodSubmitBtn" type="submit">Enregistrer</button><button class="action" id="foodCancelEditBtn" onclick="cancelFoodEdit()" style="display:none;margin-left:8px" type="button">Annuler la modification</button></div>
+</form>
+<div class="list" id="foodList"></div>
+</div>
+</section>
+<section class="section tone-sleep">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🌙</span><span class="section-title-text" style="color:#A8A4FF!important;-webkit-text-fill-color:#A8A4FF!important;border-bottom:3px solid #A8A4FF;padding-bottom:2px;letter-spacing:.15px">Sommeil</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar">
+<button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
+<button class="action" onclick="startSleepAppleImport()" type="button">🍎 Importer via Apple Santé</button>
+</div>
+<div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
+<form class="entry" id="sleepForm" onsubmit="addSleep(event)" style="display:none">
+<div><label>Date</label><input id="sDate" required="" type="date"/></div>
+<div><label>Durée (heures)</label><input id="sHours" max="24" min="0" required="" step="0.1" type="number"/></div>
+<div><label>Qualité</label><select id="sQuality"><option>Mauvaise</option><option>Moyenne</option><option selected="">Bonne</option><option>Très bonne</option></select></div>
+<div><label>Réveils</label><input id="sWake" max="20" min="0" type="number"/></div>
+<div class="full"><label>Remarque</label><textarea id="sNote"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="sleepList"></div>
+</div>
+</section>
+<section class="section tone-notes">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">📝</span><span class="section-title-text" style="color:#63E6BE!important;-webkit-text-fill-color:#63E6BE!important;border-bottom:3px solid #63E6BE;padding-bottom:2px;letter-spacing:.15px">Notes &amp; rendez-vous</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('noteForm')">+ Ajouter</button></div>
+<form class="entry" id="noteForm" onsubmit="addNote(event)" style="display:none">
+<div><label>Type</label><select id="noteType"><option>Note</option><option>Rendez-vous</option></select></div>
+<div><label>Titre</label><input id="noteTitle" required=""/></div>
+<div><label>Date</label><input id="noteDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="noteTime" type="time"/></div>
+<div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
+<div class="list" id="noteList"></div>
+</div>
+</section>
+<section class="section tone-calendar" id="calendarShareSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">📅</span><span class="section-title-text" style="color:#F4E06D!important;-webkit-text-fill-color:#F4E06D!important;border-bottom:3px solid #F4E06D;padding-bottom:2px;letter-spacing:.15px">Calendrier / Partager</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Calendrier &amp; partage</div>
+<div class="small" style="margin-top:6px">
+          Ces boutons sont actifs. Vous pouvez ouvrir directement « Notes &amp; rendez-vous », préparer un nouveau rendez-vous,
           ou exporter la sauvegarde du carnet.
         </div>
-      </div>
-      <div class="toolbar">
-        <button class="action primary" type="button" onclick="openNotesAppointments()">📝 Notes & rendez-vous</button>
-        <button class="action warn" type="button" onclick="newAppointment()">📅 Nouveau rendez-vous</button>
-        <button class="action" type="button" onclick="exportData()">↗️ Partager / sauvegarder</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🎯</span>Objectifs & repères</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Glycémie</div>
-        <div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet sert à les noter et à suivre les tendances.</div>
-        <div id="objGlucoseText" class="item-text" style="margin-top:8px"></div>
-        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('glucose')">Ajouter / modifier mon repère</button></div>
-      </div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Clavicule</div>
-        <div class="small" style="margin-top:6px">Notez ici les repères personnels donnés par le kinésithérapeute / orthopédiste.</div>
-        <div id="objClavicleText" class="item-text" style="margin-top:8px"></div>
-        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('clavicle')">Ajouter / modifier mon repère</button></div>
-      </div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Sommeil</div>
-        <div class="small" style="margin-top:6px">Notez ici vos propres repères de durée, qualité ou régularité.</div>
-        <div id="objSleepText" class="item-text" style="margin-top:8px"></div>
-        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('sleep')">Ajouter / modifier mon repère</button></div>
-      </div>
-      <form class="entry" id="objectiveForm" style="display:none" onsubmit="saveObjective(event)">
-        <input id="objCategory" type="hidden">
-        <div class="full"><label>Mon objectif / repère</label><textarea id="objValue" placeholder="Écrivez ici votre objectif ou la consigne reçue"></textarea></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer le repère</button></div>
-      </form>
-    </div>
-  </section>
-
-  <section class="section" id="healthConnectionsSection">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">🔗</span>Connexions santé</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Connexions santé — V18</div>
-        <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
-      </div>
-      <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
-      <div class="integration-grid">
-        <div class="integration-card">
-          <b>Apple Santé</b>
-          <div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
-          <div class="integration-actions">
-            <button class="action" type="button" onclick="openHealthImport('Apple Santé',this)">Ajouter une donnée ici</button>
-          </div>
-        </div>
-        <div class="integration-card">
-          <b>HUAWEI Health</b>
-          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V28 conserve l’import par raccourci et le secours par presse-papiers.</div>
-          <div class="integration-actions">
-            <button class="action primary" type="button" onclick="startHuaweiImport()">Importer depuis HUAWEI</button>
-            <button class="action" type="button" onclick="importHuaweiClipboard()">Importer le total copié</button>
-            <button class="action" type="button" onclick="openHealthImport('HUAWEI Health',this)">Saisie manuelle</button>
-          </div>
-        </div>
-        <div class="integration-card">
-          <b>HUM Health</b>
-          <div class="small">Choisissez un type pour préremplir le formulaire. La V31 accepte les imports envoyés par Raccourcis Apple Santé, notamment Poids et Fréquence cardiaque depuis Hume.</div>
-          <div class="integration-actions">
-            <button class="action" type="button" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)">Tension</button>
-            <button class="action" type="button" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)">Fréquence cardiaque</button>
-            <button class="action" type="button" onclick="presetHealth('HUM Health','Sommeil','h',this)">Sommeil</button>
-            <button class="action" type="button" onclick="openHealthImport('HUM Health',this)">Autre donnée</button>
-          </div>
-        </div>
-        <div class="integration-card">
-          <b>Quirónsalud</b>
-          <div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
-          <div class="integration-actions">
-            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)">Analyse sanguine</button>
-            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)">Radio / scanner / IRM</button>
-            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Compte rendu','',this)">Compte rendu</button>
-            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Ordonnance','',this)">Ordonnance</button>
-            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Rendez-vous / consultation','',this)">Consultation</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="shortcutHelp" class="integration-status" style="display:none;margin-bottom:10px"></div>
-
-      <form class="entry" id="healthImportForm" style="display:none" onsubmit="addHealthImport(event)">
-        <div><label>Source</label>
-          <select id="hiSource">
-            <option>Apple Santé</option>
-            <option>HUAWEI Health</option>
-            <option>HUM Health</option>
-            <option>Quirónsalud</option>
-          </select>
-        </div>
-        <div><label>Type de donnée</label><input id="hiType" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required></div>
-        <div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"></div>
-        <div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"></div>
-        <div><label>Date</label><input id="hiDate" type="date" required></div>
-        <div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"></div>
-        <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
-        <div class="full"><label>Photo / capture (facultatif)</label><input id="hiPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'hiPhotoPreview','health')"><div class="photo-tools"><img id="hiPhotoPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')">Retirer la photo</button></div></div>
-        <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" type="button" onclick="healthAppointmentToCalendar()">📅 Ajouter au calendrier</button></div>
-        <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
-      </form>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Données santé ajoutées / importées</div>
-        <div id="healthImportList" class="list"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="backupSection" style="margin-bottom:120px">
-    <button class="section-head" type="button">
-      <span class="left"><span class="icon">⚙️</span>Sauvegarde</span><span class="chev">›</span>
-    </button>
-    <div class="section-body">
-      <p class="small">Les données restent enregistrées dans ce navigateur sur cet appareil. Pour éviter toute perte, exportez régulièrement une sauvegarde JSON que vous pourrez réimporter plus tard.</p>
-      <div class="toolbar">
-        <button class="action" onclick="exportData()">Exporter mes données</button>
-        <label class="action" style="cursor:pointer">Importer
-          <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)">
-        </label>
-        <button class="action danger" onclick="clearAll()">Effacer toutes les données</button>
-      </div>
-    </div>
-  </section>
+</div>
+<div class="toolbar">
+<button class="action primary" onclick="openNotesAppointments()" type="button">📝 Notes &amp; rendez-vous</button>
+<button class="action warn" onclick="newAppointment()" type="button">📅 Nouveau rendez-vous</button>
+<button class="action" onclick="exportData()" type="button">↗️ Partager / sauvegarder</button>
+</div>
+</div>
+</section>
+<section class="section tone-objectives">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🎯</span><span class="section-title-text" style="color:#FF8CE7!important;-webkit-text-fill-color:#FF8CE7!important;border-bottom:3px solid #FF8CE7;padding-bottom:2px;letter-spacing:.15px">Objectifs &amp; repères</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Glycémie</div>
+<div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet sert à les noter et à suivre les tendances.</div>
+<div class="item-text" id="objGlucoseText" style="margin-top:8px"></div>
+<div class="toolbar"><button class="action" onclick="openObjectiveForm('glucose')" type="button">Ajouter / modifier mon repère</button></div>
+</div>
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Clavicule</div>
+<div class="small" style="margin-top:6px">Notez ici les repères personnels donnés par le kinésithérapeute / orthopédiste.</div>
+<div class="item-text" id="objClavicleText" style="margin-top:8px"></div>
+<div class="toolbar"><button class="action" onclick="openObjectiveForm('clavicle')" type="button">Ajouter / modifier mon repère</button></div>
+</div>
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Sommeil</div>
+<div class="small" style="margin-top:6px">Notez ici vos propres repères de durée, qualité ou régularité.</div>
+<div class="item-text" id="objSleepText" style="margin-top:8px"></div>
+<div class="toolbar"><button class="action" onclick="openObjectiveForm('sleep')" type="button">Ajouter / modifier mon repère</button></div>
+</div>
+<form class="entry" id="objectiveForm" onsubmit="saveObjective(event)" style="display:none">
+<input id="objCategory" type="hidden"/>
+<div class="full"><label>Mon objectif / repère</label><textarea id="objValue" placeholder="Écrivez ici votre objectif ou la consigne reçue"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer le repère</button></div>
+</form>
+</div>
+</section>
+<section class="section tone-connections" id="healthConnectionsSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🔗</span><span class="section-title-text" style="color:#4DE1D2!important;-webkit-text-fill-color:#4DE1D2!important;border-bottom:3px solid #4DE1D2;padding-bottom:2px;letter-spacing:.15px">Connexions santé</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Connexions santé — V18</div>
+<div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
+</div>
+<div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
+<div class="integration-grid">
+<div class="integration-card">
+<b>Apple Santé</b>
+<div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
+<div class="integration-actions">
+<button class="action" onclick="openHealthImport('Apple Santé',this)" type="button">Ajouter une donnée ici</button>
+</div>
+</div>
+<div class="integration-card">
+<b>HUAWEI Health</b>
+<div class="small">Import automatique via « HUAWEI vers CARNET ». La V28 conserve l’import par raccourci et le secours par presse-papiers.</div>
+<div class="integration-actions">
+<button class="action primary" onclick="startHuaweiImport()" type="button">Importer depuis HUAWEI</button>
+<button class="action" onclick="importHuaweiClipboard()" type="button">Importer le total copié</button>
+<button class="action" onclick="openHealthImport('HUAWEI Health',this)" type="button">Saisie manuelle</button>
+</div>
+</div>
+<div class="integration-card">
+<b>HUM Health</b>
+<div class="small">Choisissez un type pour préremplir le formulaire. La V31 accepte les imports envoyés par Raccourcis Apple Santé, notamment Poids et Fréquence cardiaque depuis Hume.</div>
+<div class="integration-actions">
+<button class="action" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)" type="button">Tension</button>
+<button class="action" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)" type="button">Fréquence cardiaque</button>
+<button class="action" onclick="presetHealth('HUM Health','Sommeil','h',this)" type="button">Sommeil</button>
+<button class="action" onclick="openHealthImport('HUM Health',this)" type="button">Autre donnée</button>
+</div>
+</div>
+<div class="integration-card">
+<b>Quirónsalud</b>
+<div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
+<div class="integration-actions">
+<button class="action" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)" type="button">Analyse sanguine</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)" type="button">Radio / scanner / IRM</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Compte rendu','',this)" type="button">Compte rendu</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Ordonnance','',this)" type="button">Ordonnance</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Rendez-vous / consultation','',this)" type="button">Consultation</button>
+</div>
+</div>
+</div>
+<div class="integration-status" id="shortcutHelp" style="display:none;margin-bottom:10px"></div>
+<form class="entry" id="healthImportForm" onsubmit="addHealthImport(event)" style="display:none">
+<div><label>Source</label>
+<select id="hiSource">
+<option>Apple Santé</option>
+<option>HUAWEI Health</option>
+<option>HUM Health</option>
+<option>Quirónsalud</option>
+</select>
+</div>
+<div><label>Type de donnée</label><input id="hiType" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required=""/></div>
+<div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"/></div>
+<div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"/></div>
+<div><label>Date</label><input id="hiDate" required="" type="date"/></div>
+<div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"/></div>
+<div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
+<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" capture="environment" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" onclick="healthAppointmentToCalendar()" type="button">📅 Ajouter au calendrier</button></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
+</form>
+<div class="chart-wrap">
+<div class="chart-title">Données santé ajoutées / importées</div>
+<div class="list" id="healthImportList"></div>
+</div>
+</div>
+</section>
+<section class="section tone-backup" id="backupSection" style="margin-bottom:120px">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">⚙️</span><span class="section-title-text" style="color:#E0E4EA!important;-webkit-text-fill-color:#E0E4EA!important;border-bottom:3px solid #E0E4EA;padding-bottom:2px;letter-spacing:.15px">Sauvegarde</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<p class="small">Les données restent enregistrées dans ce navigateur sur cet appareil. Pour éviter toute perte, exportez régulièrement une sauvegarde JSON que vous pourrez réimporter plus tard.</p>
+<div class="toolbar">
+<button class="action" onclick="exportData()">Exporter mes données</button>
+<label class="action" style="cursor:pointer">Importer
+          <input accept=".json,application/json" id="importFile" onchange="importData(event)" style="display:none" type="file"/>
+</label>
+<button class="action danger" onclick="clearAll()">Effacer toutes les données</button>
+</div>
+</div>
+</section>
 </main>
-
 <footer>
-  <button class="action primary" onclick="openSectionByText('Aujourd’hui')">☀️ Aujourd’hui</button>
-  <button class="action" onclick="openSectionByText('Glycémie')">🩸 Glycémie</button>
-  <button class="action warn" onclick="openSectionByText('Notes')">📝 Note</button>
+<button class="action primary" onclick="openSectionByText('Aujourd’hui')">☀️ Aujourd’hui</button>
+<button class="action" onclick="openSectionByText('Glycémie')">🩸 Glycémie</button>
+<button class="action warn" onclick="openSectionByText('Notes')">📝 Note</button>
 </footer>
-
 <script>
 const KEY='monCarnetDeBord_v2';
 const OLD_KEY='monCarnetDeBord_v1';
@@ -883,6 +922,12 @@ function addSleep(e){
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
 let pendingGenericPhotos={med:'',analysis:'',food:'',health:''};
+let editingFoodIndex=-1;
+function clearPendingPhoto(key,inputId,imgId){
+  pendingGenericPhotos[key]='';
+  const input=document.getElementById(inputId); if(input) input.value='';
+  const im=document.getElementById(imgId); if(im){im.removeAttribute('src');im.style.display='none';}
+}
 function genericPhoto(input,imgId,key){
   const f=input.files&&input.files[0];
   if(!f)return;
@@ -939,18 +984,61 @@ function foodTypeChanged(){
   const isRecipe=['Recette TM7','Recette'].includes(foodType.value);
   document.querySelectorAll('.recipe-only').forEach(el=>el.style.display=isRecipe?'block':'none');
 }
+function resetFoodFormState(){
+  editingFoodIndex=-1;
+  pendingGenericPhotos.food='';
+  const prev=document.getElementById('foodPreview'); if(prev){prev.removeAttribute('src');prev.style.display='none';}
+  const input=document.getElementById('foodPhoto'); if(input)input.value='';
+  const submit=document.getElementById('foodSubmitBtn'); if(submit)submit.textContent='Enregistrer';
+  const cancel=document.getElementById('foodCancelEditBtn'); if(cancel)cancel.style.display='none';
+}
+function cancelFoodEdit(){
+  const f=document.getElementById('foodForm');
+  if(f){f.reset();f.style.display='none';}
+  resetFoodFormState();
+  setTodayDefaults(); foodTypeChanged();
+}
+function editFood(i){
+  const x=(data.foods||[])[i]; if(!x)return;
+  editingFoodIndex=i;
+  const f=document.getElementById('foodForm'); if(!f)return;
+  f.style.display='grid';
+  foodType.value=x.type||'Repas';
+  foodTitle.value=x.title||'';
+  foodDate.value=x.date||localDateString();
+  foodMoment.value=x.moment||'';
+  document.getElementById('foodDuration').value=x.duration||'';
+  document.getElementById('foodPortions').value=x.portions||'';
+  document.getElementById('foodCalories').value=x.calories||'';
+  document.getElementById('foodIngredients').value=x.ingredients||'';
+  document.getElementById('foodSteps').value=x.steps||'';
+  document.getElementById('foodCookidooUrl').value=x.cookidooUrl||'';
+  foodText.value=x.text||'';
+  pendingGenericPhotos.food=x.photo||'';
+  const prev=document.getElementById('foodPreview');
+  if(prev){ if(x.photo){prev.src=x.photo;prev.style.display='block';} else {prev.removeAttribute('src');prev.style.display='none';} }
+  const input=document.getElementById('foodPhoto'); if(input)input.value='';
+  const submit=document.getElementById('foodSubmitBtn'); if(submit)submit.textContent='Enregistrer les modifications';
+  const cancel=document.getElementById('foodCancelEditBtn'); if(cancel)cancel.style.display='inline-block';
+  foodTypeChanged();
+  f.scrollIntoView({behavior:'smooth',block:'start'});
+}
 function addFood(e){
   e.preventDefault();
-  data.foods.unshift({
+  const entry={
     title:foodTitle.value.trim(),date:foodDate.value,type:foodType.value,moment:foodMoment.value,
     duration:(document.getElementById('foodDuration')?.value||'').trim(),
     portions:(document.getElementById('foodPortions')?.value||'').trim(),
+    calories:(document.getElementById('foodCalories')?.value||'').trim(),
     ingredients:(document.getElementById('foodIngredients')?.value||'').trim(),
     steps:(document.getElementById('foodSteps')?.value||'').trim(),
     cookidooUrl:(document.getElementById('foodCookidooUrl')?.value||'').trim(),
     text:foodText.value.trim(),photo:pendingGenericPhotos.food||''
-  }); pendingGenericPhotos.food='';
-  e.target.reset(); foodTypeChanged(); e.target.style.display='none'; setTodayDefaults(); save();
+  };
+  if(editingFoodIndex>=0 && data.foods[editingFoodIndex]) data.foods[editingFoodIndex]=entry;
+  else data.foods.unshift(entry);
+  const ok=save(); if(!ok)return;
+  e.target.reset(); e.target.style.display='none'; resetFoodFormState(); foodTypeChanged(); setTodayDefaults();
 }
 function addNote(e){
   e.preventDefault();
@@ -1344,7 +1432,7 @@ function render(){
       : '<div class="empty">Aucune donnée importée.</div>';
   }
 
-  foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}`; const link=x.cookidooUrl?`<div class="toolbar"><button class="action" type="button" onclick="openSavedCookidoo(${i})">↗️ Ouvrir Cookidoo</button></div>`:''; return itemHtml(x.title,meta,details,'foods',i)+link+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
+  foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
   sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
     `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
@@ -1484,6 +1572,64 @@ function openSavedCookidoo(i){
   const x=(data.foods||[])[i];
   if(x&&x.cookidooUrl)openExternal(x.cookidooUrl);
 }
+
+function normalizedCaloriesLabel(x){
+  const c=String(x?.calories||'').trim();
+  if(!c)return '';
+  return c+(c.toLowerCase().includes('kcal')?'':' kcal')+'/portion';
+}
+function scheduleFood(i){
+  const x=(data.foods||[])[i]; if(!x)return;
+  const date=prompt('Date du repas (AAAA-MM-JJ)',x.date||localDateString());
+  if(!date)return;
+  const time=prompt('Heure du repas (HH:MM)','12:30');
+  if(time===null)return;
+  const note=[x.type||'Recette',x.portions?('Portions : '+x.portions):'',normalizedCaloriesLabel(x),x.cookidooUrl||''].filter(Boolean).join(' • ');
+  runShortcut('Ajouter au calendrier',[x.title,date,time||'12:30',note].join(' | '));
+  alert('La programmation est envoyée au raccourci « Ajouter au calendrier ».');
+}
+function ingredientsText(x){
+  return ['🛒 '+(x.title||'Liste de courses'),'',String(x.ingredients||'').trim()].join('\n').trim();
+}
+async function shareFoodIngredients(i){
+  const x=(data.foods||[])[i]; if(!x)return;
+  const text=ingredientsText(x);
+  if(!String(x.ingredients||'').trim()){alert('Aucun ingrédient enregistré pour cette recette.');return;}
+  try{
+    if(navigator.share){await navigator.share({title:'Liste de courses — '+x.title,text});return;}
+  }catch(e){if(e && e.name==='AbortError')return;}
+  try{await navigator.clipboard.writeText(text);alert('Liste de courses copiée. Vous pouvez la coller dans Rappels, Notes ou un message.');}
+  catch(e){prompt('Copiez cette liste de courses :',text);}
+}
+async function shareFoodRecipe(i){
+  const x=(data.foods||[])[i]; if(!x)return;
+  const text=[x.title,x.duration?('Durée : '+x.duration):'',x.portions?('Portions : '+x.portions):'',normalizedCaloriesLabel(x),x.ingredients?('\nIngrédients :\n'+x.ingredients):'',x.steps?('\nÉtapes :\n'+x.steps):'',x.cookidooUrl?('\nCookidoo : '+x.cookidooUrl):''].filter(Boolean).join('\n');
+  try{if(navigator.share){await navigator.share({title:x.title,text});return;}}catch(e){if(e && e.name==='AbortError')return;}
+  try{await navigator.clipboard.writeText(text);alert('Recette copiée.');}catch(e){prompt('Copiez la recette :',text);}
+}
+function applySectionTones(){
+  const map=[
+    ['Aujourd’hui','tone-today'],
+    ['Glycémie','tone-glucose'],
+    ['Rééducation','tone-rehab secondary'],
+    ['Sport','tone-sport'],
+    ['Tension','tone-pressure'],
+    ['Médicaments','tone-meds'],
+    ['Analyses','tone-analyses'],
+    ['Alimentation','tone-food'],
+    ['Sommeil','tone-sleep'],
+    ['Notes','tone-notes'],
+    ['Calendrier','tone-calendar'],
+    ['Objectifs','tone-objectives'],
+    ['Connexions','tone-connections'],
+    ['Sauvegarde','tone-backup']
+  ];
+  document.querySelectorAll('section.section').forEach(sec=>{
+    const txt=sec.querySelector('.section-head')?.textContent||'';
+    for(const [key,cls] of map){if(txt.includes(key)){cls.split(/\s+/).forEach(c=>sec.classList.add(c));break;}}
+  });
+}
+
 function openObjectiveForm(category){
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
   const f=document.getElementById('objectiveForm');
@@ -1907,6 +2053,7 @@ function scrollGlucoseChart(){
 
 setTodayDefaults();
 foodTypeChanged();
+applySectionTones();
 document.getElementById('hiType')?.addEventListener('input',updateHealthAppointmentUI);
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
