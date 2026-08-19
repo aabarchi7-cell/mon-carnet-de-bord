@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 19 AOÛT • V34c</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 19 AOÛT • V34d</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1564,9 +1564,10 @@ function openExternal(url){
 function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
-  if(st) st.textContent='Ouverture du raccourci Apple Santé pour récupérer le sommeil…';
-  const callback=window.location.href.split(/[?#]/)[0];
-  runShortcut('Carnet - Apple Santé','Sommeil | '+callback);
+  if(st){
+    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34d empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
+    st.style.display='block';
+  }
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
