@@ -291,12 +291,14 @@ footer .action{font-size:13px;padding:9px 8px}
 /* V33c: titres multicolores réellement forcés, y compris Safari/iOS */
 .section-title-text{font-weight:900!important;text-shadow:0 1px 1px rgba(0,0,0,.5)!important}
 .section-head .left{color:inherit!important}
-</style></head>
+</style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
 <body>
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION TITRES MULTICOLORES • 18 AOÛT • V33c</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 19 AOÛT • V34b</div>
 </header>
 <main>
 <div class="dashboard">
@@ -403,7 +405,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </select>
 </div>
 <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
-<div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" capture="environment" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="small">Astuce photo : après la prise, utilisez « Texte en direct » de l’iPhone si disponible pour copier le chiffre, puis collez-le dans Valeur.</div></div>
+<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre de la photo</button></div><div class="small" id="gOcrStatus">La valeur détectée est toujours proposée pour confirmation avant d’être utilisée.</div></div>
 <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -524,11 +526,11 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="bpDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
 <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-<div class="full"><label>Photo du tensiomètre (facultatif)</label><input accept="image/*" capture="environment" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="small">Astuce photo : « Texte en direct » peut aider à copier les chiffres du tensiomètre avant confirmation.</div></div>
+<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres de la photo</button></div><div class="small" id="bpOcrStatus">Les valeurs détectées sont toujours proposées pour confirmation avant d’être utilisées.</div></div>
 <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
-<div class="small" style="margin:6px 0 12px">La photo est conservée avec la mesure sur cet appareil comme repère visuel. La lecture automatique des chiffres depuis une photo n’est pas activée dans cette version hors ligne.</div>
+<div class="small" style="margin:6px 0 12px">La photo reste attachée à la mesure. La lecture automatique est une aide : vérifiez toujours les chiffres proposés avant d’enregistrer.</div>
 <div class="list" id="bpList"></div>
 </div>
 </section>
@@ -544,7 +546,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="medDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="medTime" type="time"/></div>
 <div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
-<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" capture="environment" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="list" id="medList"></div>
@@ -559,7 +561,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <form class="entry" id="analysisForm" onsubmit="addAnalysis(event)" style="display:none">
 <div><label>Examen</label><input id="analysisTitle" required=""/></div>
 <div><label>Date</label><input id="analysisDate" required="" type="date"/></div>
-<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" capture="environment" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="list" id="analysisList"></div>
@@ -584,7 +586,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" placeholder="Collez ici le lien de la recette Cookidoo" type="url"/></div>
 <div class="full recipe-only" style="display:none"><button class="action" onclick="openCookidooFromField()" type="button">↗️ Ouvrir la recette Cookidoo</button></div>
 <div class="full recipe-only feature-note" style="display:none">Après enregistrement : <b>Modifier</b>, <b>Programmer 📅</b>, <b>Liste de courses 🛒</b> et <b>Partager</b> sont disponibles directement sur la fiche.</div>
-<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" capture="environment" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" id="foodSubmitBtn" type="submit">Enregistrer</button><button class="action" id="foodCancelEditBtn" onclick="cancelFoodEdit()" style="display:none;margin-left:8px" type="button">Annuler la modification</button></div>
 </form>
 <div class="list" id="foodList"></div>
@@ -609,6 +611,11 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="list" id="sleepList"></div>
+<div class="chart-wrap" id="sleepChartBox">
+<div class="chart-title">Évolution du sommeil</div>
+<canvas height="220" id="sleepChart" width="760"></canvas>
+<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
+</div>
 </div>
 </section>
 <section class="section tone-notes">
@@ -623,6 +630,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="noteDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="noteTime" type="time"/></div>
 <div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
+<div class="full"><label>📷 Photo (facultatif)</label><input accept="image/*" id="notePhoto" onchange="genericPhoto(this,'notePreview','note')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="notePreview"/><button class="action danger" onclick="clearPendingPhoto('note','notePhoto','notePreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
@@ -743,13 +751,23 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="hiDate" required="" type="date"/></div>
 <div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"/></div>
 <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
-<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" capture="environment" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" onclick="healthAppointmentToCalendar()" type="button">📅 Ajouter au calendrier</button></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
 </form>
 <div class="chart-wrap">
 <div class="chart-title">Données santé ajoutées / importées</div>
 <div class="list" id="healthImportList"></div>
+<div class="chart-wrap" id="stepsChartBox">
+<div class="chart-title">Évolution des pas</div>
+<canvas height="220" id="stepsChart" width="760"></canvas>
+<div class="chart-legend">Nombre de pas par jour d’après les données enregistrées dans Connexions santé.</div>
+</div>
+<div class="chart-wrap" id="distanceChartBox">
+<div class="chart-title">Distance estimée</div>
+<canvas height="220" id="distanceChart" width="760"></canvas>
+<div class="chart-legend">Distance estimée à partir des pas avec une longueur de pas de 0,70 m. Une donnée Distance importée directement reste préférable lorsqu’elle est disponible.</div>
+</div>
 </div>
 </div>
 </section>
@@ -921,7 +939,7 @@ function addSleep(e){
   data.sleep.unshift({date:sDate.value,hours:Number(sHours.value),quality:sQuality.value,wake:sWake.value,note:sNote.value.trim()});
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
-let pendingGenericPhotos={med:'',analysis:'',food:'',health:''};
+let pendingGenericPhotos={med:'',analysis:'',food:'',health:'',note:''};
 let editingFoodIndex=-1;
 function clearPendingPhoto(key,inputId,imgId){
   pendingGenericPhotos[key]='';
@@ -1042,7 +1060,9 @@ function addFood(e){
 }
 function addNote(e){
   e.preventDefault();
-  data.notes.unshift({title:noteTitle.value.trim(),date:noteDate.value,time:noteTime.value,type:noteType.value,text:noteText.value.trim()});
+  data.notes.unshift({title:noteTitle.value.trim(),date:noteDate.value,time:noteTime.value,type:noteType.value,text:noteText.value.trim(),photo:pendingGenericPhotos.note||''});
+  pendingGenericPhotos.note='';
+  const prev=document.getElementById('notePreview'); if(prev){prev.removeAttribute('src');prev.style.display='none';}
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
 function runShortcut(name,inputText=''){
@@ -1421,7 +1441,7 @@ function render(){
       ? (data.healthImports||[]).map((x,i)=>{
           const base=itemHtml(
             `${x.source} • ${x.type}`,
-            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${formatHealthImportValue(x.type,x.value,x.unit)}`:''}`,
+            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${formatHealthImportValue(x.type,x.value,x.unit)}`:''}${isStepEntry(x)?` • ≈ ${formatDistanceFromSteps(x.value)}`:''}`,
             x.note||'','healthImports',i
           );
           const photo=photoBlock(x,'healthImports',i);
@@ -1433,7 +1453,7 @@ function render(){
   }
 
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
-  noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
+  noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>${photoBlock(x,'notes',i)}`).join(''):'<div class="empty">Aucune entrée.</div>';
   sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
     `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
 
@@ -1463,6 +1483,8 @@ function render(){
   renderExercises();
   renderToday();
   requestAnimationFrame(drawGlucoseChart);
+  requestAnimationFrame(drawSleepChart);
+  requestAnimationFrame(drawStepsCharts);
 }
 function renderGeneric(arr,listId){
   const el=document.getElementById(listId);
@@ -1983,6 +2005,82 @@ function renderGlucoseStats(){
   gMin.textContent=Math.min(...arr);
   gMax.textContent=Math.max(...arr);
 }
+
+function isStepEntry(x){
+  return !!x && /^(pas|steps?)$/i.test(String(x.type||'').trim());
+}
+function numericHealthValue(v){
+  const n=Number(String(v??'').replace(/\s/g,'').replace(',','.'));
+  return Number.isFinite(n)?n:NaN;
+}
+function distanceMetersFromSteps(v){
+  const n=numericHealthValue(v);
+  return Number.isFinite(n)?Math.max(0,n)*0.70:NaN;
+}
+function formatDistanceFromSteps(v){
+  const m=distanceMetersFromSteps(v);
+  if(!Number.isFinite(m)) return '—';
+  if(m<1000) return Math.round(m)+' m';
+  return (m/1000).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:2})+' km';
+}
+function drawSimpleSeries(canvasId, rows, valueLabel){
+  const canvas=document.getElementById(canvasId); if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||760), cssH=220;
+  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+  const pad={l:42,r:16,t:20,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
+  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
+  const vals=rows.map(r=>r.value).filter(Number.isFinite); if(!vals.length)return;
+  let min=Math.min(...vals),max=Math.max(...vals); if(min===max){min=Math.max(0,min*0.8);max=max*1.2+1;}
+  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+H);ctx.lineTo(pad.l+W,pad.t+H);ctx.stroke();
+  const x=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)); const y=v=>pad.t+H-(v-min)/(max-min)*H;
+  ctx.strokeStyle='#d6dde8';ctx.lineWidth=2;ctx.beginPath();rows.forEach((r,i)=>{const X=x(i),Y=y(r.value);if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y)});ctx.stroke();
+  ctx.fillStyle='#d6dde8'; rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(x(i),y(r.value),3,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#9aa4b2';ctx.font='11px system-ui'; const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i); picks.forEach(i=>ctx.fillText(String(rows[i].date||'').slice(5),Math.max(2,x(i)-16),pad.t+H+18));
+  ctx.fillText(valueLabel,pad.l,pad.t-6);
+}
+function drawSleepChart(){
+  const rows=(data.sleep||[]).map(x=>({date:x.date,value:Number(x.hours)})).filter(x=>x.date&&Number.isFinite(x.value)).sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
+  drawSimpleSeries('sleepChart',rows,'heures');
+}
+function drawStepsCharts(){
+  const map=new Map();
+  (data.healthImports||[]).filter(isStepEntry).forEach(x=>{const v=numericHealthValue(x.value);if(x.date&&Number.isFinite(v))map.set(x.date,v)});
+  const rows=[...map.entries()].sort((a,b)=>a[0].localeCompare(b[0])).slice(-14).map(([date,value])=>({date,value}));
+  drawSimpleSeries('stepsChart',rows,'pas');
+  drawSimpleSeries('distanceChart',rows.map(r=>({date:r.date,value:distanceMetersFromSteps(r.value)/1000})),'km');
+}
+async function ocrImageData(dataUrl,statusId){
+  const status=document.getElementById(statusId);
+  if(!dataUrl){if(status)status.textContent='Prenez d’abord une photo.';return ''}
+  if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
+  try{
+    if(status)status.textContent='Lecture de la photo…';
+    const worker=await Tesseract.createWorker('eng');
+    await worker.setParameters({tessedit_char_whitelist:'0123456789./'});
+    const ret=await worker.recognize(dataUrl);
+    await worker.terminate();
+    if(status)status.textContent='Lecture terminée. Vérifiez les valeurs proposées.';
+    return String(ret?.data?.text||'');
+  }catch(err){if(status)status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir les chiffres manuellement.';return ''}
+}
+async function readGlucosePhoto(){
+  const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus'); if(!text)return;
+  const nums=(text.match(/\d{2,3}/g)||[]).map(Number).filter(n=>n>=20&&n<=600);
+  if(!nums.length){document.getElementById('gOcrStatus').textContent='Aucun chiffre de glycémie fiable détecté.';return;}
+  const v=nums[0];
+  if(confirm('Valeur détectée : '+v+' mg/dL. Utiliser cette valeur ?')) document.getElementById('gValue').value=v;
+}
+async function readBPPhoto(){
+  const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus'); if(!text)return;
+  const nums=(text.match(/\d{2,3}/g)||[]).map(Number);
+  let sys=nums.find(n=>n>=80&&n<=250), dia=nums.find((n,i)=>i>nums.indexOf(sys)&&n>=40&&n<=150), pulse=nums.find((n,i)=>i>nums.indexOf(dia)&&n>=30&&n<=220);
+  if(!sys||!dia){document.getElementById('bpOcrStatus').textContent='Je n’ai pas trouvé deux valeurs de tension fiables. Saisissez-les manuellement.';return;}
+  const msg='Valeurs détectées : '+sys+'/'+dia+(pulse?' • pouls '+pulse:'')+'. Utiliser ces valeurs ?';
+  if(confirm(msg)){document.getElementById('bpSys').value=sys;document.getElementById('bpDia').value=dia;if(pulse)document.getElementById('bpPulse').value=pulse;}
+}
+
 function drawGlucoseChart(){
   const canvas=document.getElementById('glucoseChart');
   if(!canvas)return;
@@ -2058,7 +2156,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
-window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();});
+window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();});
 </script>
 </body>
 </html>
