@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 19 AOÛT • V34b</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 19 AOÛT • V34c</div>
 </header>
 <main>
 <div class="dashboard">
@@ -405,7 +405,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </select>
 </div>
 <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
-<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre de la photo</button></div><div class="small" id="gOcrStatus">La valeur détectée est toujours proposée pour confirmation avant d’être utilisée.</div></div>
+<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" capture="environment" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre de la photo</button></div><div class="small" id="gOcrStatus">La valeur détectée est toujours proposée pour confirmation avant d’être utilisée.</div></div>
 <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -451,6 +451,26 @@ footer .action{font-size:13px;padding:9px 8px}
 <span class="left"><span class="icon">🏃</span><span class="section-title-text" style="color:#7DFF9B!important;-webkit-text-fill-color:#7DFF9B!important;border-bottom:3px solid #7DFF9B;padding-bottom:2px;letter-spacing:.15px">Sport &amp; activité physique</span></span><span class="chev">›</span>
 </button>
 <div class="section-body">
+<div class="card" style="margin-bottom:10px">
+  <div class="item-title">🚶 Pas &amp; distance</div>
+  <div class="small" style="margin-top:6px">Les pas viennent des données enregistrées/importées. La distance directe est utilisée si elle existe ; sinon le carnet affiche une estimation à partir des pas.</div>
+  <div class="compare-grid" style="margin-top:10px">
+    <div class="compare-card"><b id="activityStepsToday">—</b><span>Pas du jour</span></div>
+    <div class="compare-card"><b id="activityDistanceToday">—</b><span>Distance du jour</span></div>
+    <div class="compare-card"><b id="activityStepsLatest">—</b><span>Derniers pas</span></div>
+    <div class="compare-card"><b id="activityDistanceLatest">—</b><span>Dernière distance</span></div>
+  </div>
+</div>
+<div class="chart-wrap" id="stepsChartBox">
+  <div class="chart-title">Évolution des pas</div>
+  <canvas height="220" id="stepsChart" width="760"></canvas>
+  <div class="chart-legend">Nombre de pas par jour d’après les données enregistrées dans Connexions santé.</div>
+</div>
+<div class="chart-wrap" id="distanceChartBox">
+  <div class="chart-title">Évolution de la distance</div>
+  <canvas height="220" id="distanceChart" width="760"></canvas>
+  <div class="chart-legend">Distance en m ou km. Si aucune distance directe n’est disponible, une estimation est calculée à partir des pas.</div>
+</div>
 <div class="card" style="margin-bottom:10px">
 <div class="item-title">Programme de récupération</div>
 <div class="small" style="margin-top:6px">
@@ -526,7 +546,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="bpDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
 <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres de la photo</button></div><div class="small" id="bpOcrStatus">Les valeurs détectées sont toujours proposées pour confirmation avant d’être utilisées.</div></div>
+<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" capture="environment" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres de la photo</button></div><div class="small" id="bpOcrStatus">Les valeurs détectées sont toujours proposées pour confirmation avant d’être utilisées.</div></div>
 <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -546,7 +566,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="medDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="medTime" type="time"/></div>
 <div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
-<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" capture="environment" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="list" id="medList"></div>
@@ -561,7 +581,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <form class="entry" id="analysisForm" onsubmit="addAnalysis(event)" style="display:none">
 <div><label>Examen</label><input id="analysisTitle" required=""/></div>
 <div><label>Date</label><input id="analysisDate" required="" type="date"/></div>
-<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" capture="environment" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="list" id="analysisList"></div>
@@ -586,7 +606,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" placeholder="Collez ici le lien de la recette Cookidoo" type="url"/></div>
 <div class="full recipe-only" style="display:none"><button class="action" onclick="openCookidooFromField()" type="button">↗️ Ouvrir la recette Cookidoo</button></div>
 <div class="full recipe-only feature-note" style="display:none">Après enregistrement : <b>Modifier</b>, <b>Programmer 📅</b>, <b>Liste de courses 🛒</b> et <b>Partager</b> sont disponibles directement sur la fiche.</div>
-<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" capture="environment" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" id="foodSubmitBtn" type="submit">Enregistrer</button><button class="action" id="foodCancelEditBtn" onclick="cancelFoodEdit()" style="display:none;margin-left:8px" type="button">Annuler la modification</button></div>
 </form>
 <div class="list" id="foodList"></div>
@@ -630,7 +650,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="noteDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="noteTime" type="time"/></div>
 <div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
-<div class="full"><label>📷 Photo (facultatif)</label><input accept="image/*" id="notePhoto" onchange="genericPhoto(this,'notePreview','note')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="notePreview"/><button class="action danger" onclick="clearPendingPhoto('note','notePhoto','notePreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>📷 Photo (facultatif)</label><input accept="image/*" capture="environment" id="notePhoto" onchange="genericPhoto(this,'notePreview','note')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="notePreview"/><button class="action danger" onclick="clearPendingPhoto('note','notePhoto','notePreview')" type="button">Retirer la photo</button></div></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
 <div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
@@ -751,23 +771,14 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="hiDate" required="" type="date"/></div>
 <div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"/></div>
 <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
-<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" capture="environment" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" onclick="healthAppointmentToCalendar()" type="button">📅 Ajouter au calendrier</button></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
 </form>
 <div class="chart-wrap">
 <div class="chart-title">Données santé ajoutées / importées</div>
 <div class="list" id="healthImportList"></div>
-<div class="chart-wrap" id="stepsChartBox">
-<div class="chart-title">Évolution des pas</div>
-<canvas height="220" id="stepsChart" width="760"></canvas>
-<div class="chart-legend">Nombre de pas par jour d’après les données enregistrées dans Connexions santé.</div>
-</div>
-<div class="chart-wrap" id="distanceChartBox">
-<div class="chart-title">Distance estimée</div>
-<canvas height="220" id="distanceChart" width="760"></canvas>
-<div class="chart-legend">Distance estimée à partir des pas avec une longueur de pas de 0,70 m. Une donnée Distance importée directement reste préférable lorsqu’elle est disponible.</div>
-</div>
+<div class="small" style="margin-top:10px">Les courbes Pas &amp; Distance sont maintenant affichées dans <b>Sport &amp; activité physique</b>.</div>
 </div>
 </div>
 </section>
@@ -2007,21 +2018,46 @@ function renderGlucoseStats(){
 }
 
 function isStepEntry(x){
-  return !!x && /^(pas|steps?)$/i.test(String(x.type||'').trim());
+  return !!x && /^(pas|steps?|nombre\s*de\s*pas)$/i.test(String(x.type||'').trim());
+}
+function isDistanceEntry(x){
+  return !!x && /(distance|walking.*distance|marche.*distance|distance.*marche)/i.test(String(x.type||'').trim());
 }
 function numericHealthValue(v){
   const n=Number(String(v??'').replace(/\s/g,'').replace(',','.'));
   return Number.isFinite(n)?n:NaN;
 }
+function directDistanceMeters(x){
+  if(!isDistanceEntry(x)) return NaN;
+  const n=numericHealthValue(x.value); if(!Number.isFinite(n)) return NaN;
+  const u=String(x.unit||'').trim().toLowerCase();
+  if(/km|kilom/.test(u)) return n*1000;
+  if(/^m$|mètre|metre/.test(u)) return n;
+  return n<50 ? n*1000 : n;
+}
 function distanceMetersFromSteps(v){
   const n=numericHealthValue(v);
   return Number.isFinite(n)?Math.max(0,n)*0.70:NaN;
 }
-function formatDistanceFromSteps(v){
-  const m=distanceMetersFromSteps(v);
+function formatDistanceMeters(m){
   if(!Number.isFinite(m)) return '—';
   if(m<1000) return Math.round(m)+' m';
   return (m/1000).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:2})+' km';
+}
+function formatDistanceFromSteps(v){ return formatDistanceMeters(distanceMetersFromSteps(v)); }
+function activityRows(){
+  const map=new Map();
+  (data.healthImports||[]).forEach(x=>{
+    if(!x?.date) return;
+    const r=map.get(x.date)||{date:x.date,steps:NaN,directDistance:NaN};
+    if(isStepEntry(x)){ const v=numericHealthValue(x.value); if(Number.isFinite(v)) r.steps=v; }
+    if(isDistanceEntry(x)){ const m=directDistanceMeters(x); if(Number.isFinite(m)) r.directDistance=m; }
+    map.set(x.date,r);
+  });
+  return [...map.values()].map(r=>{
+    const estimated=Number.isFinite(r.steps)?distanceMetersFromSteps(r.steps):NaN;
+    return {...r,distanceMeters:Number.isFinite(r.directDistance)?r.directDistance:estimated};
+  }).sort((a,b)=>a.date.localeCompare(b.date));
 }
 function drawSimpleSeries(canvasId, rows, valueLabel){
   const canvas=document.getElementById(canvasId); if(!canvas)return;
@@ -2031,7 +2067,7 @@ function drawSimpleSeries(canvasId, rows, valueLabel){
   ctx.clearRect(0,0,cssW,cssH);
   const pad={l:42,r:16,t:20,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
-  const vals=rows.map(r=>r.value).filter(Number.isFinite); if(!vals.length)return;
+  const vals=rows.map(r=>r.value).filter(Number.isFinite); if(!vals.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
   let min=Math.min(...vals),max=Math.max(...vals); if(min===max){min=Math.max(0,min*0.8);max=max*1.2+1;}
   ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+H);ctx.lineTo(pad.l+W,pad.t+H);ctx.stroke();
   const x=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)); const y=v=>pad.t+H-(v-min)/(max-min)*H;
@@ -2044,41 +2080,111 @@ function drawSleepChart(){
   const rows=(data.sleep||[]).map(x=>({date:x.date,value:Number(x.hours)})).filter(x=>x.date&&Number.isFinite(x.value)).sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
   drawSimpleSeries('sleepChart',rows,'heures');
 }
+function renderActivitySummary(){
+  const rows=activityRows();
+  const today=localDateString();
+  const todayRow=rows.find(r=>r.date===today);
+  const latest=[...rows].reverse().find(r=>Number.isFinite(r.steps)||Number.isFinite(r.distanceMeters));
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('activityStepsToday',todayRow&&Number.isFinite(todayRow.steps)?Math.round(todayRow.steps).toLocaleString('fr-FR'):'—');
+  set('activityDistanceToday',todayRow?formatDistanceMeters(todayRow.distanceMeters):'—');
+  set('activityStepsLatest',latest&&Number.isFinite(latest.steps)?Math.round(latest.steps).toLocaleString('fr-FR'):'—');
+  set('activityDistanceLatest',latest?formatDistanceMeters(latest.distanceMeters):'—');
+}
 function drawStepsCharts(){
-  const map=new Map();
-  (data.healthImports||[]).filter(isStepEntry).forEach(x=>{const v=numericHealthValue(x.value);if(x.date&&Number.isFinite(v))map.set(x.date,v)});
-  const rows=[...map.entries()].sort((a,b)=>a[0].localeCompare(b[0])).slice(-14).map(([date,value])=>({date,value}));
-  drawSimpleSeries('stepsChart',rows,'pas');
-  drawSimpleSeries('distanceChart',rows.map(r=>({date:r.date,value:distanceMetersFromSteps(r.value)/1000})),'km');
+  const rows=activityRows().slice(-14);
+  drawSimpleSeries('stepsChart',rows.filter(r=>Number.isFinite(r.steps)).map(r=>({date:r.date,value:r.steps})),'pas');
+  drawSimpleSeries('distanceChart',rows.filter(r=>Number.isFinite(r.distanceMeters)).map(r=>({date:r.date,value:r.distanceMeters/1000})),'km');
+  renderActivitySummary();
+}
+function preprocessOcrImage(dataUrl, cropMode='center'){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
+      if(cropMode==='center'){
+        sx=Math.round(sw*0.12); sy=Math.round(sh*0.18); sw=Math.round(sw*0.76); sh=Math.round(sh*0.68);
+      }
+      const scale=Math.min(4, Math.max(2, 1500/Math.max(sw,sh)));
+      const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(sw*scale)); c.height=Math.max(1,Math.round(sh*scale));
+      const ctx=c.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
+      const im=ctx.getImageData(0,0,c.width,c.height), d=im.data;
+      for(let i=0;i<d.length;i+=4){
+        const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+        const v=g>145?255:0; d[i]=d[i+1]=d[i+2]=v;
+      }
+      ctx.putImageData(im,0,0);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror=reject; img.src=dataUrl;
+  });
 }
 async function ocrImageData(dataUrl,statusId){
   const status=document.getElementById(statusId);
-  if(!dataUrl){if(status)status.textContent='Prenez d’abord une photo.';return ''}
+  if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture de la photo…';
+    if(status)status.textContent='Lecture de la photo… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
-    await worker.setParameters({tessedit_char_whitelist:'0123456789./'});
-    const ret=await worker.recognize(dataUrl);
+    await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1'});
+    const variants=[dataUrl];
+    try{variants.unshift(await preprocessOcrImage(dataUrl,'center'));}catch(e){}
+    try{variants.push(await preprocessOcrImage(dataUrl,'full'));}catch(e){}
+    let all='';
+    for(const v of variants){
+      for(const psm of ['6','11','7']){
+        await worker.setParameters({tessedit_pageseg_mode:psm});
+        const ret=await worker.recognize(v);
+        all+=' '+String(ret?.data?.text||'');
+      }
+    }
     await worker.terminate();
     if(status)status.textContent='Lecture terminée. Vérifiez les valeurs proposées.';
-    return String(ret?.data?.text||'');
-  }catch(err){if(status)status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir les chiffres manuellement.';return ''}
+    return all;
+  }catch(err){
+    if(status)status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir les chiffres manuellement.';
+    return ''
+  }
+}
+function candidateNumbers(text,min,max){
+  const out=[],seen=new Set();
+  for(const m of (String(text||'').match(/\d{2,3}/g)||[])){
+    const n=Number(m);
+    if(n>=min&&n<=max&&!seen.has(n)){seen.add(n);out.push(n);}
+  }
+  return out;
 }
 async function readGlucosePhoto(){
   const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus'); if(!text)return;
-  const nums=(text.match(/\d{2,3}/g)||[]).map(Number).filter(n=>n>=20&&n<=600);
-  if(!nums.length){document.getElementById('gOcrStatus').textContent='Aucun chiffre de glycémie fiable détecté.';return;}
-  const v=nums[0];
-  if(confirm('Valeur détectée : '+v+' mg/dL. Utiliser cette valeur ?')) document.getElementById('gValue').value=v;
+  const nums=candidateNumbers(text,20,600);
+  if(!nums.length){document.getElementById('gOcrStatus').textContent='Aucun chiffre fiable détecté. Saisissez la valeur manuellement.';return;}
+  let v=nums.find(n=>n>=40&&n<=400) ?? nums[0];
+  if(nums.length>1){
+    const answer=prompt('Chiffres détectés : '+nums.join(', ')+'\\nEntrez la valeur de glycémie à utiliser :',String(v));
+    if(answer===null)return;
+    const n=Number(answer); if(Number.isFinite(n)&&n>=20&&n<=600)v=n; else return;
+  }else if(!confirm('Valeur détectée : '+v+' mg/dL. Utiliser cette valeur ?')) return;
+  document.getElementById('gValue').value=v;
+  document.getElementById('gOcrStatus').textContent='Valeur proposée : '+v+' mg/dL. Vérifiez-la avant d’enregistrer.';
 }
 async function readBPPhoto(){
   const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus'); if(!text)return;
-  const nums=(text.match(/\d{2,3}/g)||[]).map(Number);
-  let sys=nums.find(n=>n>=80&&n<=250), dia=nums.find((n,i)=>i>nums.indexOf(sys)&&n>=40&&n<=150), pulse=nums.find((n,i)=>i>nums.indexOf(dia)&&n>=30&&n<=220);
-  if(!sys||!dia){document.getElementById('bpOcrStatus').textContent='Je n’ai pas trouvé deux valeurs de tension fiables. Saisissez-les manuellement.';return;}
-  const msg='Valeurs détectées : '+sys+'/'+dia+(pulse?' • pouls '+pulse:'')+'. Utiliser ces valeurs ?';
-  if(confirm(msg)){document.getElementById('bpSys').value=sys;document.getElementById('bpDia').value=dia;if(pulse)document.getElementById('bpPulse').value=pulse;}
+  const nums=candidateNumbers(text,30,260);
+  if(nums.length<2){document.getElementById('bpOcrStatus').textContent='Je n’ai pas trouvé assez de chiffres fiables. Saisissez-les manuellement.';return;}
+  let sys=nums.find(n=>n>=90&&n<=220) ?? nums[0];
+  let dia=nums.find(n=>n!==sys&&n>=40&&n<=140);
+  let pulse=nums.find(n=>n!==sys&&n!==dia&&n>=35&&n<=180);
+  if(!dia){document.getElementById('bpOcrStatus').textContent='Une seule valeur fiable a été trouvée. Saisissez la tension manuellement.';return;}
+  const answer=prompt('Chiffres détectés : '+nums.join(', ')+'\\nVérifiez puis entrez systolique/diastolique/pouls :',
+    sys+'/'+dia+(pulse?'/'+pulse:''));
+  if(answer===null)return;
+  const p=answer.split(/[\/,\s]+/).map(Number).filter(Number.isFinite);
+  if(p.length<2)return;
+  document.getElementById('bpSys').value=p[0];
+  document.getElementById('bpDia').value=p[1];
+  if(p[2]) document.getElementById('bpPulse').value=p[2];
+  document.getElementById('bpOcrStatus').textContent='Valeurs proposées : '+p[0]+'/'+p[1]+(p[2]?' • pouls '+p[2]:'')+'. Vérifiez-les avant d’enregistrer.';
 }
 
 function drawGlucoseChart(){
