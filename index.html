@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34g</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34h</div>
 </header>
 <main>
 <div class="dashboard">
@@ -619,7 +619,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="section-body">
 <div class="toolbar">
 <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
-<button class="action" onclick="startSleepAppleImport()" type="button">🍎 Importer via Apple Santé</button>
+<button class="action" onclick="startSleepAppleImport()" type="button">🍎 Prélever depuis Apple Santé</button>
 </div>
 <div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
 <form class="entry" id="sleepForm" onsubmit="addSleep(event)" style="display:none">
@@ -634,7 +634,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="chart-wrap" id="sleepChartBox">
 <div class="chart-title">Évolution du sommeil</div>
 <canvas height="220" id="sleepChart" width="760"></canvas>
-<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
+<div class="chart-legend">Durée de sommeil enregistrée par nuit. Le bouton Apple Santé lance le raccourci de lecture Santé et enregistre automatiquement la durée reçue dans Sommeil.</div>
 </div>
 </div>
 </section>
@@ -1323,8 +1323,11 @@ function importHealthFromUrl(){
     if(/huawei/i.test(directSource) || (!directSource && directType==='Pas')){
       ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
     }else if(/apple/i.test(directSource) && directType==='Sommeil'){
-      const hours=Number(String(value).replace(',','.'));
+      let hours=Number(String(value).replace(',','.'));
+      if(/^(seconds?|secondes?|sec|s)$/i.test(String(directUnit||'').trim())) hours=hours/3600;
+      else if(/^(minutes?|min)$/i.test(String(directUnit||'').trim())) hours=hours/60;
       if(Number.isFinite(hours)){
+        hours=Math.round(hours*100)/100;
         data.sleep=data.sleep||[];
         const entry={date:directDate,hours,quality:'Bonne',wake:'',note:directNote||'Import Apple Santé'};
         const existing=data.sleep.findIndex(x=>x && x.date===directDate && /Import Apple Santé/i.test(x.note||''));
@@ -1565,9 +1568,12 @@ function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
-    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34g empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
+    st.textContent='Ouverture d’Apple Santé via le raccourci « Carnet - Apple Santé » pour récupérer le sommeil…';
     st.style.display='block';
   }
+  // Le raccourci lit la donnée Sommeil dans Apple Santé puis revient au carnet
+  // avec healthSource=Apple Santé, healthType=Sommeil, healthValue, healthUnit et healthDate.
+  runShortcut('Carnet - Apple Santé','Sommeil');
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
@@ -2118,6 +2124,15 @@ function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=fa
       }else if(cropMode==='displayRightTight'){
         // Cadrage très serré sur les grands chiffres, en évitant l'heure/date du haut.
         sx=Math.round(sw*0.42); sy=Math.round(sh*0.43); sw=Math.round(sw*0.45); sh=Math.round(sh*0.30);
+      }else if(cropMode==='bpScreen'){
+        // Tensiomètre : écran principal, en excluant les repères imprimés sous/à droite (ex. 140/90).
+        sx=Math.round(sw*0.10); sy=Math.round(sh*0.25); sw=Math.round(sw*0.72); sh=Math.round(sh*0.47);
+      }else if(cropMode==='bpScreenTight'){
+        // Cadrage plus serré sur SYS/DIA/PUL uniquement.
+        sx=Math.round(sw*0.14); sy=Math.round(sh*0.29); sw=Math.round(sw*0.62); sh=Math.round(sh*0.38);
+      }else if(cropMode==='bpDigits'){
+        // Zone des grands chiffres, sans la légende et les valeurs de référence imprimées.
+        sx=Math.round(sw*0.16); sy=Math.round(sh*0.31); sw=Math.round(sw*0.56); sh=Math.round(sh*0.34);
       }
       const scale=Math.min(6, Math.max(2.5, 1900/Math.max(sw,sh)));
       const c=document.createElement('canvas');
@@ -2142,12 +2157,12 @@ function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=fa
     img.onerror=reject; img.src=dataUrl;
   });
 }
-async function ocrImageData(dataUrl,statusId){
+async function ocrImageData(dataUrl,statusId,profile='glucose'){
   const status=document.getElementById(statusId);
   if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture V34g : cadrage du grand écran et analyse des chiffres… cela peut prendre quelques secondes.';
+    if(status)status.textContent='Lecture V34h : cadrage de l’écran et analyse des chiffres… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({
       tessedit_char_whitelist:'0123456789',
@@ -2157,8 +2172,22 @@ async function ocrImageData(dataUrl,statusId){
     const variants=[];
     // Les cadrages serrés sont essayés en premier : ils évitent que la date/heure du lecteur
     // soit confondue avec la valeur principale.
-    const jobs=[
-      // En priorité : cadrages décalés à droite, adaptés aux photos réelles du lecteur.
+    const jobs=profile==='bp' ? [
+      // Pour la tension, on analyse d'abord uniquement l'écran afin d'ignorer les inscriptions
+      // imprimées sur le boîtier, notamment les repères 140/90.
+      ['bpDigits',105,false,true],
+      ['bpDigits',125,false,true],
+      ['bpDigits',145,false,true],
+      ['bpDigits',165,false,true],
+      ['bpScreenTight',115,false,true],
+      ['bpScreenTight',140,false,true],
+      ['bpScreenTight',165,false,true],
+      ['bpScreen',125,false,true],
+      ['bpScreen',150,false,true],
+      ['bpDigits',140,true,true],
+      ['bpScreenTight',145,false,false]
+    ] : [
+      // Glycémie : cadrages serrés sur le grand résultat de l'écran.
       ['displayRightTight',105,false,true],
       ['displayRightTight',125,false,true],
       ['displayRightTight',145,false,true],
@@ -2172,16 +2201,12 @@ async function ocrImageData(dataUrl,statusId){
       ['lcdTight',155,false,true],
       ['lcd',128,false,true],
       ['lcd',160,false,true],
-      ['lowerCenter',145,false,true],
-      ['center',145,false,true],
-      ['lcdTight',145,true,true],
-      ['center',145,false,false],
-      ['full',145,false,false]
+      ['lowerCenter',145,false,true]
     ];
     for(const j of jobs){
       try{variants.push(await preprocessOcrImage(dataUrl,...j));}catch(e){}
     }
-    variants.push(dataUrl);
+    if(profile!=='bp') variants.push(dataUrl);
     const chunks=[];
     for(const v of variants){
       // 7 = une ligne, 13 = ligne brute, 6 = bloc compact.
@@ -2225,7 +2250,7 @@ function glucoseScore(n,text){
 }
 async function readGlucosePhoto(){
   const status=document.getElementById('gOcrStatus');
-  const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus'); if(!text)return;
+  const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus','glucose'); if(!text)return;
   const nums=candidateNumbers(text,20,600);
   if(!nums.length){status.textContent='Aucun chiffre fiable détecté. Essayez une photo plus rapprochée de l’écran ou saisissez la valeur manuellement.';return;}
   const ranked=[...nums].sort((a,b)=>glucoseScore(b,text)-glucoseScore(a,text));
@@ -2242,13 +2267,36 @@ async function readGlucosePhoto(){
 }
 async function readBPPhoto(){
   const status=document.getElementById('bpOcrStatus');
-  const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus'); if(!text)return;
+  const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus','bp'); if(!text)return;
   const nums=candidateNumbers(text,30,260);
   if(nums.length<2){status.textContent='Je n’ai pas trouvé assez de chiffres fiables. Essayez une photo plus rapprochée de l’écran.';return;}
-  let sys=nums.find(n=>n>=90&&n<=220) ?? nums[0];
-  let dia=nums.find(n=>n!==sys&&n>=40&&n<=140);
-  let pulse=nums.find(n=>n!==sys&&n!==dia&&n>=35&&n<=180);
-  if(!dia){status.textContent='Une seule valeur fiable a été trouvée. Saisissez la tension manuellement.';return;}
+  // Cherche le triplet physiologiquement cohérent le plus probable.
+  // Les valeurs imprimées 140/90 ne sont normalement plus dans le cadrage, mais ce score
+  // constitue une seconde protection si elles apparaissent malgré tout.
+  const freq=new Map();
+  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
+    const n=Number(m); if(n>=30&&n<=260) freq.set(n,(freq.get(n)||0)+1);
+  }
+  const f=n=>freq.get(n)||0;
+  let best=null,bestScore=-Infinity;
+  const vals=[...freq.keys()];
+  for(const sys of vals.filter(n=>n>=85&&n<=230)){
+    for(const dia of vals.filter(n=>n>=40&&n<=140&&n<sys)){
+      for(const pulse of [null,...vals.filter(n=>n>=35&&n<=180&&n!==sys&&n!==dia)]){
+        let score=f(sys)*12+f(dia)*11+(pulse?f(pulse)*9:0);
+        if(sys-dia>=20&&sys-dia<=90) score+=12;
+        if(sys>=95&&sys<=180) score+=5;
+        if(dia>=55&&dia<=110) score+=5;
+        if(pulse&&pulse>=45&&pulse<=120) score+=4;
+        // Le repère imprimé 140/90 est fréquent sur certains tensiomètres : on le pénalise
+        // lorsqu'il n'est pas fortement répété dans les cadrages de l'écran.
+        if(sys===140&&dia===90 && (f(140)<=2 || f(90)<=2)) score-=30;
+        if(score>bestScore){bestScore=score;best={sys,dia,pulse};}
+      }
+    }
+  }
+  if(!best){status.textContent='Je n’ai pas trouvé une combinaison fiable. Saisissez la tension manuellement.';return;}
+  let {sys,dia,pulse}=best;
   const answer=prompt('Valeurs possibles détectées : '+nums.slice(0,8).join(', ')+'\nVérifiez puis entrez systolique/diastolique/pouls :',
     sys+'/'+dia+(pulse?'/'+pulse:''));
   if(answer===null)return;
