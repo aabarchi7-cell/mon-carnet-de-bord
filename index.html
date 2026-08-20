@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34e</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34f</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1565,7 +1565,7 @@ function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
-    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34e empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
+    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34f empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
     st.style.display='block';
   }
 }
@@ -2098,22 +2098,37 @@ function drawStepsCharts(){
   drawSimpleSeries('distanceChart',rows.filter(r=>Number.isFinite(r.distanceMeters)).map(r=>({date:r.date,value:r.distanceMeters/1000})),'km');
   renderActivitySummary();
 }
-function preprocessOcrImage(dataUrl, cropMode='center'){
+function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=false, binary=true){
   return new Promise((resolve,reject)=>{
     const img=new Image();
     img.onload=()=>{
       let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
+      // Plusieurs cadrages : certains lecteurs ont un petit écran LCD au centre/bas de la photo.
       if(cropMode==='center'){
         sx=Math.round(sw*0.12); sy=Math.round(sh*0.18); sw=Math.round(sw*0.76); sh=Math.round(sh*0.68);
+      }else if(cropMode==='lcd'){
+        sx=Math.round(sw*0.20); sy=Math.round(sh*0.28); sw=Math.round(sw*0.60); sh=Math.round(sh*0.48);
+      }else if(cropMode==='lcdTight'){
+        sx=Math.round(sw*0.27); sy=Math.round(sh*0.38); sw=Math.round(sw*0.46); sh=Math.round(sh*0.32);
+      }else if(cropMode==='lowerCenter'){
+        sx=Math.round(sw*0.18); sy=Math.round(sh*0.34); sw=Math.round(sw*0.64); sh=Math.round(sh*0.52);
       }
-      const scale=Math.min(4, Math.max(2, 1500/Math.max(sw,sh)));
-      const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(sw*scale)); c.height=Math.max(1,Math.round(sh*scale));
+      const scale=Math.min(6, Math.max(2.5, 1900/Math.max(sw,sh)));
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(sw*scale));
+      c.height=Math.max(1,Math.round(sh*scale));
       const ctx=c.getContext('2d',{willReadFrequently:true});
+      ctx.imageSmoothingEnabled=true;
+      ctx.imageSmoothingQuality='high';
       ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
       const im=ctx.getImageData(0,0,c.width,c.height), d=im.data;
+      // Contraste renforcé pour les chiffres LCD / 7 segments.
       for(let i=0;i<d.length;i+=4){
-        const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-        const v=g>145?255:0; d[i]=d[i+1]=d[i+2]=v;
+        let g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+        g=Math.max(0,Math.min(255,(g-128)*1.65+128));
+        let v=binary?(g>threshold?255:0):g;
+        if(invert) v=255-v;
+        d[i]=d[i+1]=d[i+2]=v;
       }
       ctx.putImageData(im,0,0);
       resolve(c.toDataURL('image/png'));
@@ -2126,66 +2141,105 @@ async function ocrImageData(dataUrl,statusId){
   if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture de la photo… cela peut prendre quelques secondes.';
+    if(status)status.textContent='Lecture renforcée de la photo… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
-    await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1'});
-    const variants=[dataUrl];
-    try{variants.unshift(await preprocessOcrImage(dataUrl,'center'));}catch(e){}
-    try{variants.push(await preprocessOcrImage(dataUrl,'full'));}catch(e){}
-    let all='';
+    await worker.setParameters({
+      tessedit_char_whitelist:'0123456789',
+      preserve_interword_spaces:'1',
+      user_defined_dpi:'300'
+    });
+    const variants=[];
+    // Les cadrages serrés sont essayés en premier : ils évitent que la date/heure du lecteur
+    // soit confondue avec la valeur principale.
+    const jobs=[
+      ['lcdTight',128,false,true],
+      ['lcdTight',155,false,true],
+      ['lcd',128,false,true],
+      ['lcd',160,false,true],
+      ['lowerCenter',145,false,true],
+      ['center',145,false,true],
+      ['lcdTight',145,true,true],
+      ['center',145,false,false],
+      ['full',145,false,false]
+    ];
+    for(const j of jobs){
+      try{variants.push(await preprocessOcrImage(dataUrl,...j));}catch(e){}
+    }
+    variants.push(dataUrl);
+    const chunks=[];
     for(const v of variants){
-      for(const psm of ['6','11','7']){
+      // 7 = une ligne, 13 = ligne brute, 6 = bloc compact.
+      for(const psm of ['7','13','6']){
         await worker.setParameters({tessedit_pageseg_mode:psm});
         const ret=await worker.recognize(v);
-        all+=' '+String(ret?.data?.text||'');
+        const t=String(ret?.data?.text||'').replace(/[^0-9\s]/g,' ').trim();
+        if(t) chunks.push(t);
       }
     }
     await worker.terminate();
-    if(status)status.textContent='Lecture terminée. Vérifiez les valeurs proposées.';
-    return all;
+    if(status)status.textContent='Lecture terminée. Vérifiez la valeur proposée.';
+    return chunks.join(' | ');
   }catch(err){
     if(status)status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir les chiffres manuellement.';
     return ''
   }
 }
 function candidateNumbers(text,min,max){
-  const out=[],seen=new Set();
-  for(const m of (String(text||'').match(/\d{2,3}/g)||[])){
+  const freq=new Map();
+  // On conserve aussi les groupes d’un chiffre uniquement pour la tension/pouls,
+  // mais la glycémie privilégie ensuite les groupes de 2–3 chiffres.
+  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
     const n=Number(m);
-    if(n>=min&&n<=max&&!seen.has(n)){seen.add(n);out.push(n);}
+    if(n>=min&&n<=max) freq.set(n,(freq.get(n)||0)+1);
   }
-  return out;
+  return [...freq.entries()].sort((a,b)=>b[1]-a[1]).map(([n])=>n);
+}
+function glucoseScore(n,text){
+  let score=0;
+  const occurrences=(String(text||'').match(new RegExp('(^|\\D)'+n+'(?=\\D|$)','g'))||[]).length;
+  score+=occurrences*10;
+  if(n>=40&&n<=400)score+=8;
+  if(n>=60&&n<=250)score+=5;
+  if(String(n).length===3)score+=3;
+  // Les petites valeurs sont souvent l’heure/date imprimée en haut de l’écran.
+  if(n<40)score-=10;
+  return score;
 }
 async function readGlucosePhoto(){
+  const status=document.getElementById('gOcrStatus');
   const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus'); if(!text)return;
   const nums=candidateNumbers(text,20,600);
-  if(!nums.length){document.getElementById('gOcrStatus').textContent='Aucun chiffre fiable détecté. Saisissez la valeur manuellement.';return;}
-  let v=nums.find(n=>n>=40&&n<=400) ?? nums[0];
-  if(nums.length>1){
-    const answer=prompt('Chiffres détectés : '+nums.join(', ')+'\\nEntrez la valeur de glycémie à utiliser :',String(v));
-    if(answer===null)return;
-    const n=Number(answer); if(Number.isFinite(n)&&n>=20&&n<=600)v=n; else return;
-  }else if(!confirm('Valeur détectée : '+v+' mg/dL. Utiliser cette valeur ?')) return;
+  if(!nums.length){status.textContent='Aucun chiffre fiable détecté. Essayez une photo plus rapprochée de l’écran ou saisissez la valeur manuellement.';return;}
+  const ranked=[...nums].sort((a,b)=>glucoseScore(b,text)-glucoseScore(a,text));
+  let v=ranked[0];
+  // Toujours faire confirmer : la reconnaissance automatique reste une aide.
+  const preview=ranked.slice(0,6);
+  const answer=prompt('Valeurs possibles détectées : '+preview.join(', ')+'\nVérifiez puis entrez la glycémie à utiliser :',String(v));
+  if(answer===null)return;
+  const n=Number(String(answer).replace(',','.'));
+  if(!Number.isFinite(n)||n<20||n>600){status.textContent='Valeur non valide. Saisissez la glycémie manuellement.';return;}
+  v=Math.round(n);
   document.getElementById('gValue').value=v;
-  document.getElementById('gOcrStatus').textContent='Valeur proposée : '+v+' mg/dL. Vérifiez-la avant d’enregistrer.';
+  status.textContent='Valeur proposée : '+v+' mg/dL. Vérifiez-la avant d’enregistrer.';
 }
 async function readBPPhoto(){
+  const status=document.getElementById('bpOcrStatus');
   const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus'); if(!text)return;
   const nums=candidateNumbers(text,30,260);
-  if(nums.length<2){document.getElementById('bpOcrStatus').textContent='Je n’ai pas trouvé assez de chiffres fiables. Saisissez-les manuellement.';return;}
+  if(nums.length<2){status.textContent='Je n’ai pas trouvé assez de chiffres fiables. Essayez une photo plus rapprochée de l’écran.';return;}
   let sys=nums.find(n=>n>=90&&n<=220) ?? nums[0];
   let dia=nums.find(n=>n!==sys&&n>=40&&n<=140);
   let pulse=nums.find(n=>n!==sys&&n!==dia&&n>=35&&n<=180);
-  if(!dia){document.getElementById('bpOcrStatus').textContent='Une seule valeur fiable a été trouvée. Saisissez la tension manuellement.';return;}
-  const answer=prompt('Chiffres détectés : '+nums.join(', ')+'\\nVérifiez puis entrez systolique/diastolique/pouls :',
+  if(!dia){status.textContent='Une seule valeur fiable a été trouvée. Saisissez la tension manuellement.';return;}
+  const answer=prompt('Valeurs possibles détectées : '+nums.slice(0,8).join(', ')+'\nVérifiez puis entrez systolique/diastolique/pouls :',
     sys+'/'+dia+(pulse?'/'+pulse:''));
   if(answer===null)return;
-  const p=answer.split(/[\/,\s]+/).map(Number).filter(Number.isFinite);
+  const p=answer.split(/[\/,;\s]+/).map(Number).filter(Number.isFinite);
   if(p.length<2)return;
   document.getElementById('bpSys').value=p[0];
   document.getElementById('bpDia').value=p[1];
   if(p[2]) document.getElementById('bpPulse').value=p[2];
-  document.getElementById('bpOcrStatus').textContent='Valeurs proposées : '+p[0]+'/'+p[1]+(p[2]?' • pouls '+p[2]:'')+'. Vérifiez-les avant d’enregistrer.';
+  status.textContent='Valeurs proposées : '+p[0]+'/'+p[1]+(p[2]?' • pouls '+p[2]:'')+'. Vérifiez-les avant d’enregistrer.';
 }
 
 function drawGlucoseChart(){
