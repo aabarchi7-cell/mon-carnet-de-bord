@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 19 AOÛT • V34d</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34e</div>
 </header>
 <main>
 <div class="dashboard">
@@ -405,7 +405,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </select>
 </div>
 <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
-<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" capture="environment" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre de la photo</button></div><div class="small" id="gOcrStatus">La valeur détectée est toujours proposée pour confirmation avant d’être utilisée.</div></div>
+<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre de la photo</button></div><div class="small" id="gOcrStatus">La valeur détectée est toujours proposée pour confirmation avant d’être utilisée.</div></div>
 <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -546,7 +546,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="bpDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
 <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" capture="environment" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres de la photo</button></div><div class="small" id="bpOcrStatus">Les valeurs détectées sont toujours proposées pour confirmation avant d’être utilisées.</div></div>
+<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres de la photo</button></div><div class="small" id="bpOcrStatus">Les valeurs détectées sont toujours proposées pour confirmation avant d’être utilisées.</div></div>
 <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -1565,7 +1565,7 @@ function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
-    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34d empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
+    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34e empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
     st.style.display='block';
   }
 }
