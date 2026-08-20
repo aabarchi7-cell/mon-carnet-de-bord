@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34h</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34i</div>
 </header>
 <main>
 <div class="dashboard">
@@ -2162,7 +2162,7 @@ async function ocrImageData(dataUrl,statusId,profile='glucose'){
   if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture V34h : cadrage de l’écran et analyse des chiffres… cela peut prendre quelques secondes.';
+    if(status)status.textContent='Lecture V34i : cadrage de l’écran et analyse des chiffres… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({
       tessedit_char_whitelist:'0123456789',
@@ -2187,21 +2187,25 @@ async function ocrImageData(dataUrl,statusId,profile='glucose'){
       ['bpDigits',140,true,true],
       ['bpScreenTight',145,false,false]
     ] : [
-      // Glycémie : cadrages serrés sur le grand résultat de l'écran.
-      ['displayRightTight',105,false,true],
-      ['displayRightTight',125,false,true],
-      ['displayRightTight',145,false,true],
-      ['displayRightTight',165,false,true],
-      ['displayRight',115,false,true],
-      ['displayRight',140,false,true],
-      ['displayRight',165,false,true],
-      ['displayRightTight',140,true,true],
-      ['displayRightTight',145,false,false],
-      ['lcdTight',128,false,true],
-      ['lcdTight',155,false,true],
-      ['lcd',128,false,true],
+      // Glycémie V34i : on commence par le centre/bas de l'écran. Les lecteurs comme
+      // VivaChek ont souvent le résultat principal centré, et non dans la moitié droite.
+      ['lcdTight',105,false,true],
+      ['lcdTight',125,false,true],
+      ['lcdTight',145,false,true],
+      ['lcdTight',165,false,true],
+      ['lcdTight',135,true,true],
+      ['lcdTight',145,false,false],
+      ['lcd',110,false,true],
+      ['lcd',135,false,true],
       ['lcd',160,false,true],
-      ['lowerCenter',145,false,true]
+      ['lowerCenter',115,false,true],
+      ['lowerCenter',145,false,true],
+      ['center',125,false,true],
+      ['center',150,false,true],
+      // Variantes de secours pour les photos prises de côté.
+      ['displayRightTight',125,false,true],
+      ['displayRightTight',150,false,true],
+      ['displayRight',140,false,true]
     ];
     for(const j of jobs){
       try{variants.push(await preprocessOcrImage(dataUrl,...j));}catch(e){}
@@ -2227,11 +2231,22 @@ async function ocrImageData(dataUrl,statusId,profile='glucose'){
 }
 function candidateNumbers(text,min,max){
   const freq=new Map();
-  // On conserve aussi les groupes d’un chiffre uniquement pour la tension/pouls,
-  // mais la glycémie privilégie ensuite les groupes de 2–3 chiffres.
-  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
-    const n=Number(m);
-    if(n>=min&&n<=max) freq.set(n,(freq.get(n)||0)+1);
+  const add=(raw,weight=1)=>{
+    const n=Number(raw);
+    if(Number.isFinite(n)&&n>=min&&n<=max) freq.set(n,(freq.get(n)||0)+weight);
+  };
+  const src=String(text||'');
+  // Groupes OCR normaux.
+  for(const m of (src.match(/\d{1,3}/g)||[])) add(m,1);
+  // V34i : les afficheurs LCD sont souvent lus avec des espaces (ex. "1 33" ou "13 3").
+  // On reconstitue donc aussi les chiffres à l'intérieur de chaque résultat OCR séparé par |.
+  for(const chunk of src.split('|')){
+    const compact=chunk.replace(/\D/g,'');
+    if(compact.length>=2&&compact.length<=3) add(compact,3);
+    // Si plusieurs chiffres parasites entourent la mesure, teste chaque fenêtre de 3 chiffres.
+    if(compact.length>3){
+      for(let i=0;i<=compact.length-3;i++) add(compact.slice(i,i+3),1);
+    }
   }
   return [...freq.entries()].sort((a,b)=>b[1]-a[1]).map(([n])=>n);
 }
@@ -2239,6 +2254,8 @@ function glucoseScore(n,text){
   let score=0;
   const occurrences=(String(text||'').match(new RegExp('(^|\\D)'+n+'(?=\\D|$)','g'))||[]).length;
   score+=occurrences*10;
+  const compactHits=String(text||'').split('|').filter(c=>c.replace(/\D/g,'')===String(n)).length;
+  score+=compactHits*18;
   if(n>=40&&n<=400)score+=8;
   if(n>=60&&n<=250)score+=7;
   // Pour un lecteur mg/dL photographié, le grand résultat est très souvent sur 3 chiffres.
