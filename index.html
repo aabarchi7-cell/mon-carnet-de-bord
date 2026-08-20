@@ -298,7 +298,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34f</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34g</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1565,7 +1565,7 @@ function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
-    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34f empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
+    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34g empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
     st.style.display='block';
   }
 }
@@ -2112,6 +2112,12 @@ function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=fa
         sx=Math.round(sw*0.27); sy=Math.round(sh*0.38); sw=Math.round(sw*0.46); sh=Math.round(sh*0.32);
       }else if(cropMode==='lowerCenter'){
         sx=Math.round(sw*0.18); sy=Math.round(sh*0.34); sw=Math.round(sw*0.64); sh=Math.round(sh*0.52);
+      }else if(cropMode==='displayRight'){
+        // Lecteurs photographiés légèrement de côté : l'écran est souvent dans la moitié droite.
+        sx=Math.round(sw*0.38); sy=Math.round(sh*0.37); sw=Math.round(sw*0.50); sh=Math.round(sh*0.40);
+      }else if(cropMode==='displayRightTight'){
+        // Cadrage très serré sur les grands chiffres, en évitant l'heure/date du haut.
+        sx=Math.round(sw*0.42); sy=Math.round(sh*0.43); sw=Math.round(sw*0.45); sh=Math.round(sh*0.30);
       }
       const scale=Math.min(6, Math.max(2.5, 1900/Math.max(sw,sh)));
       const c=document.createElement('canvas');
@@ -2141,7 +2147,7 @@ async function ocrImageData(dataUrl,statusId){
   if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture renforcée de la photo… cela peut prendre quelques secondes.';
+    if(status)status.textContent='Lecture V34g : cadrage du grand écran et analyse des chiffres… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({
       tessedit_char_whitelist:'0123456789',
@@ -2152,6 +2158,16 @@ async function ocrImageData(dataUrl,statusId){
     // Les cadrages serrés sont essayés en premier : ils évitent que la date/heure du lecteur
     // soit confondue avec la valeur principale.
     const jobs=[
+      // En priorité : cadrages décalés à droite, adaptés aux photos réelles du lecteur.
+      ['displayRightTight',105,false,true],
+      ['displayRightTight',125,false,true],
+      ['displayRightTight',145,false,true],
+      ['displayRightTight',165,false,true],
+      ['displayRight',115,false,true],
+      ['displayRight',140,false,true],
+      ['displayRight',165,false,true],
+      ['displayRightTight',140,true,true],
+      ['displayRightTight',145,false,false],
       ['lcdTight',128,false,true],
       ['lcdTight',155,false,true],
       ['lcd',128,false,true],
@@ -2169,7 +2185,7 @@ async function ocrImageData(dataUrl,statusId){
     const chunks=[];
     for(const v of variants){
       // 7 = une ligne, 13 = ligne brute, 6 = bloc compact.
-      for(const psm of ['7','13','6']){
+      for(const psm of ['8','7','13','6']){
         await worker.setParameters({tessedit_pageseg_mode:psm});
         const ret=await worker.recognize(v);
         const t=String(ret?.data?.text||'').replace(/[^0-9\s]/g,' ').trim();
@@ -2199,10 +2215,12 @@ function glucoseScore(n,text){
   const occurrences=(String(text||'').match(new RegExp('(^|\\D)'+n+'(?=\\D|$)','g'))||[]).length;
   score+=occurrences*10;
   if(n>=40&&n<=400)score+=8;
-  if(n>=60&&n<=250)score+=5;
-  if(String(n).length===3)score+=3;
+  if(n>=60&&n<=250)score+=7;
+  // Pour un lecteur mg/dL photographié, le grand résultat est très souvent sur 3 chiffres.
+  if(String(n).length===3)score+=10;
+  if(String(n).length===2)score-=2;
   // Les petites valeurs sont souvent l’heure/date imprimée en haut de l’écran.
-  if(n<40)score-=10;
+  if(n<40)score-=14;
   return score;
 }
 async function readGlucosePhoto(){
