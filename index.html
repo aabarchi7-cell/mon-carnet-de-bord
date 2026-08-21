@@ -268,6 +268,17 @@ footer .action{font-size:13px;padding:9px 8px}
 .section .section-head .left .icon{color:#0d1117}
 .section .section-head .chev{color:var(--sectAccent)}
 
+
+/* V34h — ciblage manuel ultra-simple de l’écran avant OCR */
+.ocr-target-modal{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:16px}
+.ocr-target-card{width:min(94vw,720px);background:#171a20;border:1px solid #48515e;border-radius:16px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.ocr-target-title{font-weight:800;margin:2px 0 8px;font-size:17px}.ocr-target-help{font-size:13px;opacity:.82;margin-bottom:10px}
+.ocr-target-wrap{position:relative;display:flex;justify-content:center;align-items:center;max-height:68vh;overflow:hidden;border-radius:12px;background:#0c0e12}
+.ocr-target-img{display:block;max-width:100%;max-height:68vh;object-fit:contain;touch-action:manipulation}
+.ocr-target-dot{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.55);pointer-events:none;display:none}
+.ocr-target-dot:before,.ocr-target-dot:after{content:'';position:absolute;background:#fff;left:50%;top:50%;transform:translate(-50%,-50%)}
+.ocr-target-dot:before{width:20px;height:2px}.ocr-target-dot:after{width:2px;height:20px}
+.ocr-target-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}
 </style>
 <style>
 /* V33b — titres statiquement différenciés, même si JavaScript n'est pas exécuté */
@@ -298,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34l</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34h</div>
 </header>
 <main>
 <div class="dashboard">
@@ -405,7 +416,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </select>
 </div>
 <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
-<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre de la photo</button></div><div class="small" id="gOcrStatus">La valeur détectée est toujours proposée pour confirmation avant d’être utilisée.</div></div>
+<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('glucose')">🎯 Cibler le grand chiffre</button><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre</button></div><div class="small" id="gOcrStatus">V34h : touchez d’abord « Cibler le grand chiffre », puis touchez le grand nombre sur l’écran. La valeur reste toujours à confirmer.</div></div>
 <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -546,7 +557,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="bpDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
 <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres de la photo</button></div><div class="small" id="bpOcrStatus">Les valeurs détectées sont toujours proposées pour confirmation avant d’être utilisées.</div></div>
+<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('bp')">🎯 Cibler l’écran</button><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres</button></div><div class="small" id="bpOcrStatus">V34h : ciblez d’abord le centre des grands chiffres du tensiomètre. Les valeurs restent toujours à confirmer.</div></div>
 <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -619,7 +630,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="section-body">
 <div class="toolbar">
 <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
-<button class="action" onclick="startSleepAppleImport()" type="button">🍎 Prélever depuis Apple Santé</button>
+<button class="action" onclick="startSleepAppleImport()" type="button">🍎 Importer via Apple Santé</button>
 </div>
 <div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
 <form class="entry" id="sleepForm" onsubmit="addSleep(event)" style="display:none">
@@ -634,7 +645,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="chart-wrap" id="sleepChartBox">
 <div class="chart-title">Évolution du sommeil</div>
 <canvas height="220" id="sleepChart" width="760"></canvas>
-<div class="chart-legend">Durée de sommeil enregistrée par nuit. Le bouton Apple Santé lance le raccourci de lecture Santé et enregistre automatiquement la durée reçue dans Sommeil.</div>
+<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
 </div>
 </div>
 </section>
@@ -880,6 +891,7 @@ function setTodayDefaults(){
 }
 let pendingGlucosePhoto='';
 function previewGlucosePhoto(input,imgId){
+  ocrTargetGlucose=null;
   const img=document.getElementById(imgId);
   const file=input.files && input.files[0];
   if(!file){pendingGlucosePhoto='';img.removeAttribute('src');img.style.display='none';return;}
@@ -918,6 +930,7 @@ function addClavicle(e){
 }
 let pendingBPPhoto='';
 function previewPhoto(input,imgId){
+  ocrTargetBP=null;
   const img=document.getElementById(imgId);
   const file=input.files && input.files[0];
   if(!file){pendingBPPhoto='';img.removeAttribute('src');img.style.display='none';return;}
@@ -1323,11 +1336,8 @@ function importHealthFromUrl(){
     if(/huawei/i.test(directSource) || (!directSource && directType==='Pas')){
       ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
     }else if(/apple/i.test(directSource) && directType==='Sommeil'){
-      let hours=Number(String(value).replace(',','.'));
-      if(/^(seconds?|secondes?|sec|s)$/i.test(String(directUnit||'').trim())) hours=hours/3600;
-      else if(/^(minutes?|min)$/i.test(String(directUnit||'').trim())) hours=hours/60;
+      const hours=Number(String(value).replace(',','.'));
       if(Number.isFinite(hours)){
-        hours=Math.round(hours*100)/100;
         data.sleep=data.sleep||[];
         const entry={date:directDate,hours,quality:'Bonne',wake:'',note:directNote||'Import Apple Santé'};
         const existing=data.sleep.findIndex(x=>x && x.date===directDate && /Import Apple Santé/i.test(x.note||''));
@@ -1568,12 +1578,9 @@ function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
-    st.textContent='Ouverture d’Apple Santé via le raccourci « Carnet - Apple Santé » pour récupérer le sommeil…';
+    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34g empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
     st.style.display='block';
   }
-  // Le raccourci lit la donnée Sommeil dans Apple Santé puis revient au carnet
-  // avec healthSource=Apple Santé, healthType=Sommeil, healthValue, healthUnit et healthDate.
-  runShortcut('Carnet - Apple Santé','Sommeil');
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
@@ -2104,6 +2111,71 @@ function drawStepsCharts(){
   drawSimpleSeries('distanceChart',rows.filter(r=>Number.isFinite(r.distanceMeters)).map(r=>({date:r.date,value:r.distanceMeters/1000})),'km');
   renderActivitySummary();
 }
+let ocrTargetMode='';
+let ocrTargetTemp=null;
+let ocrTargetGlucose=null;
+let ocrTargetBP=null;
+function targetOcrDisplay(mode){
+  const src=mode==='glucose'?pendingGlucosePhoto:pendingBPPhoto;
+  const status=document.getElementById(mode==='glucose'?'gOcrStatus':'bpOcrStatus');
+  if(!src){ if(status)status.textContent='Choisissez d’abord une photo.'; return; }
+  ocrTargetMode=mode; ocrTargetTemp=null;
+  const modal=document.getElementById('ocrTargetModal'), img=document.getElementById('ocrTargetImg'), dot=document.getElementById('ocrTargetDot'), use=document.getElementById('ocrTargetUse');
+  document.getElementById('ocrTargetTitle').textContent=mode==='glucose'?'Touchez le grand chiffre de glycémie':'Touchez le centre des grands chiffres';
+  document.getElementById('ocrTargetHelp').textContent=mode==='glucose'?'Touchez une fois au milieu du grand nombre (par exemple 137), pas sur la date ni l’heure.':'Touchez une fois au milieu de la zone SYS / DIA / pouls.';
+  img.src=src; dot.style.display='none'; use.disabled=true; modal.style.display='flex';
+  const pick=(ev)=>{
+    const r=img.getBoundingClientRect();
+    if(!r.width||!r.height)return;
+    const pt=ev.touches&&ev.touches[0]?ev.touches[0]:ev;
+    const x=Math.max(0,Math.min(1,(pt.clientX-r.left)/r.width));
+    const y=Math.max(0,Math.min(1,(pt.clientY-r.top)/r.height));
+    ocrTargetTemp={x,y};
+    const wrap=document.getElementById('ocrTargetWrap').getBoundingClientRect();
+    dot.style.left=(r.left-wrap.left+x*r.width)+'px';
+    dot.style.top=(r.top-wrap.top+y*r.height)+'px';
+    dot.style.display='block'; use.disabled=false;
+    ev.preventDefault();
+  };
+  img.onpointerdown=pick;
+}
+function closeOcrTarget(use){
+  const modal=document.getElementById('ocrTargetModal');
+  if(use&&ocrTargetTemp){
+    if(ocrTargetMode==='glucose')ocrTargetGlucose={...ocrTargetTemp};
+    else if(ocrTargetMode==='bp')ocrTargetBP={...ocrTargetTemp};
+    const status=document.getElementById(ocrTargetMode==='glucose'?'gOcrStatus':'bpOcrStatus');
+    if(status)status.textContent='Zone ciblée. Touchez maintenant « Lire '+(ocrTargetMode==='glucose'?'le chiffre':'les chiffres')+' ».';
+  }
+  modal.style.display='none';
+  document.getElementById('ocrTargetImg').onpointerdown=null;
+}
+function preprocessOcrTarget(dataUrl,target,mode='glucose',threshold=145,invert=false,binary=true){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const W=img.naturalWidth,H=img.naturalHeight;
+      const cx=(target?.x??0.5)*W, cy=(target?.y??0.5)*H;
+      // Glycémie : rectangle assez serré autour du nombre touché. Tension : écran plus large.
+      const fracW=mode==='glucose'?0.46:0.72, fracH=mode==='glucose'?0.28:0.62;
+      let sw=Math.round(W*fracW), sh=Math.round(H*fracH);
+      let sx=Math.round(cx-sw/2), sy=Math.round(cy-sh/2);
+      sx=Math.max(0,Math.min(W-sw,sx)); sy=Math.max(0,Math.min(H-sh,sy));
+      const scale=Math.min(7,Math.max(3,2200/Math.max(sw,sh)));
+      const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(sw*scale)); c.height=Math.max(1,Math.round(sh*scale));
+      const ctx=c.getContext('2d',{willReadFrequently:true}); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
+      const im=ctx.getImageData(0,0,c.width,c.height),d=im.data;
+      for(let i=0;i<d.length;i+=4){
+        let g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+        g=Math.max(0,Math.min(255,(g-128)*1.85+128));
+        let v=binary?(g>threshold?255:0):g; if(invert)v=255-v; d[i]=d[i+1]=d[i+2]=v;
+      }
+      ctx.putImageData(im,0,0); resolve(c.toDataURL('image/png'));
+    };
+    img.onerror=reject; img.src=dataUrl;
+  });
+}
 function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=false, binary=true){
   return new Promise((resolve,reject)=>{
     const img=new Image();
@@ -2116,16 +2188,6 @@ function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=fa
         sx=Math.round(sw*0.20); sy=Math.round(sh*0.28); sw=Math.round(sw*0.60); sh=Math.round(sh*0.48);
       }else if(cropMode==='lcdTight'){
         sx=Math.round(sw*0.27); sy=Math.round(sh*0.38); sw=Math.round(sw*0.46); sh=Math.round(sh*0.32);
-      }else if(cropMode==='glucoseDigits'){
-        // V34l : cadrage très serré sur les grands chiffres du résultat.
-        // Écarte l'heure/date du haut, les boutons et la marque du lecteur.
-        sx=Math.round(sw*0.34); sy=Math.round(sh*0.47); sw=Math.round(sw*0.38); sh=Math.round(sh*0.22);
-      }else if(cropMode==='glucoseDigitsWide'){
-        // Variante un peu plus large si la photo est légèrement décentrée.
-        sx=Math.round(sw*0.29); sy=Math.round(sh*0.43); sw=Math.round(sw*0.47); sh=Math.round(sh*0.28);
-      }else if(cropMode==='glucoseVeryTight'){
-        // V34l : uniquement la ligne du grand résultat, sans l'heure ni les unités.
-        sx=Math.round(sw*0.37); sy=Math.round(sh*0.50); sw=Math.round(sw*0.34); sh=Math.round(sh*0.17);
       }else if(cropMode==='lowerCenter'){
         sx=Math.round(sw*0.18); sy=Math.round(sh*0.34); sw=Math.round(sw*0.64); sh=Math.round(sh*0.52);
       }else if(cropMode==='displayRight'){
@@ -2134,24 +2196,6 @@ function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=fa
       }else if(cropMode==='displayRightTight'){
         // Cadrage très serré sur les grands chiffres, en évitant l'heure/date du haut.
         sx=Math.round(sw*0.42); sy=Math.round(sh*0.43); sw=Math.round(sw*0.45); sh=Math.round(sh*0.30);
-      }else if(cropMode==='bpScreen'){
-        // Tensiomètre : écran principal, en excluant les repères imprimés sous/à droite (ex. 140/90).
-        sx=Math.round(sw*0.10); sy=Math.round(sh*0.25); sw=Math.round(sw*0.72); sh=Math.round(sh*0.47);
-      }else if(cropMode==='bpScreenTight'){
-        // Cadrage plus serré sur SYS/DIA/PUL uniquement.
-        sx=Math.round(sw*0.14); sy=Math.round(sh*0.29); sw=Math.round(sw*0.62); sh=Math.round(sh*0.38);
-      }else if(cropMode==='bpDigits'){
-        // Zone des grands chiffres, sans la légende et les valeurs de référence imprimées.
-        sx=Math.round(sw*0.16); sy=Math.round(sh*0.31); sw=Math.round(sw*0.56); sh=Math.round(sh*0.34);
-      }else if(cropMode==='bpSys'){
-        // V34l : ligne SYS uniquement.
-        sx=Math.round(sw*0.30); sy=Math.round(sh*0.30); sw=Math.round(sw*0.40); sh=Math.round(sh*0.16);
-      }else if(cropMode==='bpDia'){
-        // V34l : ligne DIA uniquement.
-        sx=Math.round(sw*0.30); sy=Math.round(sh*0.43); sw=Math.round(sw*0.40); sh=Math.round(sh*0.16);
-      }else if(cropMode==='bpPulse'){
-        // V34l : ligne PUL uniquement.
-        sx=Math.round(sw*0.30); sy=Math.round(sh*0.56); sw=Math.round(sw*0.40); sh=Math.round(sh*0.16);
       }
       const scale=Math.min(6, Math.max(2.5, 1900/Math.max(sw,sh)));
       const c=document.createElement('canvas');
@@ -2176,12 +2220,12 @@ function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=fa
     img.onerror=reject; img.src=dataUrl;
   });
 }
-async function ocrImageData(dataUrl,statusId,profile='glucose'){
+async function ocrImageData(dataUrl,statusId,target=null,mode='glucose'){
   const status=document.getElementById(statusId);
   if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture V34l : cadrage de l’écran et analyse des chiffres… cela peut prendre quelques secondes.';
+    if(status)status.textContent='Lecture V34h : analyse de la zone ciblée… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({
       tessedit_char_whitelist:'0123456789',
@@ -2189,70 +2233,37 @@ async function ocrImageData(dataUrl,statusId,profile='glucose'){
       user_defined_dpi:'300'
     });
     const variants=[];
+    if(target){
+      const targetJobs=[[105,false,true],[120,false,true],[135,false,true],[150,false,true],[165,false,true],[140,true,true],[145,false,false]];
+      for(const j of targetJobs){ try{variants.push(await preprocessOcrTarget(dataUrl,target,mode,...j));}catch(e){} }
+    }
     // Les cadrages serrés sont essayés en premier : ils évitent que la date/heure du lecteur
     // soit confondue avec la valeur principale.
-    const jobs=profile==='bp' ? [
-      // V34l : lecture séparée des trois lignes SYS / DIA / PUL.
-      ['bpSys',95,false,true],['bpSys',120,false,true],['bpSys',145,false,true],['bpSys',170,false,true],
-      ['bpDia',95,false,true],['bpDia',120,false,true],['bpDia',145,false,true],['bpDia',170,false,true],
-      ['bpPulse',95,false,true],['bpPulse',120,false,true],['bpPulse',145,false,true],['bpPulse',170,false,true],
-      // Puis analyse globale de secours de l'écran uniquement.
-      ['bpDigits',105,false,true],
-      ['bpDigits',125,false,true],
-      ['bpDigits',145,false,true],
-      ['bpDigits',165,false,true],
-      ['bpScreenTight',115,false,true],
-      ['bpScreenTight',140,false,true],
-      ['bpScreenTight',165,false,true],
-      ['bpScreen',125,false,true],
-      ['bpScreen',150,false,true],
-      ['bpDigits',140,true,true],
-      ['bpScreenTight',145,false,false]
-    ] : [
-      // Glycémie V34l : on commence par la ligne du grand résultat uniquement.
-      ['glucoseVeryTight',80,false,true],
-      ['glucoseVeryTight',95,false,true],
-      ['glucoseVeryTight',110,false,true],
-      ['glucoseVeryTight',125,false,true],
-      ['glucoseVeryTight',140,false,true],
-      ['glucoseVeryTight',155,false,true],
-      ['glucoseVeryTight',170,false,true],
-      ['glucoseVeryTight',125,true,true],
-      ['glucoseVeryTight',135,false,false],
-      // Cadrages de secours.
-      ['glucoseDigits',95,false,true],
-      ['glucoseDigits',110,false,true],
-      ['glucoseDigits',125,false,true],
-      ['glucoseDigits',140,false,true],
-      ['glucoseDigits',155,false,true],
-      ['glucoseDigits',125,true,true],
-      ['glucoseDigits',135,false,false],
-      ['glucoseDigitsWide',105,false,true],
-      ['glucoseDigitsWide',125,false,true],
-      ['glucoseDigitsWide',145,false,true],
-      // Puis seulement les cadrages plus larges de secours.
-      ['lcdTight',105,false,true],
-      ['lcdTight',125,false,true],
-      ['lcdTight',145,false,true],
-      ['lcdTight',165,false,true],
-      ['lcdTight',135,true,true],
-      ['lcdTight',145,false,false],
-      ['lcd',110,false,true],
-      ['lcd',135,false,true],
-      ['lcd',160,false,true],
-      ['lowerCenter',115,false,true],
-      ['lowerCenter',145,false,true],
-      ['center',125,false,true],
-      ['center',150,false,true],
-      // Variantes de secours pour les photos prises de côté.
+    const jobs=[
+      // En priorité : cadrages décalés à droite, adaptés aux photos réelles du lecteur.
+      ['displayRightTight',105,false,true],
       ['displayRightTight',125,false,true],
-      ['displayRightTight',150,false,true],
-      ['displayRight',140,false,true]
+      ['displayRightTight',145,false,true],
+      ['displayRightTight',165,false,true],
+      ['displayRight',115,false,true],
+      ['displayRight',140,false,true],
+      ['displayRight',165,false,true],
+      ['displayRightTight',140,true,true],
+      ['displayRightTight',145,false,false],
+      ['lcdTight',128,false,true],
+      ['lcdTight',155,false,true],
+      ['lcd',128,false,true],
+      ['lcd',160,false,true],
+      ['lowerCenter',145,false,true],
+      ['center',145,false,true],
+      ['lcdTight',145,true,true],
+      ['center',145,false,false],
+      ['full',145,false,false]
     ];
     for(const j of jobs){
       try{variants.push(await preprocessOcrImage(dataUrl,...j));}catch(e){}
     }
-    if(profile!=='bp') variants.push(dataUrl);
+    variants.push(dataUrl);
     const chunks=[];
     for(const v of variants){
       // 7 = une ligne, 13 = ligne brute, 6 = bloc compact.
@@ -2273,22 +2284,11 @@ async function ocrImageData(dataUrl,statusId,profile='glucose'){
 }
 function candidateNumbers(text,min,max){
   const freq=new Map();
-  const add=(raw,weight=1)=>{
-    const n=Number(raw);
-    if(Number.isFinite(n)&&n>=min&&n<=max) freq.set(n,(freq.get(n)||0)+weight);
-  };
-  const src=String(text||'');
-  // Groupes OCR normaux.
-  for(const m of (src.match(/\d{1,3}/g)||[])) add(m,1);
-  // V34l : les afficheurs LCD sont souvent lus avec des espaces (ex. "1 33" ou "13 3").
-  // On reconstitue donc aussi les chiffres à l'intérieur de chaque résultat OCR séparé par |.
-  for(const chunk of src.split('|')){
-    const compact=chunk.replace(/\D/g,'');
-    if(compact.length>=2&&compact.length<=3) add(compact,3);
-    // Si plusieurs chiffres parasites entourent la mesure, teste chaque fenêtre de 3 chiffres.
-    if(compact.length>3){
-      for(let i=0;i<=compact.length-3;i++) add(compact.slice(i,i+3),1);
-    }
+  // On conserve aussi les groupes d’un chiffre uniquement pour la tension/pouls,
+  // mais la glycémie privilégie ensuite les groupes de 2–3 chiffres.
+  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
+    const n=Number(m);
+    if(n>=min&&n<=max) freq.set(n,(freq.get(n)||0)+1);
   }
   return [...freq.entries()].sort((a,b)=>b[1]-a[1]).map(([n])=>n);
 }
@@ -2296,23 +2296,18 @@ function glucoseScore(n,text){
   let score=0;
   const occurrences=(String(text||'').match(new RegExp('(^|\\D)'+n+'(?=\\D|$)','g'))||[]).length;
   score+=occurrences*10;
-  const compactHits=String(text||'').split('|').filter(c=>c.replace(/\D/g,'')===String(n)).length;
-  score+=compactHits*18;
   if(n>=40&&n<=400)score+=8;
-  if(n>=60&&n<=250)score+=9;
-  if(n>=70&&n<=220)score+=5;
+  if(n>=60&&n<=250)score+=7;
   // Pour un lecteur mg/dL photographié, le grand résultat est très souvent sur 3 chiffres.
-  if(String(n).length===3)score+=13;
-  // Les valeurs >250 restent possibles mais sont moins souvent le grand résultat sur ce lecteur.
-  if(n>250)score-=6;
-  if(String(n).length===2)score-=2;
+  if(String(n).length===3)score+=18;
+  if(String(n).length===2)score-=8;
   // Les petites valeurs sont souvent l’heure/date imprimée en haut de l’écran.
   if(n<40)score-=14;
   return score;
 }
 async function readGlucosePhoto(){
   const status=document.getElementById('gOcrStatus');
-  const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus','glucose'); if(!text)return;
+  const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus',ocrTargetGlucose,'glucose'); if(!text)return;
   const nums=candidateNumbers(text,20,600);
   if(!nums.length){status.textContent='Aucun chiffre fiable détecté. Essayez une photo plus rapprochée de l’écran ou saisissez la valeur manuellement.';return;}
   const ranked=[...nums].sort((a,b)=>glucoseScore(b,text)-glucoseScore(a,text));
@@ -2327,83 +2322,15 @@ async function readGlucosePhoto(){
   document.getElementById('gValue').value=v;
   status.textContent='Valeur proposée : '+v+' mg/dL. Vérifiez-la avant d’enregistrer.';
 }
-async function ocrSingleNumericZone(dataUrl,cropModes,statusId,min,max){
-  if(!dataUrl||!window.Tesseract)return null;
-  try{
-    const worker=await Tesseract.createWorker('eng');
-    await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1',user_defined_dpi:'300'});
-    const freq=new Map();
-    const add=(raw,w=1)=>{const n=Number(String(raw).replace(/\D/g,''));if(Number.isFinite(n)&&n>=min&&n<=max)freq.set(n,(freq.get(n)||0)+w)};
-    for(const mode of cropModes){
-      for(const th of [85,105,125,145,165]){
-        let v; try{v=await preprocessOcrImage(dataUrl,mode,th,false,true)}catch(e){continue}
-        for(const psm of ['7','8','13']){
-          await worker.setParameters({tessedit_pageseg_mode:psm});
-          const ret=await worker.recognize(v);
-          const txt=String(ret?.data?.text||'');
-          const compact=txt.replace(/\D/g,'');
-          if(compact.length>=2&&compact.length<=3)add(compact,4);
-          for(const m of (txt.match(/\d{2,3}/g)||[]))add(m,2);
-        }
-      }
-    }
-    await worker.terminate();
-    const ranked=[...freq.entries()].sort((a,b)=>b[1]-a[1]);
-    return ranked.length?ranked[0][0]:null;
-  }catch(e){return null}
-}
-
 async function readBPPhoto(){
   const status=document.getElementById('bpOcrStatus');
-  if(!pendingBPPhoto){status.textContent='Choisissez d’abord une photo.';return;}
-  status.textContent='Lecture V34l : analyse séparée de SYS, DIA et PUL…';
-  // Lecture indépendante de chaque ligne : cela évite que 140/90 imprimé sur le boîtier soit choisi.
-  const sysDirect=await ocrSingleNumericZone(pendingBPPhoto,['bpSys'],'bpOcrStatus',80,240);
-  const diaDirect=await ocrSingleNumericZone(pendingBPPhoto,['bpDia'],'bpOcrStatus',35,150);
-  const pulseDirect=await ocrSingleNumericZone(pendingBPPhoto,['bpPulse'],'bpOcrStatus',35,180);
-  if(sysDirect&&diaDirect&&sysDirect>diaDirect){
-    const proposal=sysDirect+'/'+diaDirect+(pulseDirect?'/'+pulseDirect:'');
-    const answer=prompt('Lecture séparée de l’écran. Vérifiez puis entrez systolique/diastolique/pouls :',proposal);
-    if(answer===null)return;
-    const p=answer.split(/[\/,;\s]+/).map(Number).filter(Number.isFinite);
-    if(p.length>=2){
-      document.getElementById('bpSys').value=p[0]; document.getElementById('bpDia').value=p[1];
-      if(p[2])document.getElementById('bpPulse').value=p[2];
-      status.textContent='Valeurs proposées : '+p[0]+'/'+p[1]+(p[2]?' • pouls '+p[2]:'')+'. Vérifiez-les avant d’enregistrer.';
-      return;
-    }
-  }
-  // Secours : analyse globale si une des trois lignes n'a pas été reconnue.
-  const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus','bp'); if(!text)return;
+  const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus',ocrTargetBP,'bp'); if(!text)return;
   const nums=candidateNumbers(text,30,260);
   if(nums.length<2){status.textContent='Je n’ai pas trouvé assez de chiffres fiables. Essayez une photo plus rapprochée de l’écran.';return;}
-  // Cherche le triplet physiologiquement cohérent le plus probable.
-  // Les valeurs imprimées 140/90 ne sont normalement plus dans le cadrage, mais ce score
-  // constitue une seconde protection si elles apparaissent malgré tout.
-  const freq=new Map();
-  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
-    const n=Number(m); if(n>=30&&n<=260) freq.set(n,(freq.get(n)||0)+1);
-  }
-  const f=n=>freq.get(n)||0;
-  let best=null,bestScore=-Infinity;
-  const vals=[...freq.keys()];
-  for(const sys of vals.filter(n=>n>=85&&n<=230)){
-    for(const dia of vals.filter(n=>n>=40&&n<=140&&n<sys)){
-      for(const pulse of [null,...vals.filter(n=>n>=35&&n<=180&&n!==sys&&n!==dia)]){
-        let score=f(sys)*12+f(dia)*11+(pulse?f(pulse)*9:0);
-        if(sys-dia>=20&&sys-dia<=90) score+=12;
-        if(sys>=95&&sys<=180) score+=5;
-        if(dia>=55&&dia<=110) score+=5;
-        if(pulse&&pulse>=45&&pulse<=120) score+=4;
-        // Le repère imprimé 140/90 est fréquent sur certains tensiomètres : on le pénalise
-        // lorsqu'il n'est pas fortement répété dans les cadrages de l'écran.
-        if(sys===140&&dia===90 && (f(140)<=2 || f(90)<=2)) score-=30;
-        if(score>bestScore){bestScore=score;best={sys,dia,pulse};}
-      }
-    }
-  }
-  if(!best){status.textContent='Je n’ai pas trouvé une combinaison fiable. Saisissez la tension manuellement.';return;}
-  let {sys,dia,pulse}=best;
+  let sys=nums.find(n=>n>=90&&n<=220) ?? nums[0];
+  let dia=nums.find(n=>n!==sys&&n>=40&&n<=140);
+  let pulse=nums.find(n=>n!==sys&&n!==dia&&n>=35&&n<=180);
+  if(!dia){status.textContent='Une seule valeur fiable a été trouvée. Saisissez la tension manuellement.';return;}
   const answer=prompt('Valeurs possibles détectées : '+nums.slice(0,8).join(', ')+'\nVérifiez puis entrez systolique/diastolique/pouls :',
     sys+'/'+dia+(pulse?'/'+pulse:''));
   if(answer===null)return;
@@ -2413,115 +2340,6 @@ async function readBPPhoto(){
   document.getElementById('bpDia').value=p[1];
   if(p[2]) document.getElementById('bpPulse').value=p[2];
   status.textContent='Valeurs proposées : '+p[0]+'/'+p[1]+(p[2]?' • pouls '+p[2]:'')+'. Vérifiez-les avant d’enregistrer.';
-}
-
-
-// ===== V34l : lecteur LCD 7 segments local (sans dépendre uniquement de l'OCR texte) =====
-const LCD_PATTERNS={
-  0:[1,1,1,1,1,1,0],1:[0,1,1,0,0,0,0],2:[1,1,0,1,1,0,1],3:[1,1,1,1,0,0,1],
-  4:[0,1,1,0,0,1,1],5:[1,0,1,1,0,1,1],6:[1,0,1,1,1,1,1],7:[1,1,1,0,0,0,0],
-  8:[1,1,1,1,1,1,1],9:[1,1,1,1,0,1,1]
-};
-function loadImageDataUrl(src){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src;});}
-function darkRatio(data,w,h,x0,y0,x1,y1){
-  x0=Math.max(0,Math.floor(x0));y0=Math.max(0,Math.floor(y0));x1=Math.min(w,Math.ceil(x1));y1=Math.min(h,Math.ceil(y1));
-  let dark=0,n=0; for(let y=y0;y<y1;y+=2){for(let x=x0;x<x1;x+=2){const i=(y*w+x)*4; const g=(data[i]+data[i+1]+data[i+2])/3; if(g<128)dark++;n++;}}
-  return n?dark/n:0;
-}
-function decodeSevenSegSlot(data,w,h,x0,x1){
-  const ww=x1-x0, hh=h;
-  const boxes=[
-    [.22,.03,.78,.20], [.68,.13,.94,.48], [.68,.52,.94,.87], [.22,.80,.78,.98],
-    [.06,.52,.32,.87], [.06,.13,.32,.48], [.22,.40,.78,.62]
-  ];
-  const r=boxes.map(b=>darkRatio(data,w,h,x0+b[0]*ww,b[1]*hh,x0+b[2]*ww,b[3]*hh));
-  // Seuil adaptatif entre segments allumés et éteints.
-  const sorted=[...r].sort((a,b)=>a-b); const low=(sorted[0]+sorted[1]+sorted[2])/3; const high=(sorted[4]+sorted[5]+sorted[6])/3;
-  const th=Math.max(.10,Math.min(.42,(low+high)/2));
-  let best=null,bestScore=1e9;
-  for(const [d,p] of Object.entries(LCD_PATTERNS)){
-    let score=0;
-    for(let i=0;i<7;i++){
-      // pénalise continûment : un segment attendu veut un ratio élevé, sinon faible
-      score += p[i] ? Math.max(0,th-r[i])*2 + Math.max(0,.16-r[i]) : Math.max(0,r[i]-th)*2;
-    }
-    // 1 est étroit : ne pas le pénaliser sur les segments horizontaux légèrement contaminés.
-    if(+d===1) score*=.94;
-    if(score<bestScore){bestScore=score;best={digit:+d,score,ratios:r,th};}
-  }
-  return best;
-}
-async function lcdDecodeCrop(dataUrl,cropMode,digits,threshold=135,invert=false){
-  const proc=await preprocessOcrImage(dataUrl,cropMode,threshold,invert,true);
-  const im=await loadImageDataUrl(proc); const c=document.createElement('canvas'); c.width=im.width;c.height=im.height; const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0);
-  const id=ctx.getImageData(0,0,c.width,c.height), d=id.data, w=c.width,h=c.height;
-  // BBox de l'encre, en ignorant une petite bordure.
-  let minX=w,maxX=0,minY=h,maxY=0; const mx=Math.floor(w*.03),my=Math.floor(h*.03);
-  for(let y=my;y<h-my;y+=2)for(let x=mx;x<w-mx;x+=2){const i=(y*w+x)*4; if(d[i]<128){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}}
-  if(maxX<=minX||maxY<=minY)return null;
-  // évite bord d'écran : garde surtout la hauteur des chiffres et élargit légèrement
-  const padX=(maxX-minX)*.03; minX=Math.max(0,minX-padX); maxX=Math.min(w,maxX+padX);
-  const y0=Math.max(0,minY), y1=Math.min(h,maxY); const hh=Math.max(1,y1-y0);
-  // recopier uniquement bbox verticale afin que les positions des segments soient normalisées
-  const cc=document.createElement('canvas');cc.width=w;cc.height=hh;const cx=cc.getContext('2d',{willReadFrequently:true});cx.drawImage(c,0,y0,w,hh,0,0,w,hh);const dd=cx.getImageData(0,0,w,hh).data;
-  const span=maxX-minX; let out='',score=0;
-  for(let k=0;k<digits;k++){
-    // légère marge interne par case; fonctionne mieux avec le chiffre 1 étroit
-    let a=minX+span*k/digits, b=minX+span*(k+1)/digits;
-    const dec=decodeSevenSegSlot(dd,w,hh,a,b); if(!dec)return null; out+=dec.digit; score+=dec.score;
-  }
-  return {value:Number(out),text:out,score:score/digits};
-}
-async function lcdBest(dataUrl,modes,digitCounts,min,max){
-  const all=[];
-  for(const mode of modes){for(const n of digitCounts){for(const th of [95,115,135,155,175]){for(const inv of [false,true]){
-    try{const r=await lcdDecodeCrop(dataUrl,mode,n,th,inv); if(r&&r.value>=min&&r.value<=max)all.push({...r,mode,n,th,inv});}catch(e){}
-  }}}}
-  if(!all.length)return null;
-  // consensus : récompense les valeurs répétées dans plusieurs seuils/cadrages
-  const groups=new Map(); for(const r of all){const g=groups.get(r.value)||{value:r.value,count:0,best:1e9};g.count++;g.best=Math.min(g.best,r.score);groups.set(r.value,g)}
-  return [...groups.values()].sort((a,b)=>(b.count*3-b.best)-(a.count*3-a.best))[0];
-}
-
-async function readGlucosePhoto(){
-  const status=document.getElementById('gOcrStatus');
-  if(!pendingGlucosePhoto){status.textContent='Choisissez d’abord une photo.';return;}
-  status.textContent='Lecture V34l : reconnaissance des chiffres LCD…';
-  let lcd=await lcdBest(pendingGlucosePhoto,['glucoseVeryTight','glucoseDigits','glucoseDigitsWide'],[3,2],20,600);
-  let suggestions=[];
-  if(lcd)suggestions.push(lcd.value);
-  // OCR classique en secours et pour proposer d'autres choix
-  const text=await ocrImageData(pendingGlucosePhoto,'gOcrStatus','glucose');
-  if(text)suggestions.push(...candidateNumbers(text,20,600));
-  suggestions=[...new Set(suggestions)].slice(0,7);
-  if(!suggestions.length){status.textContent='Aucun chiffre fiable détecté. Saisissez la valeur manuellement.';return;}
-  const first=lcd?lcd.value:suggestions[0];
-  const answer=prompt('Lecture LCD + OCR. Valeurs possibles : '+suggestions.join(', ')+'\nVérifiez puis entrez la glycémie à utiliser :',String(first));
-  if(answer===null)return; const n=Number(String(answer).replace(',','.'));
-  if(!Number.isFinite(n)||n<20||n>600){status.textContent='Valeur non valide.';return;}
-  document.getElementById('gValue').value=Math.round(n); status.textContent='Valeur proposée : '+Math.round(n)+' mg/dL. Vérifiez-la avant d’enregistrer.';
-}
-
-async function readBPPhoto(){
-  const status=document.getElementById('bpOcrStatus');
-  if(!pendingBPPhoto){status.textContent='Choisissez d’abord une photo.';return;}
-  status.textContent='Lecture V34l : reconnaissance LCD séparée SYS / DIA / PUL…';
-  const s=await lcdBest(pendingBPPhoto,['bpSys'],[3],80,240);
-  const d=await lcdBest(pendingBPPhoto,['bpDia'],[2,3],35,150);
-  const p=await lcdBest(pendingBPPhoto,['bpPulse'],[2,3],35,180);
-  if(s&&d&&s.value>d.value){
-    const proposal=s.value+'/'+d.value+(p?'/'+p.value:'');
-    const ans=prompt('Lecture LCD de l’écran. Vérifiez systolique/diastolique/pouls :',proposal);
-    if(ans===null)return; const a=ans.split(/[\/,;\s]+/).map(Number).filter(Number.isFinite);
-    if(a.length>=2){document.getElementById('bpSys').value=a[0];document.getElementById('bpDia').value=a[1];if(a[2])document.getElementById('bpPulse').value=a[2];status.textContent='Valeurs proposées : '+a[0]+'/'+a[1]+(a[2]?' • pouls '+a[2]:'')+'. Vérifiez-les avant d’enregistrer.';return;}
-  }
-  // Repli vers l'ancienne méthode si le décodage 7 segments n'est pas assez cohérent.
-  status.textContent='Le lecteur LCD n’est pas assez sûr sur cette photo. Essai OCR de secours…';
-  const text=await ocrImageData(pendingBPPhoto,'bpOcrStatus','bp');
-  const nums=candidateNumbers(text,30,260);
-  const ans=prompt('Valeurs possibles détectées : '+(nums.slice(0,8).join(', ')||'aucune')+'\nEntrez systolique/diastolique/pouls :','');
-  if(ans===null)return; const a=ans.split(/[\/,;\s]+/).map(Number).filter(Number.isFinite);
-  if(a.length>=2){document.getElementById('bpSys').value=a[0];document.getElementById('bpDia').value=a[1];if(a[2])document.getElementById('bpPulse').value=a[2];status.textContent='Valeurs saisies. Vérifiez avant d’enregistrer.';}
 }
 
 function drawGlucoseChart(){
@@ -2601,5 +2419,20 @@ render();
 importHealthFromUrl();
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();});
 </script>
+
+<div id="ocrTargetModal" class="ocr-target-modal" role="dialog" aria-modal="true" aria-label="Cibler l’écran">
+  <div class="ocr-target-card">
+    <div class="ocr-target-title" id="ocrTargetTitle">Touchez le grand chiffre</div>
+    <div class="ocr-target-help" id="ocrTargetHelp">Touchez une fois au milieu du grand nombre affiché sur l’appareil.</div>
+    <div class="ocr-target-wrap" id="ocrTargetWrap">
+      <img id="ocrTargetImg" class="ocr-target-img" alt="Photo à cibler">
+      <div id="ocrTargetDot" class="ocr-target-dot"></div>
+    </div>
+    <div class="ocr-target-actions">
+      <button class="action" type="button" onclick="closeOcrTarget(false)">Annuler</button>
+      <button class="action primary" id="ocrTargetUse" type="button" onclick="closeOcrTarget(true)" disabled>Utiliser cette zone</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
