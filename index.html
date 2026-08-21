@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34i</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34j</div>
 </header>
 <main>
 <div class="dashboard">
@@ -416,7 +416,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </select>
 </div>
 <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
-<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('glucose')">🎯 Cibler le grand chiffre</button><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre</button></div><div class="small" id="gOcrStatus">V34i : ciblez le grand nombre, puis touchez « Lire le chiffre ». La lecture essaie spécialement les écrans LCD / 7 segments. La valeur reste toujours à confirmer.</div></div>
+<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('glucose')">🎯 Cibler le grand chiffre</button><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre</button></div><div class="small" id="gOcrStatus">V34j : ciblez le grand nombre, puis touchez « Lire le chiffre ». La lecture essaie spécialement les écrans LCD / 7 segments. La valeur reste toujours à confirmer.</div></div>
 <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -557,7 +557,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div><label>Date</label><input id="bpDate" required="" type="date"/></div>
 <div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
 <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('bp')">🎯 Cibler l’écran</button><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres</button></div><div class="small" id="bpOcrStatus">V34i : ciblez le centre de l’écran. SYS, DIA et pouls sont lus séparément, puis toujours proposés pour confirmation.</div></div>
+<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('bp')">🎯 Cibler l’écran</button><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres</button></div><div class="small" id="bpOcrStatus">V34j : ciblez le centre de l’écran. SYS, DIA et pouls sont lus séparément, puis toujours proposés pour confirmation.</div></div>
 <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
 </form>
@@ -1114,6 +1114,10 @@ function extractHuaweiNumber(value){
   if(value===null || value===undefined) return '';
   let s=String(value).trim();
   try{s=decodeURIComponent(s)}catch(_){}
+  // V34j : conserve une tension complète transmise sous la forme 130/80.
+  // La version précédente ne gardait que le premier nombre (130).
+  const bp=s.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+  if(bp) return bp[1]+'/'+bp[2];
   // Accepte "8 776", "8776", "8776healthSource=...", etc.
   const m=s.match(/-?\d[\d\s\u00A0.,]*/);
   if(!m) return '';
@@ -1233,7 +1237,7 @@ function importHealthFromUrl(){
     // contient des accents ou des espaces (ex. "Fréquence cardiaque").
     let decodedHref=href;
     try{decodedHref=decodeURIComponent(href.replace(/\+/g,' '));}catch(_){decodedHref=href.replace(/\+/g,' ');}
-    const fastValue=decodedHref.match(/[?&#]healthValue\s*=\s*([-+]?\d+(?:[.,]\d+)?)/i);
+    const fastValue=decodedHref.match(/[?&#]healthValue\s*=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
     if(fastValue){
       const getRaw=(key)=>{
         const re=new RegExp('[?&#]'+key+'\\s*=\\s*([^&#]*)','i');
@@ -1289,7 +1293,7 @@ function importHealthFromUrl(){
       }
     }
     if(!rawValue){
-      const vm=href.match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?)/i);
+      const vm=href.match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
       if(vm) rawValue=vm[1];
     }
     if(/hume/i.test(directSource) && /^(bpm|nombre\s*\/\s*min)$/i.test(String(directUnit||'').trim())){
@@ -1315,7 +1319,7 @@ function importHealthFromUrl(){
     }
     if(!value){
       // Dernier secours : cherche healthValue directement dans toute l’URL.
-      const m=String(window.location.href||'').match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?)/i);
+      const m=String(window.location.href||'').match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
       if(m) value=extractHuaweiNumber(m[1]);
     }
     if(!value){
@@ -2274,7 +2278,7 @@ async function ocrImageData(dataUrl,statusId,target=null,mode='glucose'){
   if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
   if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
   try{
-    if(status)status.textContent='Lecture V34i : analyse renforcée de l’écran… cela peut prendre quelques secondes.';
+    if(status)status.textContent='Lecture V34j : analyse renforcée de l’écran… cela peut prendre quelques secondes.';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({
       tessedit_char_whitelist:'0123456789',
@@ -2360,7 +2364,7 @@ async function readGlucosePhoto(){
   if(!ocrTargetGlucose){status.textContent='Touchez d’abord « Cibler le grand chiffre » et visez le milieu du nombre.';return;}
   if(!window.Tesseract){status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return;}
   try{
-    status.textContent='Lecture V34i : je me concentre uniquement sur le grand nombre…';
+    status.textContent='Lecture V34j : je me concentre uniquement sur le grand nombre…';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1',user_defined_dpi:'300'});
     const vars=[];
@@ -2392,7 +2396,7 @@ async function readBPPhoto(){
   if(!ocrTargetBP){status.textContent='Touchez d’abord « Cibler l’écran » au centre des trois grands nombres.';return;}
   if(!window.Tesseract){status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return;}
   try{
-    status.textContent='Lecture V34i : lecture séparée de SYS, DIA et pouls…';
+    status.textContent='Lecture V34j : lecture séparée de SYS, DIA et pouls…';
     const worker=await Tesseract.createWorker('eng');
     await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1',user_defined_dpi:'300'});
     async function lineValue(offset,min,max,prefer){
