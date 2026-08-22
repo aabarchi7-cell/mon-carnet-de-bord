@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34o</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34p</div>
 </header>
 <main>
 <div class="dashboard">
@@ -841,6 +841,7 @@ const defaultData={
   objectives:{glucose:'',clavicle:'',sleep:''}
 };
 let data=loadData();
+reconcileImportedHealth(data);
 
 function loadData(){
   try{
@@ -866,6 +867,7 @@ function loadData(){
 }
 function save(){
   try{
+    reconcileImportedHealth(data);
     localStorage.setItem(KEY,JSON.stringify(data));
     render();
     return true;
@@ -876,7 +878,7 @@ function save(){
   }
 }
 
-// V34o : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
+// V34p : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
 // une donnée, l'onglet déjà ouvert peut garder une ancienne copie en mémoire.
 // À chaque retour au carnet, on relit donc localStorage puis on redessine les courbes.
 let lastSyncedStorage='';
@@ -886,6 +888,7 @@ function syncFromStorageAndRender(force=false){
     if(!force && raw===lastSyncedStorage) return;
     if(raw){
       data=loadData();
+      reconcileImportedHealth(data);
       lastSyncedStorage=raw;
       render();
     }
@@ -1481,6 +1484,40 @@ function indexedNewest(arr){
 function indexedOldest(arr){
   return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(a.x).localeCompare(entryDateTimeKey(b.x)));
 }
+// V34p : les imports Santé ne restent plus isolés dans « Données santé ».
+// Les types reconnus sont aussi répercutés dans leur rubrique principale afin
+// que les cartes et les courbes utilisent immédiatement les mesures récentes.
+function healthImportKey(x){
+  return [String(x?.source||''),String(x?.type||''),String(x?.date||''),String(x?.time||''),String(x?.value||''),String(x?.unit||'')].join('|');
+}
+function reconcileImportedHealth(target=data){
+  if(!target) return target;
+  target.healthImports=target.healthImports||[];
+  target.bp=target.bp||[]; target.sleep=target.sleep||[]; target.glucose=target.glucose||[];
+  for(const x of target.healthImports){
+    if(!x?.date) continue;
+    const typ=canonicalHealthType(x.type||'');
+    const ik=healthImportKey(x);
+    if(/tension|blood\s*pressure/i.test(typ)){
+      const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+      if(m && !target.bp.some(b=>b.importKey===ik)){
+        target.bp.push({sys:Number(m[1]),dia:Number(m[2]),pulse:'',date:x.date,time:x.time||'',context:'Import Santé',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:ik});
+      }
+    }else if(/sommeil|sleep/i.test(typ)){
+      const h=sleepHoursFromHealthImport(x);
+      if(Number.isFinite(h) && !target.sleep.some(z=>z.importKey===ik)){
+        target.sleep.push({hours:Number(h.toFixed(2)),quality:'Importé',date:x.date,wake:'',note:x.note||`Importé depuis ${x.source||'Santé'}`,importKey:ik});
+      }
+    }else if(/glyc[eé]mie|glucose|blood\s*glucose/i.test(typ)){
+      const v=numericHealthValue(x.value);
+      if(Number.isFinite(v) && !target.glucose.some(g=>g.importKey===ik)){
+        target.glucose.push({value:v,moment:'Import Santé',date:x.date,time:x.time||'',meal:'',mealTag:'',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:ik});
+      }
+    }
+  }
+  return target;
+}
+
 function render(){
   glucoseList.innerHTML=data.glucose.length?indexedNewest(data.glucose).map(({x,i})=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
@@ -2183,17 +2220,21 @@ function drawSleepChart(){
   drawSimpleSeries('sleepChart',combinedSleepRows(),'heures',{min:0,max:10,ticks:5,formatTick:v=>Math.round(v)+' h'});
 }
 function bpRows(){
-  const rows=[];
+  const map=new Map();
+  const add=r=>{
+    const k=[r.date||'',r.time||'',Number(r.sys),Number(r.dia)].join('|');
+    map.set(k,r);
+  };
   (data.bp||[]).forEach(x=>{
     const sys=Number(x.sys),dia=Number(x.dia);
-    if(x?.date && Number.isFinite(sys) && Number.isFinite(dia)) rows.push({date:x.date,time:x.time||'',sys,dia});
+    if(x?.date && Number.isFinite(sys) && Number.isFinite(dia)) add({date:x.date,time:x.time||'',sys,dia});
   });
   (data.healthImports||[]).forEach(x=>{
     if(!x?.date || !/tension|blood\s*pressure/i.test(String(x.type||''))) return;
     const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-    if(m) rows.push({date:x.date,time:x.time||'',sys:Number(m[1]),dia:Number(m[2])});
+    if(m) add({date:x.date,time:x.time||'',sys:Number(m[1]),dia:Number(m[2])});
   });
-  return rows.sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b))).slice(-14);
+  return [...map.values()].sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b))).slice(-14);
 }
 function drawBPChart(){
   const canvas=document.getElementById('bpChart'); if(!canvas)return;
