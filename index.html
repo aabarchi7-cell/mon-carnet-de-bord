@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34m</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34n</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1450,8 +1450,19 @@ function delItem(arr,i,btn){
     if(document.body.contains(btn)){btn.dataset.confirmDelete='';btn.textContent='Suppr.';}
   },5000);
 }
+function entryDateTimeKey(x){
+  const d=String(x?.date||'0000-00-00');
+  const t=String(x?.time||'00:00').padStart(5,'0');
+  return d+'T'+t;
+}
+function indexedNewest(arr){
+  return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(b.x).localeCompare(entryDateTimeKey(a.x)));
+}
+function indexedOldest(arr){
+  return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(a.x).localeCompare(entryDateTimeKey(b.x)));
+}
 function render(){
-  glucoseList.innerHTML=data.glucose.length?data.glucose.map((x,i)=>`<div class="item">
+  glucoseList.innerHTML=data.glucose.length?indexedNewest(data.glucose).map(({x,i})=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
     <button class="action danger" style="padding:5px 8px" onclick="delItem('glucose',${i},this)">Suppr.</button></div>
     ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
@@ -1460,7 +1471,7 @@ function render(){
   clavicleList.innerHTML=data.clavicle.length?data.clavicle.map((x,i)=>itemHtml(
     `Clavicule${x.pain!==''?' • douleur '+x.pain+'/10':''}`,
     `${x.date} • ${x.mobility||''}${x.kine?' • Kiné: '+x.kine:''}`,x.note,'clavicle',i)).join(''):'<div class="empty">Aucune note.</div>';
-  bpList.innerHTML=(data.bp||[]).length?(data.bp||[]).map((x,i)=>`<div class="item">
+  bpList.innerHTML=(data.bp||[]).length?indexedNewest(data.bp).map(({x,i})=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.sys}/${x.dia} mmHg${x.pulse!==''?' • '+x.pulse+'/min':''}`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.context||''}`)}</div></div>
     <button class="action danger" style="padding:5px 8px" onclick="delItem('bp',${i},this)">Suppr.</button></div>
     ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
@@ -1471,7 +1482,7 @@ function render(){
   const hil=document.getElementById('healthImportList');
   if(hil){
     hil.innerHTML=(data.healthImports||[]).length
-      ? (data.healthImports||[]).map((x,i)=>{
+      ? indexedNewest(data.healthImports).map(({x,i})=>{
           const base=itemHtml(
             `${x.source} • ${x.type}`,
             `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${formatHealthImportValue(x.type,x.value,x.unit)}`:''}${isStepEntry(x)?` • ≈ ${formatDistanceFromSteps(x.value)}`:''}`,
@@ -1488,10 +1499,10 @@ function render(){
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>${photoBlock(x,'notes',i)}`).join(''):'<div class="empty">Aucune entrée.</div>';
   {
-    const manual=(data.sleep||[]).map((x,i)=>itemHtml(`${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i));
-    const imported=(data.healthImports||[]).map((x,i)=>({x,i,h:sleepHoursFromHealthImport(x)})).filter(o=>o.x?.date&&Number.isFinite(o.h)).map(o=>itemHtml(`${o.h.toLocaleString('fr-FR',{maximumFractionDigits:2})} h • importé`,`${o.x.date} • ${o.x.source||'Santé'}`,o.x.note||'Donnée importée','healthImports',o.i));
-    const all=manual.concat(imported);
-    sleepList.innerHTML=all.length?all.join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+    const manual=indexedNewest(data.sleep).map(({x,i})=>({date:x.date||'',html:itemHtml(`${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)}));
+    const imported=indexedNewest(data.healthImports).map(({x,i})=>({x,i,h:sleepHoursFromHealthImport(x)})).filter(o=>o.x?.date&&Number.isFinite(o.h)).map(o=>({date:o.x.date||'',html:itemHtml(`${o.h.toLocaleString('fr-FR',{maximumFractionDigits:2})} h • importé`,`${o.x.date} • ${o.x.source||'Santé'}`,o.x.note||'Donnée importée','healthImports',o.i)}));
+    const all=manual.concat(imported).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    sleepList.innerHTML=all.length?all.map(o=>o.html).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
   }
 
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
@@ -1501,7 +1512,7 @@ function render(){
   if(os)os.textContent=data.objectives.sleep||'Aucun repère personnel enregistré.';
 
   if(data.glucose.length){
-    const g=data.glucose[0];
+    const g=indexedNewest(data.glucose)[0].x;
     const [st,cls]=glucoseStatus(Number(g.value));
     lastGlucose.textContent=g.value+' mg/dL';
     lastGlucoseNote.innerHTML=esc(g.moment+' • '+g.date)+' • <span class="'+cls+'">'+st+'</span>';
@@ -1517,7 +1528,7 @@ function render(){
     if(s){lastSleep.textContent=s.value.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h';lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
     else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   }
-  if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
+  if((data.bp||[]).length){const b=indexedNewest(data.bp)[0].x;lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
   renderGlucoseIntelligence();
   renderExercises();
@@ -2090,22 +2101,32 @@ function activityRows(){
     return {...r,distanceMeters:Number.isFinite(r.directDistance)?r.directDistance:estimated};
   }).sort((a,b)=>a.date.localeCompare(b.date));
 }
-function drawSimpleSeries(canvasId, rows, valueLabel){
+function drawSimpleSeries(canvasId, rows, valueLabel, options={}){
   const canvas=document.getElementById(canvasId); if(!canvas)return;
+  rows=[...(rows||[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).slice(-14);
   const ctx=canvas.getContext('2d');
   const dpr=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||760), cssH=220;
   canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,cssW,cssH);
-  const pad={l:42,r:16,t:20,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
+  const pad={l:48,r:16,t:22,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
-  const vals=rows.map(r=>r.value).filter(Number.isFinite); if(!vals.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
-  let min=Math.min(...vals),max=Math.max(...vals); if(min===max){min=Math.max(0,min*0.8);max=max*1.2+1;}
-  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+H);ctx.lineTo(pad.l+W,pad.t+H);ctx.stroke();
+  const vals=rows.map(r=>Number(r.value)).filter(Number.isFinite); if(!vals.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
+  let min=Number.isFinite(options.min)?options.min:Math.min(...vals), max=Number.isFinite(options.max)?options.max:Math.max(...vals);
+  if(min===max){min=Math.max(0,min*0.8);max=max*1.2+1;}
+  if(options.step){ min=Math.floor(min/options.step)*options.step; max=Math.ceil(max/options.step)*options.step; if(max<=min)max=min+options.step; }
   const x=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)); const y=v=>pad.t+H-(v-min)/(max-min)*H;
-  ctx.strokeStyle='#d6dde8';ctx.lineWidth=2;ctx.beginPath();rows.forEach((r,i)=>{const X=x(i),Y=y(r.value);if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y)});ctx.stroke();
-  ctx.fillStyle='#d6dde8'; rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(x(i),y(r.value),3,0,Math.PI*2);ctx.fill();});
-  ctx.fillStyle='#9aa4b2';ctx.font='11px system-ui'; const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i); picks.forEach(i=>ctx.fillText(String(rows[i].date||'').slice(5),Math.max(2,x(i)-16),pad.t+H+18));
-  ctx.fillText(valueLabel,pad.l,pad.t-6);
+  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';
+  const ticks=options.ticks||5;
+  for(let i=0;i<=ticks;i++){
+    const val=min+i*(max-min)/ticks, yy=y(val);
+    ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(pad.l+W,yy);ctx.stroke();
+    const label=options.formatTick?options.formatTick(val):((Math.abs(val)>=1000)?Math.round(val).toLocaleString('fr-FR'):(Math.round(val*10)/10).toLocaleString('fr-FR'));
+    ctx.fillText(label,4,yy+3);
+  }
+  ctx.strokeStyle='#d6dde8';ctx.lineWidth=2;ctx.beginPath();rows.forEach((r,i)=>{const X=x(i),Y=y(Number(r.value));if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y)});ctx.stroke();
+  ctx.fillStyle='#d6dde8'; rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(x(i),y(Number(r.value)),3,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui'; const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i); picks.forEach(i=>ctx.fillText(String(rows[i].date||'').slice(5),Math.max(2,x(i)-16),pad.t+H+18));
+  ctx.fillText(valueLabel,pad.l,pad.t-8);
 }
 function sleepHoursFromHealthImport(x){
   if(!x || !/sommeil|sleep/i.test(String(x.type||''))) return NaN;
@@ -2139,20 +2160,20 @@ function combinedSleepRows(){
   return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date));
 }
 function drawSleepChart(){
-  drawSimpleSeries('sleepChart',combinedSleepRows().slice(-14),'heures');
+  drawSimpleSeries('sleepChart',combinedSleepRows(),'heures',{min:0,max:10,ticks:5,formatTick:v=>Math.round(v)+' h'});
 }
 function bpRows(){
   const rows=[];
   (data.bp||[]).forEach(x=>{
     const sys=Number(x.sys),dia=Number(x.dia);
-    if(x?.date && Number.isFinite(sys) && Number.isFinite(dia)) rows.push({date:x.date,sys,dia});
+    if(x?.date && Number.isFinite(sys) && Number.isFinite(dia)) rows.push({date:x.date,time:x.time||'',sys,dia});
   });
   (data.healthImports||[]).forEach(x=>{
     if(!x?.date || !/tension|blood\s*pressure/i.test(String(x.type||''))) return;
     const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-    if(m) rows.push({date:x.date,sys:Number(m[1]),dia:Number(m[2])});
+    if(m) rows.push({date:x.date,time:x.time||'',sys:Number(m[1]),dia:Number(m[2])});
   });
-  return rows.sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
+  return rows.sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b))).slice(-14);
 }
 function drawBPChart(){
   const canvas=document.getElementById('bpChart'); if(!canvas)return;
@@ -2160,15 +2181,18 @@ function drawBPChart(){
   const dpr=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||760), cssH=220;
   canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,cssW,cssH);
-  const rows=bpRows(), pad={l:42,r:16,t:22,b:42}, W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
+  const rows=bpRows(), pad={l:48,r:16,t:24,b:42}, W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
-  const vals=rows.flatMap(r=>[r.sys,r.dia]); let min=Math.min(...vals),max=Math.max(...vals); min=Math.max(0,min-10);max+=10;
-  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+H);ctx.lineTo(pad.l+W,pad.t+H);ctx.stroke();
+  const vals=rows.flatMap(r=>[r.sys,r.dia]);
+  let min=Math.min(60,Math.floor((Math.min(...vals)-10)/20)*20), max=Math.max(160,Math.ceil((Math.max(...vals)+10)/20)*20);
   const X=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)), Y=v=>pad.t+H-(v-min)/(max-min)*H;
+  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';
+  for(let v=min;v<=max;v+=20){const yy=Y(v);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(pad.l+W,yy);ctx.stroke();ctx.fillText(String(v),5,yy+3);}
   const series=[['sys','#7ddfff'],['dia','#ffb86b']];
-  series.forEach(([key,color])=>{ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r[key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[key]),3,0,Math.PI*2);ctx.fill();});});
-  ctx.fillStyle='#9aa4b2';ctx.font='11px system-ui';const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i);picks.forEach(i=>ctx.fillText(rows[i].date.slice(5),Math.max(2,X(i)-16),pad.t+H+18));
-  ctx.fillStyle='#7ddfff';ctx.fillText('SYS',pad.l,pad.t-7);ctx.fillStyle='#ffb86b';ctx.fillText('DIA',pad.l+38,pad.t-7);
+  series.forEach(([key,color])=>{ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2.5;ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r[key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[key]),3.5,0,Math.PI*2);ctx.fill();});});
+  ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i);picks.forEach(i=>ctx.fillText(rows[i].date.slice(5),Math.max(2,X(i)-16),pad.t+H+18));
+  ctx.fillStyle='#7ddfff';ctx.fillText('SYS',pad.l,pad.t-8);ctx.fillStyle='#ffb86b';ctx.fillText('DIA',pad.l+38,pad.t-8);
+  ctx.fillStyle='#aeb5c0';ctx.fillText('mmHg',4,pad.t-8);
 }
 function renderActivitySummary(){
   const rows=activityRows();
@@ -2642,7 +2666,7 @@ function drawGlucoseChart(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,cssW,cssH);
 
-  const points=[...data.glucose].reverse().slice(-20);
+  const points=indexedOldest(data.glucose).map(o=>o.x).slice(-20);
   if(points.length===0){
     ctx.fillStyle='#b7bdc8'; ctx.font='14px -apple-system,Arial';
     ctx.fillText('Aucune donnée à afficher.',14,28); return;
