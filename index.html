@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34w</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34x</div>
 </header>
 <main>
 <div class="dashboard">
@@ -774,14 +774,14 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="integration-status" id="shortcutHelp" style="display:none;margin-bottom:10px"></div>
 <form class="entry" id="healthImportForm" onsubmit="addHealthImport(event)" style="display:none">
 <div><label>Source</label>
-<select id="hiSource">
+<select id="hiSource" onchange="healthFormChanged()">
 <option>Apple Santé</option>
 <option>HUAWEI Health</option>
 <option>HUM Health</option>
 <option>Quirónsalud</option>
 </select>
 </div>
-<div><label>Type de donnée</label><input id="hiType" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required=""/></div>
+<div><label>Type de donnée</label><input id="hiType" oninput="healthFormChanged()" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required=""/></div>
 <div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"/></div>
 <div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"/></div>
 <div><label>Date</label><input id="hiDate" required="" type="date"/></div>
@@ -789,8 +789,14 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
 <div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" capture="environment" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
 <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" onclick="healthAppointmentToCalendar()" type="button">📅 Ajouter au calendrier</button></div>
+<div class="full" id="hiHuaweiImportWrap" style="display:none"><button class="action primary" onclick="startHuaweiImport()" type="button">⬇️ Importer depuis HUAWEI</button></div>
 <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
 </form>
+<div class="chart-wrap" id="healthSelectedChartBox" style="display:none">
+<div class="chart-title" id="healthSelectedChartTitle">Évolution</div>
+<canvas height="220" id="healthSelectedChart" width="760"></canvas>
+<div class="chart-legend" id="healthSelectedChartLegend">La courbe utilise les données santé enregistrées/importées correspondant au type sélectionné.</div>
+</div>
 <div class="chart-wrap">
 <div class="chart-title">Données santé ajoutées / importées</div>
 <div class="list" id="healthImportList"></div>
@@ -1187,6 +1193,38 @@ function healthImportStatus(message){
   if(!box) return;
   box.textContent=message;
   box.style.display='block';
+}
+
+function healthFormChanged(){
+  const source=document.getElementById('hiSource')?.value||'';
+  const type=(document.getElementById('hiType')?.value||'').trim();
+  const wrap=document.getElementById('hiHuaweiImportWrap');
+  if(wrap) wrap.style.display=/huawei/i.test(source)?'block':'none';
+  const box=document.getElementById('healthSelectedChartBox');
+  if(box) box.style.display=type?'block':'none';
+  const title=document.getElementById('healthSelectedChartTitle');
+  if(title) title.textContent=type?'Évolution — '+type:'Évolution';
+  requestAnimationFrame(drawSelectedHealthChart);
+}
+function drawSelectedHealthChart(){
+  const canvas=document.getElementById('healthSelectedChart'); if(!canvas)return;
+  const type=(document.getElementById('hiType')?.value||'').trim();
+  if(!type)return;
+  if(/tension|blood\s*pressure/i.test(type)){
+    const old=canvas.id; canvas.id='bpChartTemp';
+    const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
+    const rows=bpRows(),pad={l:48,r:16,t:24,b:42},W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
+    if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Aucune tension importée exploitable.',pad.l,pad.t+30);canvas.id=old;return;}
+    const vals=rows.flatMap(r=>[r.sys,r.dia]);let min=Math.min(60,Math.floor((Math.min(...vals)-10)/20)*20),max=Math.max(160,Math.ceil((Math.max(...vals)+10)/20)*20);
+    const X=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)),Y=v=>pad.t+H-(v-min)/(max-min)*H;
+    ctx.strokeStyle='#45505f';ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';for(let v=min;v<=max;v+=20){let y=Y(v);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+W,y);ctx.stroke();ctx.fillText(String(v),5,y+3)}
+    [['sys','#7ddfff'],['dia','#ffb86b']].forEach(([k,c])=>{ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=3;ctx.beginPath();rows.forEach((r,i)=>i?ctx.lineTo(X(i),Y(r[k])):ctx.moveTo(X(i),Y(r[k])));ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[k]),rows.length===1?7:4.5,0,Math.PI*2);ctx.fill()})});
+    ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';rows.forEach((r,i)=>{if(i===0||i===rows.length-1)ctx.fillText(r.date.slice(5),X(i)-15,pad.t+H+18)});canvas.id=old;return;
+  }
+  const norm=v=>{const m=String(v??'').replace(',','.').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):NaN};
+  const wanted=type.toLowerCase();
+  const rows=(data.healthImports||[]).filter(x=>x?.date&&String(x.type||'').toLowerCase()===wanted).map(x=>({date:x.date,value:norm(x.value)})).filter(x=>Number.isFinite(x.value)).sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
+  drawSimpleSeries('healthSelectedChart',rows,'');
 }
 function startHuaweiImport(){
   // Envoie au raccourci l'adresse de retour du carnet.
@@ -1804,6 +1842,7 @@ function render(){
   requestAnimationFrame(drawSleepChart);
   requestAnimationFrame(drawStepsCharts);
   requestAnimationFrame(drawBPChart);
+  requestAnimationFrame(healthFormChanged);
 }
 function renderGeneric(arr,listId){
   const el=document.getElementById(listId);
