@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34v</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34w</div>
 </header>
 <main>
 <div class="dashboard">
@@ -949,7 +949,18 @@ window.addEventListener('storage',(e)=>{if(e.key===KEY)syncFromStorageAndRender(
 document.getElementById('openExerciseLog')?.addEventListener('click',()=>toggleForm('exerciseLogForm'));
 document.getElementById('openCustomExercise')?.addEventListener('click',()=>toggleForm('customExerciseForm'));
 document.querySelectorAll('.section-head').forEach(btn=>{
-  btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open'));
+  btn.addEventListener('click',()=>{
+    const sec=btn.parentElement;
+    sec.classList.toggle('open');
+    if(sec.classList.contains('open')){
+      requestAnimationFrame(()=>{
+        if(sec.classList.contains('tone-pressure')) drawBPChart();
+        if(sec.classList.contains('tone-glucose')) drawGlucoseChart();
+        if(sec.classList.contains('tone-sleep')) drawSleepChart();
+        if(sec.classList.contains('tone-sport')){ drawStepsCharts(); drawExerciseChart(); }
+      });
+    }
+  });
 });
 function toggleForm(id){
   const el=document.getElementById(id);
@@ -1279,7 +1290,7 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
 }
 
 function readHealthParam(name){
-  // V34v : lecture très tolérante des retours iOS/Raccourcis.
+  // V34w : lecture très tolérante des retours iOS/Raccourcis.
   // Accepte aussi les paramètres accidentellement collés sans « & » :
   // healthValue=130healthSource=Apple SantéhealthType=Fréquence cardiaque...
   const key=String(name||'').trim();
@@ -1574,7 +1585,7 @@ function indexedOldest(arr){
 // Les types reconnus sont aussi répercutés dans leur rubrique principale afin
 // que les cartes et les courbes utilisent immédiatement les mesures récentes.
 function cleanupAmbiguousHealthImports(){
-  // V34v : retire uniquement les faux doublons évidents créés par les anciennes
+  // V34w : retire uniquement les faux doublons évidents créés par les anciennes
   // versions : « Apple Santé • Donnée Santé • N » identique, le même jour,
   // à un vrai import HUAWEI « Pas • N ». Aucune donnée typée n'est supprimée.
   const arr=data.healthImports||[];
@@ -1718,12 +1729,21 @@ function render(){
   clavicleList.innerHTML=data.clavicle.length?data.clavicle.map((x,i)=>itemHtml(
     `Clavicule${x.pain!==''?' • douleur '+x.pain+'/10':''}`,
     `${x.date} • ${x.mobility||''}${x.kine?' • Kiné: '+x.kine:''}`,x.note,'clavicle',i)).join(''):'<div class="empty">Aucune note.</div>';
-  bpList.innerHTML=(data.bp||[]).length?indexedNewest(data.bp).map(({x,i})=>`<div class="item">
-    <div class="item-top"><div><div class="item-title">${esc(`${x.sys}/${x.dia} mmHg${x.pulse!==''?' • '+x.pulse+'/min':''}`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.context||''}`)}</div></div>
-    <button class="action danger" style="padding:5px 8px" onclick="delItem('bp',${i},this)">Suppr.</button></div>
-    ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
-    ${x.photo?`<img src="${x.photo}" alt="Photo du tensiomètre" class="saved-thumb"><div><button class="action danger" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('bp',${i})">Supprimer la photo</button></div>`:''}
-  </div>`).join(''):'<div class="empty">Aucune mesure.</div>';
+  {
+    const manual=indexedNewest(data.bp||[]).map(({x,i})=>({date:x.date||'',time:x.time||'',html:`<div class="item">
+      <div class="item-top"><div><div class="item-title">${esc(`${x.sys}/${x.dia} mmHg${x.pulse!==''?' • '+x.pulse+'/min':''}`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.context||''}`)}</div></div>
+      <button class="action danger" style="padding:5px 8px" onclick="delItem('bp',${i},this)">Suppr.</button></div>
+      ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
+      ${x.photo?`<img src="${x.photo}" alt="Photo du tensiomètre" class="saved-thumb"><div><button class="action danger" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('bp',${i})">Supprimer la photo</button></div>`:''}
+    </div>`}));
+    const imported=indexedNewest(data.healthImports||[]).map(({x,i})=>{
+      if(!x?.date || !/tension|blood\s*pressure/i.test(String(x.type||''))) return null;
+      const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/); if(!m) return null;
+      return {date:x.date||'',time:x.time||'',html:itemHtml(`${m[1]}/${m[2]} mmHg • importé`,`${x.date}${x.time?' • '+x.time:''} • ${x.source||'Santé'}`,x.note||'Donnée importée','healthImports',i)};
+    }).filter(Boolean);
+    const all=manual.concat(imported).sort((a,b)=>`${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
+    bpList.innerHTML=all.length?all.map(o=>o.html).join(''):'<div class="empty">Aucune mesure.</div>';
+  }
   medList.innerHTML=data.meds.length?data.meds.map((x,i)=>itemHtml(x.title,`${x.date}${x.time?' • '+x.time:''}${x.dose?' • '+x.dose:''}${x.taken?' • '+x.taken:''}`,x.text,'meds',i)+photoBlock(x,'meds',i)).join(''):'<div class="empty">Aucune entrée.</div>';
   renderGeneric('analyses','analysisList');
   const hil=document.getElementById('healthImportList');
@@ -1775,7 +1795,7 @@ function render(){
     if(s){lastSleep.textContent=s.value.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h';lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
     else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   }
-  if((data.bp||[]).length){const b=indexedNewest(data.bp)[0].x;lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
+  { const br=bpRows(); const b=br.length?br[br.length-1]:null; if(b){lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.time?b.time+' • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'} }
   renderGlucoseStats();
   renderGlucoseIntelligence();
   renderExercises();
@@ -2359,7 +2379,7 @@ function drawSimpleSeries(canvasId, rows, valueLabel, options={}){
   rows=[...(rows||[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).slice(-14);
   const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
   const pad={l:48,r:16,t:22,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
-  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
+  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Aucune mesure de tension exploitable.',pad.l,pad.t+30);return;}
   const vals=rows.map(r=>Number(r.value)).filter(Number.isFinite); if(!vals.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
   let min=Number.isFinite(options.min)?options.min:Math.min(...vals), max=Number.isFinite(options.max)?options.max:Math.max(...vals);
   if(min===max){min=Math.max(0,min*0.8);max=max*1.2+1;}
@@ -2459,14 +2479,15 @@ function drawBPChart(){
   const canvas=document.getElementById('bpChart'); if(!canvas)return;
   const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
   const rows=bpRows(), pad={l:48,r:16,t:24,b:42}, W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
-  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
+  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Aucune mesure de tension exploitable.',pad.l,pad.t+30);return;}
   const vals=rows.flatMap(r=>[r.sys,r.dia]);
   let min=Math.min(60,Math.floor((Math.min(...vals)-10)/20)*20), max=Math.max(160,Math.ceil((Math.max(...vals)+10)/20)*20);
   const X=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)), Y=v=>pad.t+H-(v-min)/(max-min)*H;
   ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';
   for(let v=min;v<=max;v+=20){const yy=Y(v);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(pad.l+W,yy);ctx.stroke();ctx.fillText(String(v),5,yy+3);}
   const series=[['sys','#7ddfff'],['dia','#ffb86b']];
-  series.forEach(([key,color])=>{ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2.5;ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r[key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[key]),3.5,0,Math.PI*2);ctx.fill();});});
+  series.forEach(([key,color])=>{ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=3;ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r[key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[key]),rows.length===1?7:4.5,0,Math.PI*2);ctx.fill();});});
+  if(rows.length===1){ctx.fillStyle='#aeb5c0';ctx.font='11px system-ui';ctx.fillText('1 mesure enregistrée — la courbe apparaîtra dès la 2e mesure.',pad.l,pad.t+H+34);}
   ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i);picks.forEach(i=>ctx.fillText(rows[i].date.slice(5),Math.max(2,X(i)-16),pad.t+H+18));
   ctx.fillStyle='#7ddfff';ctx.fillText('SYS',pad.l,pad.t-8);ctx.fillStyle='#ffb86b';ctx.fillText('DIA',pad.l+38,pad.t-8);
   ctx.fillStyle='#aeb5c0';ctx.fillText('mmHg',4,pad.t-8);
