@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34r</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34s</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1260,10 +1260,12 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   let u=(unit||'').trim();
   if(!u && /poids|weight/i.test(typ)) u='kg';
   else if(!u && /fréquence cardiaque|heart rate|pouls/i.test(typ)) u='bpm';
-  else if(!u && /tension|blood pressure/i.test(typ)) u='mmHg';
+  else if(!u && /(tension|pression artérielle|blood pressure)/i.test(typ)) u='mmHg';
+  else if(!u && /spo₂|spo2|saturation/i.test(typ)) u='%';
   else if(!u && /pas|steps/i.test(typ)) u='pas';
   else if(!u && /sommeil|sleep/i.test(typ)) u='h';
-  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||'Import automatique via Apple Santé',photo:''};
+  const defaultNote=/huawei/i.test(src)?'Import automatique via HUAWEI vers CARNET':'Import automatique via Apple Santé';
+  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||defaultNote,photo:''};
   const existing=data.healthImports.findIndex(x=>x && x.source===src && x.type===typ && x.date===d);
   if(existing>=0) data.healthImports.splice(existing,1,entry);
   else data.healthImports.unshift(entry);
@@ -1299,7 +1301,10 @@ function canonicalHealthType(type){
   if(simple==='poids' || simple==='weight') return 'Poids';
   if(simple==='sommeil' || simple==='sleep') return 'Sommeil';
   if(simple==='pas' || simple==='steps' || simple==='nombredepas') return 'Pas';
-  if(simple==='tension' || simple==='tensionarterielle' || simple==='bloodpressure') return 'Tension artérielle';
+  if(simple==='pressionarteriellesystolique' || simple==='tensionarteriellesystolique' || simple==='systolicbloodpressure') return 'Pression artérielle systolique';
+  if(simple==='pressionarteriellediastolique' || simple==='tensionarteriellediastolique' || simple==='diastolicbloodpressure') return 'Pression artérielle diastolique';
+  if(simple==='tension' || simple==='tensionarterielle' || simple==='pressionarterielle' || simple==='bloodpressure') return 'Tension artérielle';
+  if(simple==='spo2' || simple==='saturationenoxygene' || simple==='oxygensaturation') return 'SpO₂';
   return raw || 'Donnée Santé';
 }
 function importHealthFromUrl(){
@@ -1335,10 +1340,13 @@ function importHealthFromUrl(){
 
       if(fastClean){
         let fastOk=false;
-        if(/huawei/i.test(fastSource) || (!fastSource && fastType==='Pas')){
+        // V34s : HUAWEI n'est plus synonyme de « Pas ».
+        // Seul le vrai type Pas utilise saveHuaweiImport ; les autres mesures
+        // HUAWEI gardent leur type (tension, sommeil, fréquence, poids, SpO2...).
+        if((/huawei/i.test(fastSource) || !fastSource) && fastType==='Pas'){
           fastOk=saveHuaweiImport(fastClean,'Import automatique via HUAWEI vers CARNET');
         }else{
-          fastOk=saveDirectHealthImport(fastSource,fastType||'Donnée Santé',fastClean,fastUnit,fastDate,fastNote);
+          fastOk=saveDirectHealthImport(fastSource||'Apple Santé',fastType||'Donnée Santé',fastClean,fastUnit,fastDate,fastNote);
         }
         if(fastOk){
           if(window.history && history.replaceState){
@@ -1408,11 +1416,13 @@ function importHealthFromUrl(){
       else if(directType==='Fréquence cardiaque') directUnit='bpm';
       else if(directType==='Sommeil') directUnit='h';
       else if(directType==='Pas') directUnit='pas';
-      else if(directType==='Tension artérielle') directUnit='mmHg';
+      else if(/^(Tension artérielle|Pression artérielle systolique|Pression artérielle diastolique)$/.test(directType)) directUnit='mmHg';
+      else if(directType==='SpO₂') directUnit='%';
     }
 
     let ok=false;
-    if(/huawei/i.test(directSource) || (!directSource && directType==='Pas')){
+    // V34s : on ne force plus toutes les données HUAWEI dans « Pas ».
+    if((/huawei/i.test(directSource) || !directSource) && directType==='Pas'){
       ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
     }else if(/apple/i.test(directSource) && directType==='Sommeil'){
       const hours=Number(String(value).replace(',','.'));
@@ -1541,16 +1551,54 @@ function reconcileImportedHealth(target=data){
   if(!target) return target;
   target.healthImports=target.healthImports||[];
   target.bp=target.bp||[]; target.sleep=target.sleep||[]; target.glucose=target.glucose||[];
+  // D'abord les tensions complètes 130/80.
   for(const x of target.healthImports){
     if(!x?.date) continue;
     const typ=canonicalHealthType(x.type||'');
     const ik=healthImportKey(x);
-    if(/tension|blood\s*pressure/i.test(typ)){
+    if(/tension artérielle|blood\s*pressure/i.test(typ)){
       const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
       if(m && !target.bp.some(b=>b.importKey===ik)){
         target.bp.push({sys:Number(m[1]),dia:Number(m[2]),pulse:'',date:x.date,time:x.time||'',context:'Import Santé',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:ik});
       }
-    }else if(/sommeil|sleep/i.test(typ)){
+    }
+  }
+  // Puis les mesures HUAWEI/HealthKit séparées en systolique et diastolique.
+  const bpParts=new Map();
+  for(const x of target.healthImports){
+    if(!x?.date) continue;
+    const typ=canonicalHealthType(x.type||'');
+    if(!/pression artérielle (systolique|diastolique)/i.test(typ)) continue;
+    const n=Number(String(x.value||'').replace(',','.'));
+    if(!Number.isFinite(n)) continue;
+    const key=[x.source||'Santé',x.date,x.time||''].join('|');
+    const o=bpParts.get(key)||{source:x.source||'Santé',date:x.date,time:x.time||'',note:x.note||'',sys:null,dia:null,keys:[]};
+    if(/systolique/i.test(typ)) o.sys=n; else o.dia=n;
+    o.keys.push(healthImportKey(x));
+    bpParts.set(key,o);
+  }
+  // Si l'heure n'est pas identique entre les deux composantes, rapproche aussi par source+date.
+  const byDay=new Map();
+  for(const o of bpParts.values()){
+    const dayKey=[o.source,o.date].join('|');
+    const d=byDay.get(dayKey)||{source:o.source,date:o.date,time:o.time||'',note:o.note||'',sys:null,dia:null,keys:[]};
+    if(o.sys!=null) d.sys=o.sys;
+    if(o.dia!=null) d.dia=o.dia;
+    d.keys.push(...o.keys);
+    byDay.set(dayKey,d);
+  }
+  for(const o of byDay.values()){
+    if(o.sys==null || o.dia==null) continue;
+    const ik='bp-pair|'+o.keys.sort().join('~');
+    if(!target.bp.some(b=>b.importKey===ik)){
+      target.bp.push({sys:o.sys,dia:o.dia,pulse:'',date:o.date,time:o.time||'',context:'Import Santé',note:o.note||`Importé depuis ${o.source}`,photo:'',importKey:ik});
+    }
+  }
+  for(const x of target.healthImports){
+    if(!x?.date) continue;
+    const typ=canonicalHealthType(x.type||'');
+    const ik=healthImportKey(x);
+    if(/sommeil|sleep/i.test(typ)){
       const h=sleepHoursFromHealthImport(x);
       if(Number.isFinite(h) && !target.sleep.some(z=>z.importKey===ik)){
         target.sleep.push({hours:Number(h.toFixed(2)),quality:'Importé',date:x.date,wake:'',note:x.note||`Importé depuis ${x.source||'Santé'}`,importKey:ik});
