@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 20 AOÛT • V34k</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34m</div>
 </header>
 <main>
 <div class="dashboard">
@@ -563,6 +563,11 @@ footer .action{font-size:13px;padding:9px 8px}
 </form>
 <div class="small" style="margin:6px 0 12px">La photo reste attachée à la mesure. La lecture automatique est une aide : vérifiez toujours les chiffres proposés avant d’enregistrer.</div>
 <div class="list" id="bpList"></div>
+<div class="chart-wrap" id="bpChartBox">
+<div class="chart-title">Évolution de la tension</div>
+<canvas height="220" id="bpChart" width="760"></canvas>
+<div class="chart-legend">Systolique et diastolique au fil des mesures. Les données importées de type « Tension artérielle » sont incluses lorsqu’elles contiennent une valeur de type 128/78.</div>
+</div>
 </div>
 </section>
 <section class="section tone-meds">
@@ -1482,8 +1487,12 @@ function render(){
 
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>${photoBlock(x,'notes',i)}`).join(''):'<div class="empty">Aucune entrée.</div>';
-  sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
-    `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+  {
+    const manual=(data.sleep||[]).map((x,i)=>itemHtml(`${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i));
+    const imported=(data.healthImports||[]).map((x,i)=>({x,i,h:sleepHoursFromHealthImport(x)})).filter(o=>o.x?.date&&Number.isFinite(o.h)).map(o=>itemHtml(`${o.h.toLocaleString('fr-FR',{maximumFractionDigits:2})} h • importé`,`${o.x.date} • ${o.x.source||'Santé'}`,o.x.note||'Donnée importée','healthImports',o.i));
+    const all=manual.concat(imported);
+    sleepList.innerHTML=all.length?all.join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+  }
 
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
   const og=document.getElementById('objGlucoseText'),oc=document.getElementById('objClavicleText'),os=document.getElementById('objSleepText');
@@ -1502,9 +1511,12 @@ function render(){
   if(data.clavicle.length){
     const c=data.clavicle[0];lastClavicle.textContent=c.mobility||'Suivi';lastClavicleNote.textContent=c.date;
   }else{lastClavicle.textContent='—';lastClavicleNote.textContent='Aucune donnée'}
-  if(data.sleep.length){
-    const s=data.sleep[0];lastSleep.textContent=s.hours+' h';lastSleepNote.textContent=s.quality+' • '+s.date;
-  }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
+  {
+    const sr=combinedSleepRows();
+    const s=sr.length?sr[sr.length-1]:null;
+    if(s){lastSleep.textContent=s.value.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h';lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
+    else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
+  }
   if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
   renderGlucoseIntelligence();
@@ -1513,6 +1525,7 @@ function render(){
   requestAnimationFrame(drawGlucoseChart);
   requestAnimationFrame(drawSleepChart);
   requestAnimationFrame(drawStepsCharts);
+  requestAnimationFrame(drawBPChart);
 }
 function renderGeneric(arr,listId){
   const el=document.getElementById(listId);
@@ -2094,9 +2107,68 @@ function drawSimpleSeries(canvasId, rows, valueLabel){
   ctx.fillStyle='#9aa4b2';ctx.font='11px system-ui'; const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i); picks.forEach(i=>ctx.fillText(String(rows[i].date||'').slice(5),Math.max(2,x(i)-16),pad.t+H+18));
   ctx.fillText(valueLabel,pad.l,pad.t-6);
 }
+function sleepHoursFromHealthImport(x){
+  if(!x || !/sommeil|sleep/i.test(String(x.type||''))) return NaN;
+  const raw=String(x.value??'').trim();
+  const unit=String(x.unit||'').trim().toLowerCase();
+  let n=numericHealthValue(raw);
+  if(Number.isFinite(n)){
+    if(/^(seconds?|secondes?|sec|s)$/.test(unit)) return n/3600;
+    if(/^(minutes?|mins?|min)$/.test(unit)) return n/60;
+    return n;
+  }
+  const h=raw.match(/(\d+(?:[.,]\d+)?)\s*h/i);
+  const m=raw.match(/(\d+(?:[.,]\d+)?)\s*min/i);
+  if(h||m){
+    const hv=h?Number(h[1].replace(',','.')):0;
+    const mv=m?Number(m[1].replace(',','.')):0;
+    return (Number.isFinite(hv)?hv:0)+(Number.isFinite(mv)?mv:0)/60;
+  }
+  return NaN;
+}
+function combinedSleepRows(){
+  const map=new Map();
+  (data.sleep||[]).forEach(x=>{
+    const v=Number(x.hours);
+    if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:'Sommeil'});
+  });
+  (data.healthImports||[]).forEach(x=>{
+    const v=sleepHoursFromHealthImport(x);
+    if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:x.source||'Santé'});
+  });
+  return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date));
+}
 function drawSleepChart(){
-  const rows=(data.sleep||[]).map(x=>({date:x.date,value:Number(x.hours)})).filter(x=>x.date&&Number.isFinite(x.value)).sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
-  drawSimpleSeries('sleepChart',rows,'heures');
+  drawSimpleSeries('sleepChart',combinedSleepRows().slice(-14),'heures');
+}
+function bpRows(){
+  const rows=[];
+  (data.bp||[]).forEach(x=>{
+    const sys=Number(x.sys),dia=Number(x.dia);
+    if(x?.date && Number.isFinite(sys) && Number.isFinite(dia)) rows.push({date:x.date,sys,dia});
+  });
+  (data.healthImports||[]).forEach(x=>{
+    if(!x?.date || !/tension|blood\s*pressure/i.test(String(x.type||''))) return;
+    const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+    if(m) rows.push({date:x.date,sys:Number(m[1]),dia:Number(m[2])});
+  });
+  return rows.sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
+}
+function drawBPChart(){
+  const canvas=document.getElementById('bpChart'); if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||760), cssH=220;
+  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+  const rows=bpRows(), pad={l:42,r:16,t:22,b:42}, W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
+  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
+  const vals=rows.flatMap(r=>[r.sys,r.dia]); let min=Math.min(...vals),max=Math.max(...vals); min=Math.max(0,min-10);max+=10;
+  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+H);ctx.lineTo(pad.l+W,pad.t+H);ctx.stroke();
+  const X=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)), Y=v=>pad.t+H-(v-min)/(max-min)*H;
+  const series=[['sys','#7ddfff'],['dia','#ffb86b']];
+  series.forEach(([key,color])=>{ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r[key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[key]),3,0,Math.PI*2);ctx.fill();});});
+  ctx.fillStyle='#9aa4b2';ctx.font='11px system-ui';const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i);picks.forEach(i=>ctx.fillText(rows[i].date.slice(5),Math.max(2,X(i)-16),pad.t+H+18));
+  ctx.fillStyle='#7ddfff';ctx.fillText('SYS',pad.l,pad.t-7);ctx.fillStyle='#ffb86b';ctx.fillText('DIA',pad.l+38,pad.t-7);
 }
 function renderActivitySummary(){
   const rows=activityRows();
@@ -2635,7 +2707,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
-window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();});
+window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
 
 <div id="ocrTargetModal" class="ocr-target-modal" role="dialog" aria-modal="true" aria-label="Cibler l’écran">
