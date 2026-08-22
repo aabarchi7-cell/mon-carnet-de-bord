@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34p</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34q</div>
 </header>
 <main>
 <div class="dashboard">
@@ -878,7 +878,7 @@ function save(){
   }
 }
 
-// V34p : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
+// V34q : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
 // une donnée, l'onglet déjà ouvert peut garder une ancienne copie en mémoire.
 // À chaque retour au carnet, on relit donc localStorage puis on redessine les courbes.
 let lastSyncedStorage='';
@@ -1484,7 +1484,7 @@ function indexedNewest(arr){
 function indexedOldest(arr){
   return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(a.x).localeCompare(entryDateTimeKey(b.x)));
 }
-// V34p : les imports Santé ne restent plus isolés dans « Données santé ».
+// V34q : les imports Santé ne restent plus isolés dans « Données santé ».
 // Les types reconnus sont aussi répercutés dans leur rubrique principale afin
 // que les cartes et les courbes utilisent immédiatement les mesures récentes.
 function healthImportKey(x){
@@ -1659,7 +1659,13 @@ function openExternal(url){
     window.location.href=url;
   }
 }
-function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
+function openAppleHealthBridge(){
+  // V34q : envoie l’adresse EXACTE de cette copie du carnet au raccourci.
+  // Ainsi Apple Santé revient dans le même index/origine et écrit dans le même localStorage.
+  const callback=window.location.href.split(/[?#]/)[0];
+  healthImportStatus('Ouverture de « Carnet - Apple Santé »… retour vers cette version du carnet.');
+  runShortcut('Carnet - Apple Santé',callback);
+}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
@@ -2792,6 +2798,8 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
+// V34q : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
+try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
 
