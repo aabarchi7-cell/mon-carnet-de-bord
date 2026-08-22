@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34q</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34r</div>
 </header>
 <main>
 <div class="dashboard">
@@ -842,6 +842,12 @@ const defaultData={
 };
 let data=loadData();
 reconcileImportedHealth(data);
+// V34r : adapte la fiche existante « poulet TM7 aux légumes » au poulet fermier congelé.
+// La migration est volontairement ciblée : elle ne touche qu'une recette dont le titre contient
+// « poulet » et « légumes » (ou « TM7 »), et conserve les autres fiches intactes.
+if(updateFrozenChickenRecipe(data)){
+  try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){ }
+}
 
 function loadData(){
   try{
@@ -865,6 +871,44 @@ function loadData(){
     };
   }catch(e){return structuredClone(defaultData)}
 }
+function updateFrozenChickenRecipe(target){
+  try{
+    const foods=target?.foods||[];
+    let changed=false;
+    foods.forEach(x=>{
+      if(!x) return;
+      const title=String(x.title||'');
+      const type=String(x.type||'');
+      if(!/recette/i.test(type)) return;
+      if(!/poulet/i.test(title)) return;
+      if(!/(l[eé]gumes?|tm7)/i.test(title)) return;
+      const marker='v34r-poulet-fermier-congele';
+      if(x.recipeMigration===marker) return;
+      x.duration='45 à 50 min';
+      x.portions='2 personnes';
+      x.ingredients=[
+        '500 à 600 g de poulet fermier congelé (de préférence en morceaux)',
+        '500 g d’eau pour le bol',
+        'Courgette, carotte, poivron, oignon et/ou aubergine, coupés en morceaux réguliers',
+        'Sel, poivre, origan ou paprika doux, selon goût',
+        'Facultatif : 1 c. à café d’huile d’olive par personne après cuisson'
+      ].join('\n');
+      x.steps=[
+        '1. Mettre 500 g d’eau dans le bol du TM7.',
+        '2. Installer le poulet fermier encore congelé dans le Varoma, en laissant circuler la vapeur. Répartir les légumes autour sans boucher toutes les ouvertures.',
+        '3. Cuire 35 min / Varoma / vitesse 1.',
+        '4. Vérifier la cuisson du poulet. S’il est encore insuffisamment cuit près de l’os, poursuivre 10 à 15 min / Varoma / vitesse 1.',
+        '5. Vérifier que le poulet est bien cuit à cœur avant de servir.',
+        '6. Assaisonner après cuisson. Ajouter éventuellement un peu d’huile d’olive au moment de servir.'
+      ].join('\n');
+      x.text='Version adaptée au poulet fermier congelé. Le temps final dépend de la taille et de l’épaisseur des morceaux.';
+      x.recipeMigration=marker;
+      changed=true;
+    });
+    return changed;
+  }catch(_){ return false; }
+}
+
 function save(){
   try{
     reconcileImportedHealth(data);
@@ -878,7 +922,7 @@ function save(){
   }
 }
 
-// V34q : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
+// V34r : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
 // une donnée, l'onglet déjà ouvert peut garder une ancienne copie en mémoire.
 // À chaque retour au carnet, on relit donc localStorage puis on redessine les courbes.
 let lastSyncedStorage='';
@@ -889,7 +933,10 @@ function syncFromStorageAndRender(force=false){
     if(raw){
       data=loadData();
       reconcileImportedHealth(data);
-      lastSyncedStorage=raw;
+      if(updateFrozenChickenRecipe(data)){
+        try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){ }
+      }
+      lastSyncedStorage=localStorage.getItem(KEY)||raw;
       render();
     }
   }catch(_){ }
@@ -1484,7 +1531,7 @@ function indexedNewest(arr){
 function indexedOldest(arr){
   return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(a.x).localeCompare(entryDateTimeKey(b.x)));
 }
-// V34q : les imports Santé ne restent plus isolés dans « Données santé ».
+// V34r : les imports Santé ne restent plus isolés dans « Données santé ».
 // Les types reconnus sont aussi répercutés dans leur rubrique principale afin
 // que les cartes et les courbes utilisent immédiatement les mesures récentes.
 function healthImportKey(x){
@@ -1660,7 +1707,7 @@ function openExternal(url){
   }
 }
 function openAppleHealthBridge(){
-  // V34q : envoie l’adresse EXACTE de cette copie du carnet au raccourci.
+  // V34r : envoie l’adresse EXACTE de cette copie du carnet au raccourci.
   // Ainsi Apple Santé revient dans le même index/origine et écrit dans le même localStorage.
   const callback=window.location.href.split(/[?#]/)[0];
   healthImportStatus('Ouverture de « Carnet - Apple Santé »… retour vers cette version du carnet.');
@@ -2798,7 +2845,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
-// V34q : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
+// V34r : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
 try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
