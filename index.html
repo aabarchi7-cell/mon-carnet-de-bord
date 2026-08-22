@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34n</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34o</div>
 </header>
 <main>
 <div class="dashboard">
@@ -875,6 +875,26 @@ function save(){
     return false;
   }
 }
+
+// V34o : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
+// une donnée, l'onglet déjà ouvert peut garder une ancienne copie en mémoire.
+// À chaque retour au carnet, on relit donc localStorage puis on redessine les courbes.
+let lastSyncedStorage='';
+function syncFromStorageAndRender(force=false){
+  try{
+    const raw=localStorage.getItem(KEY)||'';
+    if(!force && raw===lastSyncedStorage) return;
+    if(raw){
+      data=loadData();
+      lastSyncedStorage=raw;
+      render();
+    }
+  }catch(_){ }
+}
+window.addEventListener('pageshow',()=>syncFromStorageAndRender(true));
+window.addEventListener('focus',()=>syncFromStorageAndRender());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncFromStorageAndRender();});
+window.addEventListener('storage',(e)=>{if(e.key===KEY)syncFromStorageAndRender(true);});
 document.getElementById('openExerciseLog')?.addEventListener('click',()=>toggleForm('exerciseLogForm'));
 document.getElementById('openCustomExercise')?.addEventListener('click',()=>toggleForm('customExerciseForm'));
 document.querySelectorAll('.section-head').forEach(btn=>{
