@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34x</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34y</div>
 </header>
 <main>
 <div class="dashboard">
@@ -549,7 +549,12 @@ footer .action{font-size:13px;padding:9px 8px}
 <span class="left"><span class="icon">❤️</span><span class="section-title-text" style="color:#55D6FF!important;-webkit-text-fill-color:#55D6FF!important;border-bottom:3px solid #55D6FF;padding-bottom:2px;letter-spacing:.15px">Tension artérielle</span></span><span class="chev">›</span>
 </button>
 <div class="section-body">
-<div class="toolbar"><button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button></div>
+<div class="toolbar">
+<button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button>
+<button class="action" onclick="bpImportApple()" type="button">🍎 Importer Apple Santé</button>
+<button class="action" onclick="bpImportHuawei()" type="button">⬇️ Importer HUAWEI</button>
+</div>
+<div class="integration-status" id="bpImportStatus" style="display:none;margin:0 0 12px"></div>
 <form class="entry" id="bpForm" onsubmit="addBP(event)" style="display:none">
 <div><label>Systolique</label><input id="bpSys" max="260" min="50" placeholder="Ex. 125" required="" type="number"/></div>
 <div><label>Diastolique</label><input id="bpDia" max="160" min="30" placeholder="Ex. 78" required="" type="number"/></div>
@@ -1226,6 +1231,24 @@ function drawSelectedHealthChart(){
   const rows=(data.healthImports||[]).filter(x=>x?.date&&String(x.type||'').toLowerCase()===wanted).map(x=>({date:x.date,value:norm(x.value)})).filter(x=>Number.isFinite(x.value)).sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
   drawSimpleSeries('healthSelectedChart',rows,'');
 }
+function bpImportHuawei(){
+  const st=document.getElementById('bpImportStatus');
+  if(st){st.style.display='block';st.textContent='Ouverture de « HUAWEI vers CARNET »…';}
+  const callback=window.location.href.split(/[?#]/)[0]+'?healthSource='+encodeURIComponent('HUAWEI Health')+'&healthType='+encodeURIComponent('Tension artérielle')+'&healthUnit=mmHg';
+  runShortcut('HUAWEI vers CARNET',callback);
+}
+function bpImportApple(){
+  const sec=document.getElementById('healthConnectionsSection');
+  if(sec)sec.classList.add('open');
+  openHealthImport('Apple Santé');
+  const t=document.getElementById('hiType'),u=document.getElementById('hiUnit'),v=document.getElementById('hiValue');
+  if(t)t.value='Tension artérielle'; if(u)u.value='mmHg';
+  if(v)v.placeholder='Ex. 128/78';
+  healthFormChanged();
+  const st=document.getElementById('bpImportStatus');
+  if(st){st.style.display='block';st.textContent='Apple Santé : formulaire Tension artérielle ouvert. Les mesures reçues par le carnet alimentent automatiquement la courbe ci-dessous.';}
+  setTimeout(()=>document.getElementById('healthImportForm')?.scrollIntoView({behavior:'smooth',block:'center'}),100);
+}
 function startHuaweiImport(){
   // Envoie au raccourci l'adresse de retour du carnet.
   // Le raccourci pourra rouvrir cette adresse avec les paramètres healthSource,
@@ -1323,6 +1346,7 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   const sec=document.getElementById('healthConnectionsSection');
   if(sec) sec.classList.add('open');
   healthImportStatus('Donnée importée : '+src+' • '+typ+' • '+formatHealthImportValue(typ,clean,u));
+  if(/tension|blood\s*pressure/i.test(typ)){ requestAnimationFrame(drawBPChart); }
   setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
   return true;
 }
