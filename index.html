@@ -156,7 +156,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 }
 .chart-title{font-weight:800;margin-bottom:8px}
 .chart-legend{font-size:12px;color:var(--muted);margin-top:8px}
-canvas{width:100%;height:220px;display:block}
+canvas{width:100%;height:220px;min-height:220px;display:block}
 .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 12px}
 .quick{
   background:#1c2026;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center
@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34t</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34u</div>
 </header>
 <main>
 <div class="dashboard">
@@ -2313,10 +2313,7 @@ function activityRows(){
 function drawSimpleSeries(canvasId, rows, valueLabel, options={}){
   const canvas=document.getElementById(canvasId); if(!canvas)return;
   rows=[...(rows||[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).slice(-14);
-  const ctx=canvas.getContext('2d');
-  const dpr=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||760), cssH=220;
-  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,cssW,cssH);
+  const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
   const pad={l:48,r:16,t:22,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
   const vals=rows.map(r=>Number(r.value)).filter(Number.isFinite); if(!vals.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
@@ -2388,12 +2385,35 @@ function bpRows(){
   });
   return [...map.values()].sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b))).slice(-14);
 }
+function normalizedGlucoseRows(){
+  const out=[];
+  const add=(x)=>{
+    if(!x || !x.date) return;
+    const v=Number(String(x.value??'').replace(',','.').match(/\d+(?:\.\d+)?/)?.[0]);
+    if(Number.isFinite(v) && v>=20 && v<=600) out.push({...x,value:v});
+  };
+  (data.glucose||[]).forEach(add);
+  (data.healthImports||[]).forEach(x=>{
+    if(!x?.date || !/glyc|glucose/i.test(String(x.type||''))) return;
+    add({value:x.value,date:x.date,time:x.time||'',moment:'Import Santé'});
+  });
+  const seen=new Set();
+  return out.filter(x=>{const k=[x.date,x.time||'',x.value].join('|');if(seen.has(k))return false;seen.add(k);return true;})
+    .sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b)));
+}
+function resizeCanvasForChart(canvas,height=220){
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  const cssW=Math.max(280,Math.round(rect.width||canvas.parentElement?.clientWidth||760));
+  canvas.style.height=height+'px';
+  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(height*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,cssW,height);
+  return {ctx,cssW,cssH:height};
+}
 function drawBPChart(){
   const canvas=document.getElementById('bpChart'); if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const dpr=window.devicePixelRatio||1, cssW=Math.max(300,canvas.clientWidth||760), cssH=220;
-  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,cssW,cssH);
+  const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
   const rows=bpRows(), pad={l:48,r:16,t:24,b:42}, W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
   if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
   const vals=rows.flatMap(r=>[r.sys,r.dia]);
@@ -2872,14 +2892,9 @@ async function readBPPhoto(){
 function drawGlucoseChart(){
   const canvas=document.getElementById('glucoseChart');
   if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const dpr=window.devicePixelRatio||1;
-  const cssW=canvas.clientWidth||760, cssH=220;
-  canvas.width=Math.floor(cssW*dpr); canvas.height=Math.floor(cssH*dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,cssW,cssH);
+  const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
 
-  const points=indexedOldest(data.glucose).map(o=>o.x).slice(-20);
+  const points=normalizedGlucoseRows().slice(-20);
   if(points.length===0){
     ctx.fillStyle='#b7bdc8'; ctx.font='14px -apple-system,Arial';
     ctx.fillText('Aucune donnée à afficher.',14,28); return;
