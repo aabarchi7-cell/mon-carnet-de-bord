@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34s</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34t</div>
 </header>
 <main>
 <div class="dashboard">
@@ -842,6 +842,7 @@ const defaultData={
 };
 let data=loadData();
 reconcileImportedHealth(data);
+try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){}
 // V34r : adapte la fiche existante « poulet TM7 aux légumes » au poulet fermier congelé.
 // La migration est volontairement ciblée : elle ne touche qu'une recette dont le titre contient
 // « poulet » et « légumes » (ou « TM7 »), et conserve les autres fiches intactes.
@@ -1547,8 +1548,58 @@ function indexedOldest(arr){
 function healthImportKey(x){
   return [String(x?.source||''),String(x?.type||''),String(x?.date||''),String(x?.time||''),String(x?.value||''),String(x?.unit||'')].join('|');
 }
+// V34t : réparation automatique de la tension à partir des imports Santé déjà présents.
+// Cette migration ne dépend pas du raccourci : elle récupère notamment les anciennes
+// entrées « 130/80 mmHg » et peut associer une systolique + une diastolique du même jour.
+function repairBloodPressureImports(target=data){
+  try{
+    if(!target) return false;
+    target.healthImports=target.healthImports||[];
+    target.bp=target.bp||[];
+    let changed=false;
+    const byDate={};
+    for(const x of target.healthImports){
+      if(!x || !x.date) continue;
+      const typ=canonicalHealthType(x.type||'');
+      const unit=String(x.unit||'').trim();
+      const raw=String(x.value||'').trim();
+      const full=raw.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+      if(full){
+        const sys=Number(full[1]), dia=Number(full[2]);
+        if(sys>=70 && sys<=260 && dia>=35 && dia<=160){
+          const exists=target.bp.some(b=>b && b.date===x.date && Number(b.sys)===sys && Number(b.dia)===dia);
+          if(!exists){
+            target.bp.push({sys,dia,pulse:'',date:x.date,time:x.time||'',context:'Import Santé',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:'repairbp|'+healthImportKey(x)});
+            changed=true;
+          }
+          continue;
+        }
+      }
+      const n=Number(raw.replace(',','.'));
+      if(!Number.isFinite(n)) continue;
+      const clearlyBP=/pression artérielle|tension|blood pressure/i.test(typ) || /mmhg/i.test(unit);
+      if(!clearlyBP) continue;
+      byDate[x.date]=byDate[x.date]||{sys:null,dia:null,src:[]};
+      if(/systolique|systolic/i.test(typ) && n>=70 && n<=260) byDate[x.date].sys=n;
+      if(/diastolique|diastolic/i.test(typ) && n>=35 && n<=160) byDate[x.date].dia=n;
+      byDate[x.date].src.push(x);
+    }
+    for(const [date,v] of Object.entries(byDate)){
+      if(v.sys==null || v.dia==null) continue;
+      const exists=target.bp.some(b=>b && b.date===date && Number(b.sys)===Number(v.sys) && Number(b.dia)===Number(v.dia));
+      if(!exists){
+        const first=v.src[0]||{};
+        target.bp.push({sys:Number(v.sys),dia:Number(v.dia),pulse:'',date,time:first.time||'',context:'Import Santé',note:'Tension reconstruite automatiquement depuis les imports Santé',photo:'',importKey:'repairbp-pair|'+date+'|'+v.sys+'|'+v.dia});
+        changed=true;
+      }
+    }
+    return changed;
+  }catch(_){ return false; }
+}
+
 function reconcileImportedHealth(target=data){
   if(!target) return target;
+  repairBloodPressureImports(target);
   target.healthImports=target.healthImports||[];
   target.bp=target.bp||[]; target.sleep=target.sleep||[]; target.glucose=target.glucose||[];
   // D'abord les tensions complètes 130/80.
