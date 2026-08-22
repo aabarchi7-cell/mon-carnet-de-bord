@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34u</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34v</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1279,21 +1279,53 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
 }
 
 function readHealthParam(name){
-  // Lecture robuste des paramètres, même si Raccourcis/iOS laisse des espaces
-  // ou des caractères accentués non encodés dans l’URL.
+  // V34v : lecture très tolérante des retours iOS/Raccourcis.
+  // Accepte aussi les paramètres accidentellement collés sans « & » :
+  // healthValue=130healthSource=Apple SantéhealthType=Fréquence cardiaque...
+  const key=String(name||'').trim();
   try{
     const q=new URLSearchParams(window.location.search||'');
     const h=new URLSearchParams((window.location.hash||'').replace(/^#/,''));
-    const normal=q.get(name) ?? h.get(name);
+    const normal=q.get(key) ?? h.get(key);
     if(normal!==null && normal!==undefined && String(normal).trim()!=='') return String(normal).trim();
   }catch(_){}
-  const href=String(window.location.href||'');
-  const re=new RegExp('[?&#]'+name+'=([^&#]*)','i');
-  const m=href.match(re);
-  if(!m) return '';
-  let v=m[1].replace(/\+/g,' ').trim();
-  try{v=decodeURIComponent(v)}catch(_){}
-  return v.trim();
+
+  let href=String(window.location.href||'');
+  try{href=decodeURIComponent(href.replace(/\+/g,' '));}catch(_){href=href.replace(/\+/g,' ');}
+
+  // Voie normale, avec séparateur URL.
+  let re=new RegExp('[?&#]'+key+'\\s*=\\s*([^&#]*)','i');
+  let m=href.match(re);
+  if(m && String(m[1]||'').trim()){
+    let v=String(m[1]||'').trim();
+    // Coupe si un autre paramètre health... a été collé à la valeur.
+    v=v.split(/(?=health(?:Source|Type|Value|Unit|Date|Note|Payload)\s*=)/i)[0].trim();
+    if(v) return v;
+  }
+
+  // Secours : le nom du paramètre peut lui-même être collé au précédent.
+  re=new RegExp(key+'\\s*=\\s*([\\s\\S]*?)(?=health(?:Source|Type|Value|Unit|Date|Note|Payload)\\s*=|[&#]|$)','i');
+  m=href.match(re);
+  return m ? String(m[1]||'').trim() : '';
+}
+
+function inferHealthType(type,unit,rawValue,source){
+  let typ=canonicalHealthType(type);
+  const u=String(unit||'').trim();
+  const raw=String(rawValue||'').trim();
+  const joined=(typ+' '+u+' '+raw+' '+String(source||'')).toLowerCase();
+  if(typ && typ!=='Donnée Santé') return typ;
+  if(/\bbpm\b|nombre\s*\/\s*min|frequence\s*cardiaque|fréquence\s*cardiaque|heart\s*rate|\bpouls\b/i.test(joined)) return 'Fréquence cardiaque';
+  if(/\bkg\b|\bpoids\b|\bweight\b/i.test(joined)) return 'Poids';
+  if(/\bpas\b|\bsteps?\b|nombre\s*de\s*pas/i.test(joined)) return 'Pas';
+  if(/sommeil|sleep|heures?\s*de\s*sommeil/i.test(joined)) return 'Sommeil';
+  if(/spo2|spo₂|saturation/i.test(joined)) return 'SpO₂';
+  if(/mmhg|tension|pression\s*arterielle|pression\s*artérielle|blood\s*pressure/i.test(joined)){
+    if(/systol/i.test(joined)) return 'Pression artérielle systolique';
+    if(/diastol/i.test(joined)) return 'Pression artérielle diastolique';
+    return 'Tension artérielle';
+  }
+  return 'Donnée Santé';
 }
 function canonicalHealthType(type){
   const raw=String(type||'').trim();
@@ -1320,14 +1352,10 @@ function importHealthFromUrl(){
     try{decodedHref=decodeURIComponent(href.replace(/\+/g,' '));}catch(_){decodedHref=href.replace(/\+/g,' ');}
     const fastValue=decodedHref.match(/[?&#]healthValue\s*=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
     if(fastValue){
-      const getRaw=(key)=>{
-        const re=new RegExp('[?&#]'+key+'\\s*=\\s*([^&#]*)','i');
-        const m=decodedHref.match(re);
-        return m ? String(m[1]||'').trim() : '';
-      };
+      const getRaw=(key)=>readHealthParam(key);
       let fastSource=getRaw('healthSource') || 'Apple Santé';
-      let fastType=canonicalHealthType(getRaw('healthType'));
       let fastUnit=getRaw('healthUnit');
+      let fastType=inferHealthType(getRaw('healthType'),fastUnit,fastValue[1],fastSource);
       const fastDate=getRaw('healthDate') || localDateString();
       const fastNote=getRaw('healthNote');
       const fastClean=extractHuaweiNumber(fastValue[1]);
@@ -1358,8 +1386,8 @@ function importHealthFromUrl(){
       }
     }
     const directSource=readHealthParam('healthSource');
-    let directType=canonicalHealthType(readHealthParam('healthType'));
     let directUnit=readHealthParam('healthUnit');
+    let directType=inferHealthType(readHealthParam('healthType'),directUnit,readHealthParam('healthValue'),directSource);
     const directDate=readHealthParam('healthDate')||localDateString();
     const directNote=readHealthParam('healthNote');
     let rawValue=readHealthParam('healthValue');
@@ -1545,6 +1573,22 @@ function indexedOldest(arr){
 // V34r : les imports Santé ne restent plus isolés dans « Données santé ».
 // Les types reconnus sont aussi répercutés dans leur rubrique principale afin
 // que les cartes et les courbes utilisent immédiatement les mesures récentes.
+function cleanupAmbiguousHealthImports(){
+  // V34v : retire uniquement les faux doublons évidents créés par les anciennes
+  // versions : « Apple Santé • Donnée Santé • N » identique, le même jour,
+  // à un vrai import HUAWEI « Pas • N ». Aucune donnée typée n'est supprimée.
+  const arr=data.healthImports||[];
+  if(!arr.length) return false;
+  const before=arr.length;
+  data.healthImports=arr.filter((x,idx)=>{
+    if(!x || !/apple/i.test(x.source||'') || canonicalHealthType(x.type)!=='Donnée Santé' || String(x.unit||'').trim()) return true;
+    const v=String(x.value||'').trim(), d=String(x.date||'');
+    const dup=arr.some((y,j)=>j!==idx && y && /huawei/i.test(y.source||'') && canonicalHealthType(y.type)==='Pas' && String(y.value||'').trim()===v && String(y.date||'')===d);
+    return !dup;
+  });
+  return data.healthImports.length!==before;
+}
+
 function healthImportKey(x){
   return [String(x?.source||''),String(x?.type||''),String(x?.date||''),String(x?.time||''),String(x?.value||''),String(x?.unit||'')].join('|');
 }
@@ -2952,6 +2996,7 @@ function scrollGlucoseChart(){
   document.getElementById('glucoseChartBox').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
+if(cleanupAmbiguousHealthImports()) save();
 setTodayDefaults();
 foodTypeChanged();
 applySectionTones();
