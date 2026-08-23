@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35c</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35d</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1241,7 +1241,7 @@ function bpImportHuawei(){
   runShortcut('HUAWEI vers CARNET Tension',callback);
 }
 function bpImportApple(){
-  // V35c : aucun raccourci Apple Santé dédié n'est installé sur cet iPhone.
+  // V35d : aucun raccourci Apple Santé dédié n'est installé sur cet iPhone.
   // Ne plus lancer un nom inexistant : cela évite l'alerte « Le fichier n'existe pas ».
   const st=document.getElementById('bpImportStatus');
   if(st){
@@ -1339,7 +1339,7 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   else if(!u && /sommeil|sleep/i.test(typ)) u='h';
   const defaultNote=/huawei/i.test(src)?'Import automatique via HUAWEI vers CARNET':'Import automatique via Apple Santé';
   const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||defaultNote,photo:''};
-  // V35c : une tension complète reçue sous forme SYS/DIA est aussi enregistrée
+  // V35d : une tension complète reçue sous forme SYS/DIA est aussi enregistrée
   // automatiquement dans l'historique Tension, afin d'alimenter immédiatement la courbe.
   if(/tension|pression artérielle|blood pressure/i.test(typ)){
     const bpm=String(clean).match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
@@ -1476,6 +1476,10 @@ function importHealthFromUrl(){
     const directDate=readHealthParam('healthDate')||localDateString();
     const directNote=readHealthParam('healthNote');
     let rawValue=readHealthParam('healthValue');
+    // V35d : accepte aussi deux paramètres séparés envoyés par Raccourcis.
+    const directSys=readHealthParam('healthSys')||readHealthParam('systolic');
+    const directDia=readHealthParam('healthDia')||readHealthParam('diastolic');
+    if(directSys && directDia && !String(rawValue||'').includes('/')) rawValue=String(directSys).trim()+'/'+String(directDia).trim();
 
     // V30 : secours spécial Raccourcis/iOS. Certaines URL contenant des accents
     // ou des espaces arrivent partiellement décodées. Si l'unité est bpm et la
