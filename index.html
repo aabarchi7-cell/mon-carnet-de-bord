@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35d</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 23 AOÛT • V35e</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1440,10 +1440,20 @@ function importHealthFromUrl(){
       const getRaw=(key)=>readHealthParam(key);
       let fastSource=getRaw('healthSource') || 'Apple Santé';
       let fastUnit=getRaw('healthUnit');
-      let fastType=inferHealthType(getRaw('healthType'),fastUnit,fastValue[1],fastSource);
+      // V35e : si Raccourcis envoie SYS et DIA séparément, on les réunit AVANT
+      // la voie rapide. Cela évite qu'un healthValue=130 soit enregistré seul
+      // et que la fonction quitte avant de voir healthDia=80.
+      const fastSys=getRaw('healthSys')||getRaw('systolic');
+      const fastDia=getRaw('healthDia')||getRaw('diastolic');
+      let fastRawValue=fastValue[1];
+      if(fastSys && fastDia && !String(fastRawValue||'').includes('/')){
+        fastRawValue=String(fastSys).trim()+'/'+String(fastDia).trim();
+      }
+      let fastType=inferHealthType(getRaw('healthType'),fastUnit,fastRawValue,fastSource);
+      if(fastSys && fastDia) fastType='Tension artérielle';
       const fastDate=getRaw('healthDate') || localDateString();
       const fastNote=getRaw('healthNote');
-      const fastClean=extractHuaweiNumber(fastValue[1]);
+      const fastClean=extractHuaweiNumber(fastRawValue);
 
       // Si le type a été mal transmis mais que l'unité identifie clairement
       // la mesure, on privilégie l'unité. C'est le cas du rythme cardiaque.
