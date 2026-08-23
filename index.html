@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35b</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35c</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1241,7 +1241,7 @@ function bpImportHuawei(){
   runShortcut('HUAWEI vers CARNET Tension',callback);
 }
 function bpImportApple(){
-  // V35b : aucun raccourci Apple Santé dédié n'est installé sur cet iPhone.
+  // V35c : aucun raccourci Apple Santé dédié n'est installé sur cet iPhone.
   // Ne plus lancer un nom inexistant : cela évite l'alerte « Le fichier n'existe pas ».
   const st=document.getElementById('bpImportStatus');
   if(st){
@@ -1339,6 +1339,18 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   else if(!u && /sommeil|sleep/i.test(typ)) u='h';
   const defaultNote=/huawei/i.test(src)?'Import automatique via HUAWEI vers CARNET':'Import automatique via Apple Santé';
   const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||defaultNote,photo:''};
+  // V35c : une tension complète reçue sous forme SYS/DIA est aussi enregistrée
+  // automatiquement dans l'historique Tension, afin d'alimenter immédiatement la courbe.
+  if(/tension|pression artérielle|blood pressure/i.test(typ)){
+    const bpm=String(clean).match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+    if(bpm){
+      data.bp=data.bp||[];
+      const sys=Number(bpm[1]), dia=Number(bpm[2]);
+      const already=data.bp.findIndex(x=>x && x.date===d && Number(x.sys)===sys && Number(x.dia)===dia);
+      const bpEntry={sys,dia,pulse:'',date:d,time:'',context:'Import Santé',note:note||defaultNote,photo:''};
+      if(already>=0) data.bp.splice(already,1,bpEntry); else data.bp.unshift(bpEntry);
+    }
+  }
   const existing=data.healthImports.findIndex(x=>x && x.source===src && x.type===typ && x.date===d);
   if(existing>=0) data.healthImports.splice(existing,1,entry);
   else data.healthImports.unshift(entry);
