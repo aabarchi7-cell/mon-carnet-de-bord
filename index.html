@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34y</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V34z</div>
 </header>
 <main>
 <div class="dashboard">
@@ -1233,21 +1233,19 @@ function drawSelectedHealthChart(){
 }
 function bpImportHuawei(){
   const st=document.getElementById('bpImportStatus');
-  if(st){st.style.display='block';st.textContent='Ouverture de « HUAWEI vers CARNET »…';}
-  const callback=window.location.href.split(/[?#]/)[0]+'?healthSource='+encodeURIComponent('HUAWEI Health')+'&healthType='+encodeURIComponent('Tension artérielle')+'&healthUnit=mmHg';
-  runShortcut('HUAWEI vers CARNET',callback);
+  if(st){
+    st.style.display='block';
+    st.innerHTML='Le raccourci <b>« HUAWEI vers CARNET »</b> installé sur cet iPhone importe actuellement les <b>pas</b>, pas la tension. Je ne lance donc plus ce raccourci depuis la rubrique Tension pour éviter un faux import. Pour la tension HUAWEI déjà synchronisée dans Apple Santé, utilisez <b>🍎 Importer Apple Santé</b>.';
+  }
 }
 function bpImportApple(){
-  const sec=document.getElementById('healthConnectionsSection');
-  if(sec)sec.classList.add('open');
-  openHealthImport('Apple Santé');
-  const t=document.getElementById('hiType'),u=document.getElementById('hiUnit'),v=document.getElementById('hiValue');
-  if(t)t.value='Tension artérielle'; if(u)u.value='mmHg';
-  if(v)v.placeholder='Ex. 128/78';
-  healthFormChanged();
   const st=document.getElementById('bpImportStatus');
-  if(st){st.style.display='block';st.textContent='Apple Santé : formulaire Tension artérielle ouvert. Les mesures reçues par le carnet alimentent automatiquement la courbe ci-dessous.';}
-  setTimeout(()=>document.getElementById('healthImportForm')?.scrollIntoView({behavior:'smooth',block:'center'}),100);
+  if(st){st.style.display='block';st.textContent='Ouverture de « Carnet - Apple Santé » pour importer la tension…';}
+  const callback=window.location.href.split(/[?#]/)[0]
+    +'?healthSource='+encodeURIComponent('Apple Santé')
+    +'&healthType='+encodeURIComponent('Tension artérielle')
+    +'&healthUnit='+encodeURIComponent('mmHg');
+  runShortcut('Carnet - Apple Santé',callback);
 }
 function startHuaweiImport(){
   // Envoie au raccourci l'adresse de retour du carnet.
