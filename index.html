@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35a</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 22 AOÛT • V35b</div>
 </header>
 <main>
 <div class="dashboard">
@@ -551,8 +551,8 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="section-body">
 <div class="toolbar">
 <button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button>
-<button class="action" onclick="bpImportApple()" type="button">🍎 Importer Apple Santé</button>
-<button class="action" onclick="bpImportHuawei()" type="button">⬇️ Importer HUAWEI</button>
+<button class="action" onclick="bpImportApple()" type="button">🍎 Apple Santé (à configurer)</button>
+<button class="action" onclick="bpImportHuawei()" type="button">⬇️ Importer tension HUAWEI</button>
 </div>
 <div class="integration-status" id="bpImportStatus" style="display:none;margin:0 0 12px"></div>
 <form class="entry" id="bpForm" onsubmit="addBP(event)" style="display:none">
@@ -1233,7 +1233,7 @@ function drawSelectedHealthChart(){
 }
 function bpImportHuawei(){
   const st=document.getElementById('bpImportStatus');
-  if(st){st.style.display='block';st.textContent='Ouverture de « HUAWEI vers CARNET Tension »…';}
+  if(st){st.style.display='block';st.textContent='Ouverture du raccourci exact « HUAWEI vers CARNET Tension »…';}
   const callback=window.location.href.split(/[?#]/)[0]
     +'?healthSource='+encodeURIComponent('HUAWEI Health')
     +'&healthType='+encodeURIComponent('Tension artérielle')
@@ -1241,13 +1241,13 @@ function bpImportHuawei(){
   runShortcut('HUAWEI vers CARNET Tension',callback);
 }
 function bpImportApple(){
+  // V35b : aucun raccourci Apple Santé dédié n'est installé sur cet iPhone.
+  // Ne plus lancer un nom inexistant : cela évite l'alerte « Le fichier n'existe pas ».
   const st=document.getElementById('bpImportStatus');
-  if(st){st.style.display='block';st.textContent='Ouverture de « Carnet - Apple Santé » pour importer la tension…';}
-  const callback=window.location.href.split(/[?#]/)[0]
-    +'?healthSource='+encodeURIComponent('Apple Santé')
-    +'&healthType='+encodeURIComponent('Tension artérielle')
-    +'&healthUnit='+encodeURIComponent('mmHg');
-  runShortcut('Carnet - Apple Santé',callback);
+  if(st){
+    st.style.display='block';
+    st.textContent='Apple Santé : le raccourci d’import de tension n’est pas encore installé. Utilisez pour l’instant « Importer tension HUAWEI » ou « + Nouvelle mesure ».';
+  }
 }
 function startHuaweiImport(){
   // Envoie au raccourci l'adresse de retour du carnet.
