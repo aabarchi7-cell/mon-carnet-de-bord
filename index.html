@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 23 AOÛT • V35e</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 23 AOÛT • V35f</div>
 </header>
 <main>
 <div class="dashboard">
@@ -641,6 +641,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="toolbar">
 <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
 <button class="action" onclick="startSleepAppleImport()" type="button">🍎 Importer via Apple Santé</button>
+<button class="action" onclick="importSleepFromClipboard()" type="button">📋 Importer le sommeil copié</button>
 </div>
 <div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
 <form class="entry" id="sleepForm" onsubmit="addSleep(event)" style="display:none">
@@ -1444,7 +1445,7 @@ function importHealthFromUrl(){
       const getRaw=(key)=>readHealthParam(key);
       let fastSource=getRaw('healthSource') || 'Apple Santé';
       let fastUnit=getRaw('healthUnit');
-      // V35e : si Raccourcis envoie SYS et DIA séparément, on les réunit AVANT
+      // V35f : si Raccourcis envoie SYS et DIA séparément, on les réunit AVANT
       // la voie rapide. Cela évite qu'un healthValue=130 soit enregistré seul
       // et que la fonction quitte avant de voir healthDia=80.
       const fastSys=getRaw('healthSys')||getRaw('systolic');
@@ -1884,7 +1885,7 @@ function render(){
   {
     const sr=combinedSleepRows();
     const s=sr.length?sr[sr.length-1]:null;
-    if(s){lastSleep.textContent=s.value.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h';lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
+    if(s){lastSleep.textContent=formatSleepDuration(s.value);lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
     else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   }
   { const br=bpRows(); const b=br.length?br[br.length-1]:null; if(b){lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.time?b.time+' • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'} }
@@ -2521,6 +2522,51 @@ function combinedSleepRows(){
     if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:x.source||'Santé'});
   });
   return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date));
+}
+function formatSleepDuration(hours){
+  const n=Number(hours);
+  if(!Number.isFinite(n) || n<0) return '—';
+  const total=Math.round(n*60);
+  const h=Math.floor(total/60), m=total%60;
+  if(h && m) return h+' h '+m+' min';
+  if(h) return h+' h';
+  return m+' min';
+}
+async function importSleepFromClipboard(){
+  const st=document.getElementById('sleepImportStatus');
+  try{
+    const txt=await navigator.clipboard.readText();
+    let value='';
+    const urlMatch=String(txt||'').match(/[?&#]healthValue=([-+]?\d+(?:[.,]\d+)?)/i);
+    if(urlMatch) value=urlMatch[1];
+    if(!value){
+      const hm=String(txt||'').match(/(\d+(?:[.,]\d+)?)\s*h(?:eures?)?(?:\s*(\d+(?:[.,]\d+)?)\s*min)?/i);
+      if(hm){
+        const hv=Number(hm[1].replace(',','.'))||0;
+        const mv=hm[2]?Number(hm[2].replace(',','.'))||0:0;
+        value=String(hv+mv/60);
+      }
+    }
+    if(!value){
+      const n=String(txt||'').match(/[-+]?\d+(?:[.,]\d+)?/);
+      if(n) value=n[0];
+    }
+    const hours=Number(String(value).replace(',','.'));
+    if(!Number.isFinite(hours) || hours<0 || hours>24) throw new Error('Valeur de sommeil introuvable');
+    const d=localDateString();
+    data.sleep=data.sleep||[];
+    const entry={date:d,hours,quality:'Bonne',wake:'',note:'Import Apple Santé via presse-papiers'};
+    const existing=data.sleep.findIndex(x=>x && x.date===d && /Import Apple Santé/i.test(x.note||''));
+    if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
+    data.healthImports=data.healthImports||[];
+    const hEntry={source:'Apple Santé',type:'Sommeil',value:String(hours),unit:'h',date:d,note:'Import Apple Santé via presse-papiers',photo:''};
+    const hi=data.healthImports.findIndex(x=>x && x.date===d && /apple/i.test(x.source||'') && /sommeil|sleep/i.test(x.type||''));
+    if(hi>=0) data.healthImports.splice(hi,1,hEntry); else data.healthImports.unshift(hEntry);
+    save();
+    if(st) st.textContent='Sommeil importé : '+formatSleepDuration(hours)+'.';
+  }catch(err){
+    if(st) st.textContent='Impossible de lire le sommeil copié. Copiez d’abord la valeur ou l’adresse créée par le raccourci, puis réessayez.';
+  }
 }
 function drawSleepChart(){
   drawSimpleSeries('sleepChart',combinedSleepRows(),'heures',{min:0,max:10,ticks:5,formatTick:v=>Math.round(v)+' h'});
