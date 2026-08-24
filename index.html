@@ -786,7 +786,8 @@ const KEY='monCarnetDeBord_v2';
 const OLD_KEY='monCarnetDeBord_v1';
 const defaultData={
   glucose:[
-    {value:133,moment:'3 h après repas',date:'2026-08-08',time:'15:19',note:'3 h après le petit-déjeuner'}
+    {value:133,moment:'3 h après repas',date:'2026-08-08',time:'15:19',note:'3 h après le petit-déjeuner'},
+    {value:125,moment:'2 h après repas',date:'2026-08-19',time:'',note:'Selon le moment de mesure'}
   ],
   clavicle:[
     {date:'2026-08-06',pain:'',mobility:'En amélioration',kine:'',note:'Radiographies de contrôle : fracture déplacée de la clavicule gauche, consolidation en cours à surveiller.'}
@@ -799,7 +800,7 @@ const defaultData={
     {id:'table',name:'Glissement sur table assisté',desc:'Faire glisser doucement les mains vers l’avant sur une table, seulement dans l’amplitude confortable autorisée.',status:'À valider avec le kiné'}
   ],
   exerciseLogs:[],
-  bp:[], meds:[], analyses:[], foods:[{"title":"Harira légère très pauvre en glucides","date":"2026-08-20","type":"Recette TM7","moment":"Dîner","duration":"45 min","portions":"4 personnes","calories":"180","ingredients":"1 oignon • 2 branches de céleri • 1 courgette • 1 petite carotte • 2 tomates • coriandre et persil • 100 g de pois chiches cuits (facultatif) • 1 c. à café d’huile d’olive • curcuma, gingembre, cumin • 800 g d’eau • sel modéré","steps":"1. Mettre oignon, céleri et herbes dans le bol : 5 sec / vitesse 5. 2. Ajouter l’huile : 3 min / 120°C / vitesse 1. 3. Ajouter tomates et légumes : 5 sec / vitesse 4. 4. Ajouter épices et eau : 30 min / 100°C / sens inverse / vitesse 1. 5. Ajouter les pois chiches si utilisés : 8 min / 100°C / sens inverse / vitesse 1. 6. Prélever environ 1 louche de légumes avec du bouillon et mixer 20 sec / vitesse 7. 7. Remettre dans le bol et mélanger 20 sec / sens inverse / vitesse 2. Sans vermicelles.","text":"Version légère du carnet, sans vermicelles.","cookidooUrl":"","photo":""},{"title":"Pain faible en glucides moelleux – petits pains marocains","date":"2026-08-24","type":"Recette TM7","moment":"","duration":"1 h 45 + cuisson","portions":"6 petits pains","calories":"220","ingredients":"150 g d’amandes entières • 25 g de graines de lin • 70 g de farine d’orge complète • 25 g de psyllium blond • 2 œufs • 150 g d’eau tiède au départ • 10 g de levure fraîche (ou 4 g sèche) • 15 g d’huile d’olive • 1 c. à café de vinaigre de cidre ou jus de citron • 1/2 c. à café de sel","steps":"1. Moudre les amandes 8 sec / vitesse 8, réserver. 2. Moudre le lin 10 sec / vitesse 9, réserver. 3. Eau + levure : 2 min / 37°C / vitesse 2. 4. Ajouter œufs, huile et vinaigre : 20 sec / vitesse 4. 5. Ajouter amandes, lin, farine d’orge, psyllium et sel : 30 sec / vitesse 4 puis 2 min / mode Pétrin. 6. Laisser reposer 5 min ; si nécessaire ajouter 5 à 10 g d’eau à la fois. 7. Première pousse 45 à 60 min. 8. Former et aplatir les petits pains (1,5 à 2 cm). 9. Deuxième pousse 20 à 30 min. 10. Cuire environ 20 à 25 min à 180°C.","text":"Pâte volontairement moins liquide pour pouvoir façonner des petits pains marocains.","cookidooUrl":"","photo":""},{"title":"Poisson en sauce légère TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"35 min","portions":"2 personnes","calories":"230","ingredients":"300 à 350 g de poisson blanc • 1 courgette • 1 petite carotte • 1 tomate • 1/2 oignon • persil ou coriandre • citron • 1 c. à café d’huile d’olive • cumin, paprika doux • sel modéré • 150 g d’eau","steps":"Hacher l’oignon et les herbes 5 sec / vitesse 5. Ajouter huile et tomate : 4 min / 120°C / vitesse 1. Ajouter eau et épices. Mettre les légumes au Varoma et le poisson sur le plateau. Cuire 22 à 28 min / Varoma / vitesse 1, selon l’épaisseur du poisson.","text":"Sauce légère, peu grasse.","cookidooUrl":"","photo":""},{"title":"Tajine de légumes léger TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"40 min","portions":"3 personnes","calories":"170","ingredients":"1 courgette • 2 carottes • 1 poivron • 2 tomates • 1 petit oignon • 1 c. à café d’huile d’olive • persil/coriandre • curcuma, gingembre, cumin • 180 g d’eau • sel modéré","steps":"Hacher oignon et herbes 5 sec / vitesse 5. Ajouter huile : 3 min / 120°C / vitesse 1. Ajouter tomate, épices et eau. Installer les légumes coupés dans le Varoma. Cuire environ 30 min / Varoma / vitesse 1. Servir avec la sauce du bol.","text":"Légumes peu assaisonnés, sauce légère.","cookidooUrl":"","photo":""},{"title":"Boulettes de viande maigre en sauce légère","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"35 min","portions":"3 personnes","calories":"300","ingredients":"250 g de viande hachée de bœuf maigre • persil/coriandre • cumin • paprika doux • 1 petit oignon • 2 tomates • 1 c. à café d’huile d’olive • 150 g d’eau • légumes au choix","steps":"Former de petites boulettes avec la viande et les herbes. Hacher l’oignon 5 sec / vitesse 5. Ajouter huile : 3 min / 120°C / vitesse 1. Ajouter tomates, épices et eau : 8 min / 100°C / vitesse 1. Placer les boulettes et les légumes au Varoma puis cuire environ 20 min / Varoma / vitesse 1.","text":"Version maigre, sans friture.","cookidooUrl":"","photo":""},{"title":"Couscous d’orge léger TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"55 min","portions":"3 personnes","calories":"430","ingredients":"Orge pour couscous en portion modérée • bœuf maigre • courgette • carotte • navet • courge • tomate • oignon • pois chiches en petite quantité • épices douces • 1 c. à café d’huile d’olive","steps":"Préparer le bouillon et la viande dans le bol avec les légumes nécessitant une cuisson longue. Cuire le couscous d’orge à la vapeur au Varoma, en l’aérant entre les passages. Ajouter les légumes plus fragiles en cours de cuisson. Compter environ 45 à 55 min au total.","text":"Version allégée : davantage de légumes et portion d’orge modérée.","cookidooUrl":"","photo":""},{"title":"Poulet beldi façon tajine léger","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"55 min","portions":"3 personnes","calories":"330","ingredients":"Poulet fermier (beldi) en morceaux • 1 oignon • courgette • carotte • tomate • coriandre/persil • citron • 1 c. à café d’huile d’olive • curcuma, gingembre • eau • sel modéré","steps":"Hacher oignon et herbes 5 sec / vitesse 5. Ajouter huile : 3 min / 120°C / vitesse 1. Ajouter tomate, épices et eau. Mettre le poulet beldi et les légumes dans le Varoma. Cuire environ 40 à 50 min / Varoma / vitesse 1 ; vérifier la cuisson car le poulet fermier demande plus de temps.","text":"Temps adapté au poulet fermier beldi.","cookidooUrl":"","photo":""},{"title":"Poulet beldi aux légumes TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"50 min","portions":"3 personnes","calories":"320","ingredients":"Poulet fermier beldi • courgette • carotte • poireau ou oignon • tomate • herbes • citron • 1 c. à café d’huile d’olive • 180 g d’eau • épices douces","steps":"Préparer une base légère dans le bol avec oignon, tomate, herbes, huile et eau. Disposer le poulet et les légumes au Varoma. Cuire environ 40 à 50 min / Varoma / vitesse 1. Prolonger de quelques minutes si les morceaux sont épais.","text":"Repas riche en protéines avec légumes.","cookidooUrl":"","photo":""},{"title":"Soupe protéinée légère TM7","date":"2026-08-18","type":"Recette TM7","moment":"Dîner","duration":"35 min","portions":"3 personnes","calories":"210","ingredients":"Courgette • poireau • céleri • petite carotte • tomate • 120 g de poulet cuit ou autre protéine maigre • 700 g d’eau • herbes • épices douces • sel modéré","steps":"Mettre les légumes coupés et l’eau dans le bol : 25 min / 100°C / vitesse 1. Ajouter la protéine cuite. Mixer progressivement 45 sec / vitesse 5 à 8 selon la texture souhaitée. Rectifier avec un peu d’eau si nécessaire.","text":"Soupe légère enrichie en protéines.","cookidooUrl":"","photo":""}], sleep:[], notes:[], healthImports:[],
+  bp:[{sys:130,dia:80,pulse:'',date:'2026-08-23',time:'',context:'Au repos',note:''}], meds:[], analyses:[], foods:[{"title":"Harira légère très pauvre en glucides","date":"2026-08-20","type":"Recette TM7","moment":"Dîner","duration":"45 min","portions":"4 personnes","calories":"180","ingredients":"1 oignon • 2 branches de céleri • 1 courgette • 1 petite carotte • 2 tomates • coriandre et persil • 100 g de pois chiches cuits (facultatif) • 1 c. à café d’huile d’olive • curcuma, gingembre, cumin • 800 g d’eau • sel modéré","steps":"1. Mettre oignon, céleri et herbes dans le bol : 5 sec / vitesse 5. 2. Ajouter l’huile : 3 min / 120°C / vitesse 1. 3. Ajouter tomates et légumes : 5 sec / vitesse 4. 4. Ajouter épices et eau : 30 min / 100°C / sens inverse / vitesse 1. 5. Ajouter les pois chiches si utilisés : 8 min / 100°C / sens inverse / vitesse 1. 6. Prélever environ 1 louche de légumes avec du bouillon et mixer 20 sec / vitesse 7. 7. Remettre dans le bol et mélanger 20 sec / sens inverse / vitesse 2. Sans vermicelles.","text":"Version légère du carnet, sans vermicelles.","cookidooUrl":"","photo":""},{"title":"Pain faible en glucides moelleux – petits pains marocains","date":"2026-08-24","type":"Recette TM7","moment":"","duration":"1 h 45 + cuisson","portions":"6 petits pains","calories":"220","ingredients":"150 g d’amandes entières • 25 g de graines de lin • 70 g de farine d’orge complète • 25 g de psyllium blond • 2 œufs • 150 g d’eau tiède au départ • 10 g de levure fraîche (ou 4 g sèche) • 15 g d’huile d’olive • 1 c. à café de vinaigre de cidre ou jus de citron • 1/2 c. à café de sel","steps":"1. Moudre les amandes 8 sec / vitesse 8, réserver. 2. Moudre le lin 10 sec / vitesse 9, réserver. 3. Eau + levure : 2 min / 37°C / vitesse 2. 4. Ajouter œufs, huile et vinaigre : 20 sec / vitesse 4. 5. Ajouter amandes, lin, farine d’orge, psyllium et sel : 30 sec / vitesse 4 puis 2 min / mode Pétrin. 6. Laisser reposer 5 min ; si nécessaire ajouter 5 à 10 g d’eau à la fois. 7. Première pousse 45 à 60 min. 8. Former et aplatir les petits pains (1,5 à 2 cm). 9. Deuxième pousse 20 à 30 min. 10. Cuire environ 20 à 25 min à 180°C.","text":"Pâte volontairement moins liquide pour pouvoir façonner des petits pains marocains.","cookidooUrl":"","photo":""},{"title":"Poisson en sauce légère TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"35 min","portions":"2 personnes","calories":"230","ingredients":"300 à 350 g de poisson blanc • 1 courgette • 1 petite carotte • 1 tomate • 1/2 oignon • persil ou coriandre • citron • 1 c. à café d’huile d’olive • cumin, paprika doux • sel modéré • 150 g d’eau","steps":"Hacher l’oignon et les herbes 5 sec / vitesse 5. Ajouter huile et tomate : 4 min / 120°C / vitesse 1. Ajouter eau et épices. Mettre les légumes au Varoma et le poisson sur le plateau. Cuire 22 à 28 min / Varoma / vitesse 1, selon l’épaisseur du poisson.","text":"Sauce légère, peu grasse.","cookidooUrl":"","photo":""},{"title":"Tajine de légumes léger TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"40 min","portions":"3 personnes","calories":"170","ingredients":"1 courgette • 2 carottes • 1 poivron • 2 tomates • 1 petit oignon • 1 c. à café d’huile d’olive • persil/coriandre • curcuma, gingembre, cumin • 180 g d’eau • sel modéré","steps":"Hacher oignon et herbes 5 sec / vitesse 5. Ajouter huile : 3 min / 120°C / vitesse 1. Ajouter tomate, épices et eau. Installer les légumes coupés dans le Varoma. Cuire environ 30 min / Varoma / vitesse 1. Servir avec la sauce du bol.","text":"Légumes peu assaisonnés, sauce légère.","cookidooUrl":"","photo":""},{"title":"Boulettes de viande maigre en sauce légère","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"35 min","portions":"3 personnes","calories":"300","ingredients":"250 g de viande hachée de bœuf maigre • persil/coriandre • cumin • paprika doux • 1 petit oignon • 2 tomates • 1 c. à café d’huile d’olive • 150 g d’eau • légumes au choix","steps":"Former de petites boulettes avec la viande et les herbes. Hacher l’oignon 5 sec / vitesse 5. Ajouter huile : 3 min / 120°C / vitesse 1. Ajouter tomates, épices et eau : 8 min / 100°C / vitesse 1. Placer les boulettes et les légumes au Varoma puis cuire environ 20 min / Varoma / vitesse 1.","text":"Version maigre, sans friture.","cookidooUrl":"","photo":""},{"title":"Couscous d’orge léger TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"55 min","portions":"3 personnes","calories":"430","ingredients":"Orge pour couscous en portion modérée • bœuf maigre • courgette • carotte • navet • courge • tomate • oignon • pois chiches en petite quantité • épices douces • 1 c. à café d’huile d’olive","steps":"Préparer le bouillon et la viande dans le bol avec les légumes nécessitant une cuisson longue. Cuire le couscous d’orge à la vapeur au Varoma, en l’aérant entre les passages. Ajouter les légumes plus fragiles en cours de cuisson. Compter environ 45 à 55 min au total.","text":"Version allégée : davantage de légumes et portion d’orge modérée.","cookidooUrl":"","photo":""},{"title":"Poulet beldi façon tajine léger","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"55 min","portions":"3 personnes","calories":"330","ingredients":"Poulet fermier (beldi) en morceaux • 1 oignon • courgette • carotte • tomate • coriandre/persil • citron • 1 c. à café d’huile d’olive • curcuma, gingembre • eau • sel modéré","steps":"Hacher oignon et herbes 5 sec / vitesse 5. Ajouter huile : 3 min / 120°C / vitesse 1. Ajouter tomate, épices et eau. Mettre le poulet beldi et les légumes dans le Varoma. Cuire environ 40 à 50 min / Varoma / vitesse 1 ; vérifier la cuisson car le poulet fermier demande plus de temps.","text":"Temps adapté au poulet fermier beldi.","cookidooUrl":"","photo":""},{"title":"Poulet beldi aux légumes TM7","date":"2026-08-18","type":"Recette TM7","moment":"Déjeuner","duration":"50 min","portions":"3 personnes","calories":"320","ingredients":"Poulet fermier beldi • courgette • carotte • poireau ou oignon • tomate • herbes • citron • 1 c. à café d’huile d’olive • 180 g d’eau • épices douces","steps":"Préparer une base légère dans le bol avec oignon, tomate, herbes, huile et eau. Disposer le poulet et les légumes au Varoma. Cuire environ 40 à 50 min / Varoma / vitesse 1. Prolonger de quelques minutes si les morceaux sont épais.","text":"Repas riche en protéines avec légumes.","cookidooUrl":"","photo":""},{"title":"Soupe protéinée légère TM7","date":"2026-08-18","type":"Recette TM7","moment":"Dîner","duration":"35 min","portions":"3 personnes","calories":"210","ingredients":"Courgette • poireau • céleri • petite carotte • tomate • 120 g de poulet cuit ou autre protéine maigre • 700 g d’eau • herbes • épices douces • sel modéré","steps":"Mettre les légumes coupés et l’eau dans le bol : 25 min / 100°C / vitesse 1. Ajouter la protéine cuite. Mixer progressivement 45 sec / vitesse 5 à 8 selon la texture souhaitée. Rectifier avec un peu d’eau si nécessaire.","text":"Soupe légère enrichie en protéines.","cookidooUrl":"","photo":""}], sleep:[{date:'2026-08-18',hours:3.7166666667,quality:'Importé',wake:'',note:'Import automatique via Apple Santé'},{date:'2026-08-17',hours:1,quality:'Importé',wake:'',note:'Import automatique via Apple Santé'}], notes:[], healthImports:[{source:'HUAWEI Health',type:'Pas',value:'6915',unit:'pas',date:'2026-08-24',note:'Import automatique via HUAWEI vers CARNET'},{source:'Apple Santé',type:'Sommeil',value:'3.7166666667',unit:'h',date:'2026-08-18',note:'Import automatique via Apple Santé'},{source:'Apple Santé',type:'Sommeil',value:'1',unit:'h',date:'2026-08-17',note:'Import automatique via Apple Santé'}],
   objectives:{glucose:'',clavicle:'',sleep:''}
 };
 let data=loadData();
@@ -812,7 +813,7 @@ function loadData(){
     if(kind==='foods') return String(x.title||'').trim().toLowerCase();
     if(kind==='glucose') return [x.date,x.time,x.value,x.moment].join('|');
     if(kind==='bp') return [x.date,x.time,x.sys,x.dia,x.pulse].join('|');
-    if(kind==='sleep') return [x.date,x.hours,x.note].join('|');
+    if(kind==='sleep') return [x.date,x.hours].join('|');
     if(kind==='clavicle') return [x.date,x.pain,x.mobility,x.note].join('|');
     if(kind==='meds') return [x.title,x.date,x.time,x.dose].join('|');
     if(kind==='analyses') return [x.title,x.date,x.type].join('|');
@@ -823,60 +824,43 @@ function loadData(){
   }
 
   function mergeArray(kind,target,source){
-    if(!Array.isArray(source)) return target;
     const out=Array.isArray(target)?[...target]:[];
-    const seen=new Set(out.map(x=>sig(kind,x)));
+    if(!Array.isArray(source)) return out;
+    const seen=new Set(out.map(x=>sig(kind,x)).filter(Boolean));
     source.forEach(x=>{
-      const s=sig(kind,x);
-      if(s && !seen.has(s)){ out.push(x); seen.add(s); }
+      const k=sig(kind,x);
+      if(k && !seen.has(k)){out.push(x);seen.add(k);}
     });
     return out;
   }
 
   try{
     const candidates=[];
-
-    // Current and known legacy keys first
-    [KEY,OLD_KEY].forEach(k=>{
+    const used=new Set();
+    function addCandidate(raw){
       try{
-        const raw=localStorage.getItem(k);
-        if(raw){ const obj=JSON.parse(raw); if(obj && typeof obj==='object') candidates.push(obj); }
+        if(!raw || used.has(raw)) return;
+        const obj=JSON.parse(raw);
+        if(obj && typeof obj==='object') {candidates.push(obj);used.add(raw);}
       }catch(_){}
-    });
+    }
+    [KEY,OLD_KEY].forEach(k=>addCandidate(localStorage.getItem(k)));
+    for(let i=0;i<localStorage.length;i++) addCandidate(localStorage.getItem(localStorage.key(i)));
 
-    // Also scan older carnet storage keys that may have been used by previous versions.
-    try{
-      for(let i=0;i<localStorage.length;i++){
-        const k=localStorage.key(i);
-        if(!k || k===KEY || k===OLD_KEY) continue;
-        if(!/carnet|health|sante|santé/i.test(k)) continue;
-        try{
-          const obj=JSON.parse(localStorage.getItem(k));
-          if(obj && typeof obj==='object' &&
-             ['glucose','bp','sleep','foods','meds','analyses','notes','healthImports','clavicle','exerciseLogs']
-               .some(f=>Array.isArray(obj[f]))){
-            candidates.push(obj);
-          }
-        }catch(_){}
-      }
-    }catch(_){}
-
-    let merged=base;
+    let merged=structuredClone(base);
+    const arrayKinds=['glucose','clavicle','exerciseLogs','bp','meds','analyses','foods','sleep','notes','healthImports'];
     candidates.forEach(saved=>{
-      merged={...merged,...saved};
-      ['glucose','clavicle','exerciseLogs','bp','meds','analyses','foods','sleep','notes','healthImports'].forEach(kind=>{
-        merged[kind]=mergeArray(kind, merged[kind]===saved[kind]?base[kind]:merged[kind], saved[kind]);
+      arrayKinds.forEach(kind=>{ merged[kind]=mergeArray(kind,merged[kind],saved[kind]); });
+      if(Array.isArray(saved.exercises) && saved.exercises.length) merged.exercises=saved.exercises;
+      if(saved.objectives && typeof saved.objectives==='object') merged.objectives={...(merged.objectives||{}),...saved.objectives};
+      Object.keys(saved).forEach(k=>{
+        if(!arrayKinds.includes(k) && k!=='exercises' && k!=='objectives' && saved[k]!==undefined) merged[k]=saved[k];
       });
-      merged.exercises=saved.exercises||merged.exercises||structuredClone(base.exercises);
-      merged.objectives={...(base.objectives||{}),...(merged.objectives||{}),...(saved.objectives||{})};
     });
 
-    // Recipes are always restored if missing, but never duplicated.
-    const starterRecipes=structuredClone(defaultData.foods||[]);
-    merged.foods=mergeArray('foods', merged.foods||[], starterRecipes);
-
-    // Persist the consolidated result under the current key.
-    try{ localStorage.setItem(KEY,JSON.stringify(merged)); }catch(_){}
+    // Garantie : les 9 recettes de référence restent présentes une seule fois.
+    merged.foods=mergeArray('foods',merged.foods,structuredClone(defaultData.foods||[]));
+    try{localStorage.setItem(KEY,JSON.stringify(merged));}catch(_){}
     return merged;
   }catch(e){
     return base;
