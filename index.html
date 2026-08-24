@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION COURBES GLYCÉMIE + TENSION • 25 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION COURBES + PDF QUIRÓNSALUD • 25 AOÛT</div>
 </header>
 
 <main>
@@ -692,7 +692,7 @@ footer .action{font-size:13px;padding:9px 8px}
     <div class="section-body">
       <div class="card" style="margin-bottom:10px">
         <div class="item-title">Connexions santé</div>
-        <div class="small" style="margin-top:6px">Apple Santé et HUAWEI Health peuvent conserver les données déjà reçues par le carnet. Le sommeil Apple Santé est automatiquement reporté dans la rubrique « Sommeil ». Quirónsalud reste séparé : on y ajoute uniquement des résultats ou captures manuellement.</div>
+        <div class="small" style="margin-top:6px">Apple Santé et HUAWEI Health peuvent conserver les données déjà reçues par le carnet. Le sommeil Apple Santé est automatiquement reporté dans la rubrique « Sommeil ». Pour Quirónsalud, vous pouvez maintenant importer directement dans le carnet les PDF que vous avez téléchargés depuis Quirónsalud.</div>
       </div>
       <div class="integration-grid">
         <div class="integration-card">
@@ -723,8 +723,10 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>Quirónsalud</b>
-          <div class="small">Pas d’import direct depuis Quirónsalud. Ajoutez ici un résultat, un compte rendu ou une capture, avec possibilité de noter une consultation.</div>
+          <div class="small">Importez ici un PDF téléchargé depuis Quirónsalud. Le document est conservé dans le carnet sur cet appareil et peut être rouvert depuis la liste des données santé.</div>
+          <div style="margin-top:10px"><label>Classer le PDF</label><select id="quironPdfType"><option>Analyse sanguine</option><option>Radio / scanner / IRM</option><option>Compte rendu</option><option>Ordonnance</option><option>Autre document</option></select></div>
           <div class="integration-actions">
+            <label class="action primary" style="cursor:pointer">📄 Importer un PDF Quirónsalud<input id="quironPdfInput" type="file" accept="application/pdf,.pdf" style="display:none" onchange="importQuironPdf(event)"></label>
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)">Analyse sanguine</button>
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)">Radio / scanner / IRM</button>
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Compte rendu','',this)">Compte rendu</button>
@@ -1529,9 +1531,10 @@ function render(){
             x.note||'','healthImports',i
           );
           const photo=photoBlock(x,'healthImports',i);
+          const pdf=x.pdfId?`<div class="toolbar"><button class="action primary" type="button" onclick="openQuironPdf('${x.pdfId}')">📄 Ouvrir le PDF${x.pdfName?' — '+esc(x.pdfName):''}</button></div>`:'';
           const cal=(/quir[oó]n/i.test(x.source||'') && /rendez-vous|consultation/i.test(x.type||''))
             ? `<div class="toolbar"><button class="action warn" type="button" onclick="savedHealthAppointmentToCalendar(${i})">📅 Ajouter au calendrier</button></div>`:'';
-          return base+photo+cal;
+          return base+photo+pdf+cal;
         }).join('')
       : '<div class="empty">Aucune donnée importée.</div>';
   }
@@ -1747,6 +1750,39 @@ function saveObjective(e){
   data.objectives[cat]=(document.getElementById('objValue').value||'').trim();
   e.target.style.display='none';
   save();
+}
+const QUIRON_DB='monCarnetDocuments';
+function quironDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(QUIRON_DB,1);
+    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('pdfs'))db.createObjectStore('pdfs',{keyPath:'id'});};
+    req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
+  });
+}
+async function importQuironPdf(event){
+  const input=event.target, file=input.files&&input.files[0];
+  if(!file)return;
+  if(file.type!=='application/pdf' && !/\.pdf$/i.test(file.name||'')){alert('Choisissez un fichier PDF.');input.value='';return;}
+  try{
+    const id='quiron_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const db=await quironDb();
+    await new Promise((resolve,reject)=>{const tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').put({id,name:file.name,type:file.type||'application/pdf',blob:file,addedAt:new Date().toISOString()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+    const typ=document.getElementById('quironPdfType')?.value||'Document PDF';
+    data.healthImports=data.healthImports||[];
+    data.healthImports.unshift({source:'Quirónsalud',type:typ,value:file.name,unit:'PDF',date:localDate(),time:'',note:'PDF importé depuis Quirónsalud',pdfId:id,pdfName:file.name});
+    save();
+    input.value='';
+    alert('PDF Quirónsalud importé dans le carnet.');
+    setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
+  }catch(err){console.error(err);alert('Le PDF n’a pas pu être enregistré. Réessayez avec le fichier téléchargé depuis Quirónsalud.');}
+}
+async function openQuironPdf(id){
+  try{
+    const db=await quironDb();
+    const rec=await new Promise((resolve,reject)=>{const tx=db.transaction('pdfs','readonly');const r=tx.objectStore('pdfs').get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+    if(!rec||!rec.blob){alert('Ce PDF n’est plus disponible sur cet appareil.');return;}
+    const url=URL.createObjectURL(rec.blob); window.open(url,'_blank'); setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(err){console.error(err);alert('Impossible d’ouvrir ce PDF.');}
 }
 function openHealthImport(source,btn){
   const f=document.getElementById('healthImportForm');
