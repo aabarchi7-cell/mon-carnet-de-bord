@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION RECETTES RESTAURÉES • 24 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION CORRIGÉE • RECETTES + SANTÉ • 24 AOÛT</div>
 </header>
 
 <main>
@@ -382,7 +382,7 @@ footer .action{font-size:13px;padding:9px 8px}
           </select>
         </div>
         <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"></div>
-        <div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input id="gPhoto" type="file" accept="image/*" capture="environment" onchange="previewGlucosePhoto(this,'gPreview')"><img id="gPreview" class="photo-preview" alt="Aperçu glycémie"><div class="small">Astuce photo : après la prise, utilisez « Texte en direct » de l’iPhone si disponible pour copier le chiffre, puis collez-le dans Valeur.</div></div>
+        <div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input id="gPhoto" type="file" accept="image/*" capture="environment" onchange="previewGlucosePhoto(this,'gPreview')"><img id="gPreview" class="photo-preview" alt="Aperçu glycémie"><div class="small">La photo du tensiomètre peut être conservée avec la mesure. Vérifiez les chiffres avant l’enregistrement.</div></div>
         <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
         <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
       </form>
@@ -516,7 +516,7 @@ footer .action{font-size:13px;padding:9px 8px}
         <div><label>Date</label><input id="bpDate" type="date" required></div>
         <div><label>Heure</label><input id="bpTime" type="time" required></div>
         <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-        <div class="full"><label>Photo du tensiomètre (facultatif)</label><input id="bpPhoto" type="file" accept="image/*" capture="environment" onchange="previewPhoto(this,'bpPreview')"><img id="bpPreview" class="photo-preview" alt="Aperçu"><div class="small">Astuce photo : « Texte en direct » peut aider à copier les chiffres du tensiomètre avant confirmation.</div></div>
+        <div class="full"><label>Photo du tensiomètre (facultatif)</label><input id="bpPhoto" type="file" accept="image/*" capture="environment" onchange="previewPhoto(this,'bpPreview')"><img id="bpPreview" class="photo-preview" alt="Aperçu"><div class="small">La photo du tensiomètre peut être conservée avec la mesure. Vérifiez les chiffres avant l’enregistrement.</div></div>
         <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
         <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
       </form>
@@ -593,9 +593,9 @@ footer .action{font-size:13px;padding:9px 8px}
     <div class="section-body">
       <div class="toolbar">
         <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
-        <button class="action" type="button" onclick="startSleepAppleImport()">🍎 Importer via Apple Santé</button>
+        <button class="action" type="button" onclick="syncSleepFromHealthImports(true)">🍎 Reprendre le sommeil déjà importé</button>
       </div>
-      <div id="sleepImportStatus" class="small" style="margin:0 0 10px"></div>
+      <div id="sleepImportStatus" class="small" style="margin:0 0 10px">Les données « Apple Santé • Sommeil » déjà importées sont reprises automatiquement ici.</div>
       <form class="entry" id="sleepForm" style="display:none" onsubmit="addSleep(event)">
         <div><label>Date</label><input id="sDate" type="date" required></div>
         <div><label>Durée (heures)</label><input id="sHours" type="number" min="0" max="24" step="0.1" required></div>
@@ -686,21 +686,20 @@ footer .action{font-size:13px;padding:9px 8px}
     </button>
     <div class="section-body">
       <div class="card" style="margin-bottom:10px">
-        <div class="item-title">Connexions santé — V18</div>
-        <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
+        <div class="item-title">Connexions santé</div>
+        <div class="small" style="margin-top:6px">Apple Santé et HUAWEI Health peuvent conserver les données déjà reçues par le carnet. Le sommeil Apple Santé est automatiquement reporté dans la rubrique « Sommeil ». Quirónsalud reste séparé : on y ajoute uniquement des résultats ou captures manuellement.</div>
       </div>
-      <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
       <div class="integration-grid">
         <div class="integration-card">
           <b>Apple Santé</b>
-          <div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
+          <div class="small">Les données reçues depuis Apple Santé restent enregistrées. Le sommeil importé est repris automatiquement dans « Sommeil ».</div>
           <div class="integration-actions">
             <button class="action" type="button" onclick="openHealthImport('Apple Santé',this)">Ajouter une donnée ici</button>
           </div>
         </div>
         <div class="integration-card">
           <b>HUAWEI Health</b>
-          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V28 conserve l’import par raccourci et le secours par presse-papiers.</div>
+          <div class="small">Conserve les données HUAWEI déjà reçues par le carnet. L’import par votre raccourci HUAWEI existant reste disponible.</div>
           <div class="integration-actions">
             <button class="action primary" type="button" onclick="startHuaweiImport()">Importer depuis HUAWEI</button>
             <button class="action" type="button" onclick="importHuaweiClipboard()">Importer le total copié</button>
@@ -709,7 +708,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>HUM Health</b>
-          <div class="small">Choisissez un type pour préremplir le formulaire. La V31 accepte les imports envoyés par Raccourcis Apple Santé, notamment Poids et Fréquence cardiaque depuis Hume.</div>
+          <div class="small">Saisie ou données transmises au carnet pour la tension, la fréquence cardiaque, le sommeil et d’autres mesures.</div>
           <div class="integration-actions">
             <button class="action" type="button" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)">Tension</button>
             <button class="action" type="button" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)">Fréquence cardiaque</button>
@@ -719,7 +718,7 @@ footer .action{font-size:13px;padding:9px 8px}
         </div>
         <div class="integration-card">
           <b>Quirónsalud</b>
-          <div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
+          <div class="small">Pas d’import direct depuis Quirónsalud. Ajoutez ici un résultat, un compte rendu ou une capture, avec possibilité de noter une consultation.</div>
           <div class="integration-actions">
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)">Analyse sanguine</button>
             <button class="action" type="button" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)">Radio / scanner / IRM</button>
@@ -733,7 +732,7 @@ footer .action{font-size:13px;padding:9px 8px}
       <div id="shortcutHelp" class="integration-status" style="display:none;margin-bottom:10px"></div>
 
       <form class="entry" id="healthImportForm" style="display:none" onsubmit="addHealthImport(event)">
-        <div><label>Source</label>
+        <div><label>Source / dossier</label>
           <select id="hiSource">
             <option>Apple Santé</option>
             <option>HUAWEI Health</option>
@@ -747,7 +746,7 @@ footer .action{font-size:13px;padding:9px 8px}
         <div><label>Date</label><input id="hiDate" type="date" required></div>
         <div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"></div>
         <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
-        <div class="full"><label>Photo / capture (facultatif)</label><input id="hiPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'hiPhotoPreview','health')"><div class="photo-tools"><img id="hiPhotoPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')">Retirer la photo</button></div></div>
+        <div class="full"><label>Photo / capture du document (facultatif)</label><input id="hiPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'hiPhotoPreview','health')"><div class="photo-tools"><img id="hiPhotoPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')">Retirer la photo</button></div></div>
         <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" type="button" onclick="healthAppointmentToCalendar()">📅 Ajouter au calendrier</button></div>
         <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
       </form>
@@ -1130,19 +1129,71 @@ async function importHuaweiClipboard(){
   }
 }
 
+
+function formatSleepHours(value){
+  const n=Number(String(value??'').replace(',','.'));
+  if(!Number.isFinite(n) || n<0) return String(value??'');
+  const total=Math.round(n*60);
+  const h=Math.floor(total/60), m=total%60;
+  return h+(m?' h '+m+' min':' h');
+}
+
+function healthImportHours(x){
+  if(!x) return null;
+  let n=Number(String(x.value??'').replace(',','.'));
+  if(!Number.isFinite(n) || n<0) return null;
+  const u=String(x.unit||'').trim().toLowerCase();
+  if(/^(seconds?|secondes?|sec|s)$/.test(u)) n=n/3600;
+  else if(/^(minutes?|min)$/.test(u)) n=n/60;
+  return n;
+}
+
+function syncSleepFromHealthImports(showMessage=false){
+  data.sleep=data.sleep||[];
+  const imports=(data.healthImports||[])
+    .filter(x=>x && /apple/i.test(x.source||'') && /sommeil|sleep/i.test(x.type||''))
+    .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  let changed=false;
+  imports.forEach(x=>{
+    const hours=healthImportHours(x);
+    if(hours===null) return;
+    const date=x.date||localDateString();
+    const existing=data.sleep.findIndex(s=>s && s.date===date && /Apple Santé/i.test(s.note||''));
+    const entry={date,hours:Number(hours.toFixed(4)),quality:'Bonne',wake:'',note:'Import Apple Santé'};
+    if(existing>=0){
+      if(Math.abs(Number(data.sleep[existing].hours)-entry.hours)>0.0001){
+        data.sleep.splice(existing,1,entry); changed=true;
+      }
+    }else{
+      data.sleep.unshift(entry); changed=true;
+    }
+  });
+  if(changed){
+    try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){}
+  }
+  if(showMessage){
+    const st=document.getElementById('sleepImportStatus');
+    if(st){
+      const latest=imports[0];
+      st.textContent=latest
+        ? 'Sommeil repris depuis Apple Santé : '+formatSleepHours(healthImportHours(latest))+' • '+(latest.date||'')
+        : 'Aucune donnée « Apple Santé • Sommeil » trouvée dans les imports.';
+    }
+    render();
+  }
+  return changed;
+}
+
 function formatHealthImportValue(type,value,unit){
   const typ=String(type||'').trim();
   const val=String(value||'').trim();
   const u=String(unit||'').trim();
-  if(/sommeil|sleep/i.test(typ) && /^(seconds?|secondes?|sec|s)$/i.test(u)){
+  if(/sommeil|sleep/i.test(typ)){
     const n=Number(val.replace(',','.'));
     if(Number.isFinite(n) && n>=0){
-      const totalMinutes=Math.round(n/60);
-      const h=Math.floor(totalMinutes/60);
-      const m=totalMinutes%60;
-      if(h>0 && m>0) return `${h} h ${m} min`;
-      if(h>0) return `${h} h`;
-      return `${m} min`;
+      if(/^(seconds?|secondes?|sec|s)$/i.test(u)) return formatSleepHours(n/3600);
+      if(/^(minutes?|min)$/i.test(u)) return formatSleepHours(n/60);
+      if(!u || /^(h|heure|heures|hours?)$/i.test(u)) return formatSleepHours(n);
     }
   }
   return val+(u?' '+u:'');
@@ -1204,7 +1255,7 @@ function importHealthFromUrl(){
   try{
     const href=String(window.location.href||'');
 
-    // V31 : voie d'import prioritaire, volontairement simple et tolérante.
+    // : voie d'import prioritaire, volontairement simple et tolérante.
     // Elle lit directement l'URL complète avant URLSearchParams. Ceci évite
     // les pertes de valeur observées avec Raccourcis lorsque healthType
     // contient des accents ou des espaces (ex. "Fréquence cardiaque").
@@ -1456,7 +1507,7 @@ function render(){
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
   sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
-    `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+    `${formatSleepHours(x.hours)} • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
 
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
   const og=document.getElementById('objGlucoseText'),oc=document.getElementById('objClavicleText'),os=document.getElementById('objSleepText');
@@ -1476,7 +1527,7 @@ function render(){
     const c=data.clavicle[0];lastClavicle.textContent=c.mobility||'Suivi';lastClavicleNote.textContent=c.date;
   }else{lastClavicle.textContent='—';lastClavicleNote.textContent='Aucune donnée'}
   if(data.sleep.length){
-    const s=data.sleep[0];lastSleep.textContent=s.hours+' h';lastSleepNote.textContent=s.quality+' • '+s.date;
+    const s=data.sleep[0];lastSleep.textContent=formatSleepHours(s.hours);lastSleepNote.textContent=s.quality+' • '+s.date;
   }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
@@ -1549,12 +1600,9 @@ function openExternal(url){
     window.location.href=url;
   }
 }
-function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
+function openAppleHealthBridge(){openHealthImport('Apple Santé');}
 function startSleepAppleImport(){
-  const st=document.getElementById('sleepImportStatus');
-  if(st) st.textContent='Ouverture du raccourci Apple Santé pour récupérer le sommeil…';
-  const callback=window.location.href.split(/[?#]/)[0];
-  runShortcut('Carnet - Apple Santé','Sommeil | '+callback);
+  syncSleepFromHealthImports(true);
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
@@ -1705,6 +1753,15 @@ function addHealthImport(e){
   e.target.style.display='none';
   setTodayDefaults();
   updateHealthAppointmentUI();
+  if(/apple/i.test(entry.source||'') && /sommeil|sleep/i.test(entry.type||'')){
+    const hours=healthImportHours(entry);
+    if(hours!==null){
+      data.sleep=data.sleep||[];
+      const existing=data.sleep.findIndex(s=>s && s.date===entry.date && /Apple Santé/i.test(s.note||''));
+      const sEntry={date:entry.date,hours:Number(hours.toFixed(4)),quality:'Bonne',wake:'',note:'Import Apple Santé'};
+      if(existing>=0)data.sleep.splice(existing,1,sEntry); else data.sleep.unshift(sEntry);
+    }
+  }
   save();
 }
 
