@@ -1309,15 +1309,19 @@ function formatHealthImportValue(type,value,unit){
   const typ=String(type||'').trim();
   const val=String(value||'').trim();
   const u=String(unit||'').trim();
-  if(/sommeil|sleep/i.test(typ) && /^(seconds?|secondes?|sec|s)$/i.test(u)){
+  if(/sommeil|sleep/i.test(typ)){
     const n=Number(val.replace(',','.'));
     if(Number.isFinite(n) && n>=0){
-      const totalMinutes=Math.round(n/60);
-      const h=Math.floor(totalMinutes/60);
-      const m=totalMinutes%60;
-      if(h>0 && m>0) return `${h} h ${m} min`;
-      if(h>0) return `${h} h`;
-      return `${m} min`;
+      let totalMinutes;
+      if(/^(seconds?|secondes?|sec|s)$/i.test(u)) totalMinutes=Math.round(n/60);
+      else if(/^(h|heure|heures|hour|hours)$/i.test(u) || !u) totalMinutes=Math.round(n*60);
+      if(Number.isFinite(totalMinutes)){
+        const h=Math.floor(totalMinutes/60);
+        const m=totalMinutes%60;
+        if(h>0 && m>0) return `${h} h ${m} min`;
+        if(h>0) return `${h} h`;
+        return `${m} min`;
+      }
     }
   }
   return val+(u?' '+u:'');
