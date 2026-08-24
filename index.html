@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION REPRISE COMPLÈTE • 24 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION COURBES GLYCÉMIE + TENSION • 25 AOÛT</div>
 </header>
 
 <main>
@@ -522,6 +522,11 @@ footer .action{font-size:13px;padding:9px 8px}
       </form>
       <div class="small" style="margin:6px 0 12px">La photo est conservée avec la mesure sur cet appareil comme repère visuel. La lecture automatique des chiffres depuis une photo n’est pas activée dans cette version hors ligne.</div>
       <div id="bpList" class="list"></div>
+      <div class="chart-wrap" id="bpChartBox">
+        <div class="chart-title">Évolution de la tension</div>
+        <canvas id="bpChart" width="760" height="220"></canvas>
+        <div class="chart-legend">Courbe chronologique : systolique et diastolique. Les nouvelles mesures s’ajoutent automatiquement sans modifier les anciennes.</div>
+      </div>
     </div>
   </section>
 
@@ -1561,7 +1566,7 @@ function render(){
   renderGlucoseIntelligence();
   renderExercises();
   renderToday();
-  requestAnimationFrame(drawGlucoseChart);
+  requestAnimationFrame(()=>{drawGlucoseChart();drawBPChart();});
 }
 function renderGeneric(arr,listId){
   const el=document.getElementById(listId);
@@ -2098,7 +2103,7 @@ function drawGlucoseChart(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,cssW,cssH);
 
-  const points=[...data.glucose].reverse().slice(-20);
+  const points=[...(data.glucose||[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||''))).slice(-20);
   if(points.length===0){
     ctx.fillStyle='#b7bdc8'; ctx.font='14px -apple-system,Arial';
     ctx.fillText('Aucune donnée à afficher.',14,28); return;
@@ -2152,6 +2157,99 @@ function drawGlucoseChart(){
   const tw=ctx.measureText(lastText).width;
   ctx.fillText(lastText,cssW-padR-tw,cssH-10);
 }
+
+function drawBPChart(){
+  const canvas=document.getElementById('bpChart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.clientWidth||760, cssH=220;
+  canvas.width=Math.floor(cssW*dpr); canvas.height=Math.floor(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const points=[...(data.bp||[])]
+    .filter(x=>Number.isFinite(Number(x.sys)) && Number.isFinite(Number(x.dia)))
+    .sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||'')))
+    .slice(-20);
+
+  if(points.length===0){
+    ctx.fillStyle='#b7bdc8';
+    ctx.font='14px -apple-system,Arial';
+    ctx.fillText('Aucune mesure de tension à afficher.',14,28);
+    return;
+  }
+
+  const vals=points.flatMap(p=>[Number(p.sys),Number(p.dia)]);
+  let min=Math.min(...vals,50), max=Math.max(...vals,170);
+  min=Math.max(30,Math.floor((min-10)/10)*10);
+  max=Math.min(220,Math.ceil((max+10)/10)*10);
+  if(max-min<80) max=Math.min(220,min+80);
+
+  const padL=42,padR=12,padT=14,padB=32;
+  const W=cssW-padL-padR,H=cssH-padT-padB;
+  const x=i=>padL+(points.length===1?W/2:i*W/(points.length-1));
+  const y=v=>padT+(max-v)*H/(max-min);
+
+  ctx.strokeStyle='#3c424c';
+  ctx.lineWidth=1;
+  ctx.fillStyle='#aeb5c0';
+  ctx.font='11px -apple-system,Arial';
+
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const val=Math.round(min+i*(max-min)/ticks);
+    const yy=y(val);
+    ctx.beginPath();
+    ctx.moveTo(padL,yy);
+    ctx.lineTo(cssW-padR,yy);
+    ctx.stroke();
+    ctx.fillText(String(val),4,yy+4);
+  }
+
+  function lineFor(key,lineWidth){
+    ctx.lineWidth=lineWidth;
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const xx=x(i), yy=y(Number(p[key]));
+      if(i===0)ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+    });
+    ctx.stroke();
+    points.forEach((p,i)=>{
+      const xx=x(i), yy=y(Number(p[key]));
+      ctx.beginPath();
+      ctx.arc(xx,yy,4.5,0,Math.PI*2);
+      ctx.fill();
+    });
+  }
+
+  // Systolique
+  ctx.strokeStyle='#ff7f7f';
+  ctx.fillStyle='#ff7f7f';
+  lineFor('sys',2.6);
+
+  // Diastolique
+  ctx.strokeStyle='#63b8ff';
+  ctx.fillStyle='#63b8ff';
+  lineFor('dia',2.6);
+
+  // Légende
+  ctx.font='11px -apple-system,Arial';
+  ctx.fillStyle='#ff7f7f';
+  ctx.fillText('Systolique',padL,12);
+  ctx.fillStyle='#63b8ff';
+  ctx.fillText('Diastolique',padL+82,12);
+
+  // Dates : première et dernière
+  ctx.fillStyle='#aeb5c0';
+  ctx.font='10px -apple-system,Arial';
+  const first=points[0], last=points[points.length-1];
+  ctx.fillText((first.date||'').slice(5),padL,cssH-10);
+  const lastText=(last.date||'').slice(5);
+  const tw=ctx.measureText(lastText).width;
+  ctx.fillText(lastText,cssW-padR-tw,cssH-10);
+}
+
 function scrollGlucoseChart(){
   document.getElementById('glucoseChartBox').scrollIntoView({behavior:'smooth',block:'center'});
 }
@@ -2163,7 +2261,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
-window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();});
+window.addEventListener('resize',()=>{drawGlucoseChart();drawBPChart();drawExerciseChart();});
 </script>
 </body>
 </html>
