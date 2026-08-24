@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION COURBES + PDF QUIRÓNSALUD • 25 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION PDF QUIRÓNSALUD CORRIGÉ • 25 AOÛT</div>
 </header>
 
 <main>
@@ -1769,7 +1769,7 @@ async function importQuironPdf(event){
     await new Promise((resolve,reject)=>{const tx=db.transaction('pdfs','readwrite');tx.objectStore('pdfs').put({id,name:file.name,type:file.type||'application/pdf',blob:file,addedAt:new Date().toISOString()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
     const typ=document.getElementById('quironPdfType')?.value||'Document PDF';
     data.healthImports=data.healthImports||[];
-    data.healthImports.unshift({source:'Quirónsalud',type:typ,value:file.name,unit:'PDF',date:localDate(),time:'',note:'PDF importé depuis Quirónsalud',pdfId:id,pdfName:file.name});
+    data.healthImports.unshift({source:'Quirónsalud',type:typ,value:file.name,unit:'PDF',date:localDateString(),time:'',note:'PDF importé depuis Quirónsalud',pdfId:id,pdfName:file.name});
     save();
     input.value='';
     alert('PDF Quirónsalud importé dans le carnet.');
