@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 23 AOÛT • V35f</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 24 AOÛT • V35g</div>
 </header>
 <main>
 <div class="dashboard">
@@ -656,7 +656,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="chart-wrap" id="sleepChartBox">
 <div class="chart-title">Évolution du sommeil</div>
 <canvas height="220" id="sleepChart" width="760"></canvas>
-<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
+<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil. V35g regroupe les segments courts (par exemple 15 min) pour afficher la durée totale de la nuit.</div>
 </div>
 </div>
 </section>
@@ -1559,13 +1559,21 @@ function importHealthFromUrl(){
       ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
     }else if(/apple/i.test(directSource) && directType==='Sommeil'){
       const hours=Number(String(value).replace(',','.'));
-      if(Number.isFinite(hours)){
+      if(Number.isFinite(hours) && hours>=0 && hours<=24){
         data.sleep=data.sleep||[];
-        const entry={date:directDate,hours,quality:'Bonne',wake:'',note:directNote||'Import Apple Santé'};
         const existing=data.sleep.findIndex(x=>x && x.date===directDate && /Import Apple Santé/i.test(x.note||''));
+        let total=hours;
+        // V35g : Apple Santé peut renvoyer le sommeil par segments (souvent 15 min = 0,25 h).
+        // Dans ce cas on additionne les petits segments du même jour au lieu de remplacer
+        // la nuit entière par le dernier segment de 15 minutes.
+        if(existing>=0 && hours<=1){
+          const previous=Number(data.sleep[existing]?.hours);
+          if(Number.isFinite(previous) && previous>=0 && previous<24) total=Math.min(24,previous+hours);
+        }
+        const entry={date:directDate,hours:Number(total.toFixed(3)),quality:'Importé',wake:'',note:directNote||'Import Apple Santé'};
         if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
         save();
-        const st=document.getElementById('sleepImportStatus'); if(st)st.textContent='Sommeil importé depuis Apple Santé : '+hours+' h.';
+        const st=document.getElementById('sleepImportStatus'); if(st)st.textContent='Sommeil importé depuis Apple Santé : '+formatSleepDuration(total)+'.';
         ok=true;
       }
     }else{
@@ -2513,15 +2521,25 @@ function sleepHoursFromHealthImport(x){
 }
 function combinedSleepRows(){
   const map=new Map();
-  (data.sleep||[]).forEach(x=>{
-    const v=Number(x.hours);
-    if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:'Sommeil'});
-  });
+  // Regroupe d'abord les imports Santé par date. Plusieurs segments courts d'une
+  // même nuit (par ex. 0,25 h = 15 min) sont additionnés au lieu de s'écraser.
   (data.healthImports||[]).forEach(x=>{
     const v=sleepHoursFromHealthImport(x);
-    if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:x.source||'Santé'});
+    if(!x?.date || !Number.isFinite(v) || v<0) return;
+    const prev=map.get(x.date);
+    if(prev && prev.imported){
+      prev.value=Math.min(24,prev.value+v);
+      if(!prev.source && x.source) prev.source=x.source;
+    }else{
+      map.set(x.date,{date:x.date,value:v,source:x.source||'Santé',imported:true});
+    }
   });
-  return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date));
+  // Une valeur déjà consolidée dans la rubrique Sommeil a priorité sur les imports bruts.
+  (data.sleep||[]).forEach(x=>{
+    const v=Number(x.hours);
+    if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:/Import Apple Santé/i.test(x.note||'')?'Apple Santé':'Sommeil',imported:false});
+  });
+  return [...map.values()].map(({imported,...r})=>r).sort((a,b)=>a.date.localeCompare(b.date));
 }
 function formatSleepDuration(hours){
   const n=Number(hours);
