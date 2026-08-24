@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION CORRIGÉE • RECETTES + SANTÉ • 24 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION FINALE • RECETTES + SANTÉ • 24 AOÛT</div>
 </header>
 
 <main>
@@ -595,7 +595,7 @@ footer .action{font-size:13px;padding:9px 8px}
         <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
         <button class="action" type="button" onclick="syncSleepFromHealthImports(true)">🍎 Reprendre le sommeil déjà importé</button>
       </div>
-      <div id="sleepImportStatus" class="small" style="margin:0 0 10px">Les données « Apple Santé • Sommeil » déjà importées sont reprises automatiquement ici.</div>
+      <div id="sleepImportStatus" class="small" style="margin:0 0 10px">Le carnet affiche la nuit la plus récente disponible.</div>
       <form class="entry" id="sleepForm" style="display:none" onsubmit="addSleep(event)">
         <div><label>Date</label><input id="sDate" type="date" required></div>
         <div><label>Durée (heures)</label><input id="sHours" type="number" min="0" max="24" step="0.1" required></div>
@@ -1159,7 +1159,7 @@ function syncSleepFromHealthImports(showMessage=false){
     if(hours===null) return;
     const date=x.date||localDateString();
     const existing=data.sleep.findIndex(s=>s && s.date===date && /Apple Santé/i.test(s.note||''));
-    const entry={date,hours:Number(hours.toFixed(4)),quality:'Bonne',wake:'',note:'Import Apple Santé'};
+    const entry={date,hours:Number(hours.toFixed(4)),quality:'Importé',wake:'',note:'Import Apple Santé'};
     if(existing>=0){
       if(Math.abs(Number(data.sleep[existing].hours)-entry.hours)>0.0001){
         data.sleep.splice(existing,1,entry); changed=true;
@@ -1168,16 +1168,17 @@ function syncSleepFromHealthImports(showMessage=false){
       data.sleep.unshift(entry); changed=true;
     }
   });
+  data.sleep.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
   if(changed){
     try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){}
   }
   if(showMessage){
     const st=document.getElementById('sleepImportStatus');
     if(st){
-      const latest=imports[0];
+      const latest=(data.sleep||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0];
       st.textContent=latest
-        ? 'Sommeil repris depuis Apple Santé : '+formatSleepHours(healthImportHours(latest))+' • '+(latest.date||'')
-        : 'Aucune donnée « Apple Santé • Sommeil » trouvée dans les imports.';
+        ? 'Dernière nuit disponible : '+formatSleepHours(latest.hours)+' • '+(latest.date||'')
+        : 'Aucune nuit enregistrée pour le moment.';
     }
     render();
   }
@@ -1527,7 +1528,7 @@ function render(){
     const c=data.clavicle[0];lastClavicle.textContent=c.mobility||'Suivi';lastClavicleNote.textContent=c.date;
   }else{lastClavicle.textContent='—';lastClavicleNote.textContent='Aucune donnée'}
   if(data.sleep.length){
-    const s=data.sleep[0];lastSleep.textContent=formatSleepHours(s.hours);lastSleepNote.textContent=s.quality+' • '+s.date;
+    const s=(data.sleep||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))[0];lastSleep.textContent=formatSleepHours(s.hours);lastSleepNote.textContent=s.quality+' • '+s.date;
   }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
