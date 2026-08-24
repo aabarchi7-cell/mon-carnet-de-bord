@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<meta content="#17191d" name="theme-color"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17191d">
 <title>Mon carnet de bord</title>
 <style>
 :root{
@@ -156,7 +155,7 @@ hr{border:0;border-top:1px solid var(--line);margin:12px 0}
 }
 .chart-title{font-weight:800;margin-bottom:8px}
 .chart-legend{font-size:12px;color:var(--muted);margin-top:8px}
-canvas{width:100%;height:220px;min-height:220px;display:block}
+canvas{width:100%;height:220px;display:block}
 .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 12px}
 .quick{
   background:#1c2026;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center
@@ -262,575 +261,527 @@ footer .action{font-size:13px;padding:9px 8px}
 .recipe-badge{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:999px;background:#171b20;border:1px solid #46505e;color:#d7dbe2;font-size:11px}
 .feature-note{background:#1a1e24;border:1px solid #3b4653;border-radius:12px;padding:10px;margin:8px 0;color:#cfd5dd;font-size:12px;line-height:1.45}
 
-
-/* V33 — titres de rubriques colorés individuellement */
-.section .section-head .left{color:var(--sectAccent)}
-.section .section-head .left .icon{color:#0d1117}
-.section .section-head .chev{color:var(--sectAccent)}
-
-
-/* V34h — ciblage manuel ultra-simple de l’écran avant OCR */
-.ocr-target-modal{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:16px}
-.ocr-target-card{width:min(94vw,720px);background:#171a20;border:1px solid #48515e;border-radius:16px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
-.ocr-target-title{font-weight:800;margin:2px 0 8px;font-size:17px}.ocr-target-help{font-size:13px;opacity:.82;margin-bottom:10px}
-.ocr-target-wrap{position:relative;display:flex;justify-content:center;align-items:center;max-height:68vh;overflow:hidden;border-radius:12px;background:#0c0e12}
-.ocr-target-img{display:block;max-width:100%;max-height:68vh;object-fit:contain;touch-action:manipulation}
-.ocr-target-dot{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.55);pointer-events:none;display:none}
-.ocr-target-dot:before,.ocr-target-dot:after{content:'';position:absolute;background:#fff;left:50%;top:50%;transform:translate(-50%,-50%)}
-.ocr-target-dot:before{width:20px;height:2px}.ocr-target-dot:after{width:2px;height:20px}
-.ocr-target-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}
 </style>
-<style>
-/* V33b — titres statiquement différenciés, même si JavaScript n'est pas exécuté */
-.section .section-head .left{font-weight:800;text-shadow:0 1px 0 rgba(0,0,0,.35)}
-.section.tone-today .section-head .left{color:#9DBBFF!important}
-.section.tone-glucose .section-head .left{color:#FF8DB5!important}
-.section.tone-rehab .section-head .left{color:#C3C8D0!important}
-.section.tone-sport .section-head .left{color:#61B5FF!important}
-.section.tone-pressure .section-head .left{color:#65E0F0!important}
-.section.tone-meds .section-head .left{color:#D09CFF!important}
-.section.tone-analyses .section-head .left{color:#FF9B73!important}
-.section.tone-food .section-head .left{color:#FFD06A!important}
-.section.tone-sleep .section-head .left{color:#A2A7FF!important}
-.section.tone-notes .section-head .left{color:#7CC6FF!important}
-.section.tone-calendar .section-head .left{color:#FFE07A!important}
-.section.tone-objectives .section-head .left{color:#ED9AFF!important}
-.section.tone-connections .section-head .left{color:#6EDDEB!important}
-.section.tone-backup .section-head .left{color:#C7D0DC!important}
-.section .section-head .chev{color:currentColor}
-</style><style>
-/* V33c: titres multicolores réellement forcés, y compris Safari/iOS */
-.section-title-text{font-weight:900!important;text-shadow:0 1px 1px rgba(0,0,0,.5)!important}
-.section-head .left{color:inherit!important}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 <header>
-<h1>Mon carnet de bord</h1>
-<div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SUIVI + PHOTOS + COURBES • 24 AOÛT • V35g</div>
+  <h1>Mon carnet de bord</h1>
+  <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION RÉCUPÉRATION • BASE COMPLÈTE • 24 AOÛT</div>
 </header>
+
 <main>
-<div class="dashboard">
-<div class="card">
-<div class="metric-title">Dernière glycémie</div>
-<div class="metric-value" id="lastGlucose">—</div>
-<div class="metric-note" id="lastGlucoseNote">Aucune donnée</div>
-</div>
-<div class="card">
-<div class="metric-title">Mesures aujourd’hui</div>
-<div class="metric-value" id="todayCount">0</div>
-<div class="metric-note">glycémie</div>
-</div>
-<div class="card">
-<div class="metric-title">Dernière note clavicule</div>
-<div class="metric-value" id="lastClavicle" style="font-size:17px">—</div>
-<div class="metric-note" id="lastClavicleNote">Aucune donnée</div>
-</div>
-<div class="card">
-<div class="metric-title">Sommeil</div>
-<div class="metric-value" id="lastSleep">—</div>
-<div class="metric-note" id="lastSleepNote">Aucune donnée</div>
-</div>
-<div class="card">
-<div class="metric-title">Dernière tension</div>
-<div class="metric-value" id="lastBP">—</div>
-<div class="metric-note" id="lastBPNote">Aucune donnée</div>
-</div>
-</div>
-<section class="section open tone-today" id="todaySection">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">☀️</span><span class="section-title-text" style="color:#FFD166!important;-webkit-text-fill-color:#FFD166!important;border-bottom:3px solid #FFD166;padding-bottom:2px;letter-spacing:.15px">Aujourd’hui</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="card" style="margin-bottom:10px">
-<div class="item-title" id="todayDateTitle">Aujourd’hui</div>
-<div class="small" id="todaySummary">Résumé de la journée</div>
-</div>
-<div class="dashboard" style="margin-bottom:10px">
-<div class="card">
-<div class="metric-title">Glycémie</div>
-<div class="metric-value" id="todayGlucose">—</div>
-<div class="metric-note" id="todayGlucoseNote">Aucune mesure</div>
-</div>
-<div class="card">
-<div class="metric-title">Repas</div>
-<div class="metric-value" id="todayMeals">0</div>
-<div class="metric-note">notes alimentaires</div>
-</div>
-<div class="card">
-<div class="metric-title">Médicaments</div>
-<div class="metric-value" id="todayMeds">0</div>
-<div class="metric-note">entrées du jour</div>
-</div>
-<div class="card">
-<div class="metric-title">Clavicule</div>
-<div class="metric-value" id="todayClavicle" style="font-size:17px">—</div>
-<div class="metric-note" id="todayClavicleNote">Aucune note</div>
-</div>
-</div>
-<div class="toolbar">
-<button class="action primary" onclick="quickAddGlucose()">+ Glycémie</button>
-<button class="action" onclick="quickAddFood()">+ Repas</button>
-<button class="action" onclick="quickAddMed()">+ Médicament</button>
-<button class="action warn" onclick="quickAddNote()">+ Note rapide</button>
-</div>
-<div class="chart-wrap">
-<div class="chart-title">Chronologie du jour</div>
-<div class="list" id="todayTimeline"></div>
-</div>
-</div>
-</section>
-<section class="section open tone-glucose">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🩸</span><span class="section-title-text" style="color:#FF6B8A!important;-webkit-text-fill-color:#FF6B8A!important;border-bottom:3px solid #FF6B8A;padding-bottom:2px;letter-spacing:.15px">Glycémie &amp; repas</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar">
-<button class="action primary" onclick="toggleForm('glucoseForm')">+ Nouvelle mesure</button>
-<button class="action" onclick="scrollGlucoseChart()">Voir le graphique</button>
-</div>
-<div class="quick-grid">
-<div class="quick"><b id="gAvg">—</b><span>Moyenne 7 jours</span></div>
-<div class="quick"><b id="gMin">—</b><span>Plus basse</span></div>
-<div class="quick"><b id="gMax">—</b><span>Plus haute</span></div>
-</div>
-<form class="entry" id="glucoseForm" onsubmit="addGlucose(event)" style="display:none">
-<div><label>Valeur (mg/dL)</label><input id="gValue" max="600" min="20" required="" type="number"/></div>
-<div><label>Moment</label>
-<select id="gMoment">
-<option>À jeun</option><option>Avant repas</option><option>1 h après repas</option>
-<option selected="">2 h après repas</option><option>3 h après repas</option><option>Autre</option>
-</select>
-</div>
-<div><label>Date</label><input id="gDate" required="" type="date"/></div>
-<div><label>Heure</label><input id="gTime" required="" type="time"/></div>
-<div><label>Type de repas</label>
-<select id="gMeal">
-<option value="">—</option>
-<option>Petit-déjeuner</option>
-<option>Déjeuner</option>
-<option>Dîner</option>
-<option>Collation</option>
-</select>
-</div>
-<div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
-<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('glucose')">🎯 Cibler le grand chiffre</button><button class="action" type="button" onclick="readGlucosePhoto()">🔎 Lire le chiffre</button></div><div class="small" id="gOcrStatus">V34k : ciblez le milieu du grand nombre puis touchez « Lire le chiffre ». Un lecteur LCD/7-segments dédié est essayé avant l’OCR classique. La valeur reste toujours à confirmer.</div></div>
-<div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="chart-wrap">
-<div class="chart-title">Analyse par moment de la journée</div>
-<div class="compare-grid">
-<div class="compare-card"><b id="avgFasting">—</b><span>À jeun</span></div>
-<div class="compare-card"><b id="avgPremeal">—</b><span>Avant repas</span></div>
-<div class="compare-card"><b id="avg2h">—</b><span>2 h après repas</span></div>
-<div class="compare-card"><b id="avg3h">—</b><span>3 h après repas</span></div>
-</div>
-<div id="mealComparison"></div>
-</div>
-<div class="list" id="glucoseList"></div>
-<div class="chart-wrap" id="glucoseChartBox">
-<div class="chart-title">Évolution de la glycémie</div>
-<canvas height="220" id="glucoseChart" width="760"></canvas>
-<div class="chart-legend">Les points sont tracés dans l’ordre des mesures enregistrées. Le graphique sert au suivi de tendance, pas au diagnostic.</div>
-</div>
-</div>
-</section>
-<section class="section tone-rehab secondary">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🦴</span><span class="section-title-text" style="color:#C2C8D0!important;-webkit-text-fill-color:#C2C8D0!important;border-bottom:3px solid #C2C8D0;padding-bottom:2px;letter-spacing:.15px">Rééducation / récupération</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar"><button class="action primary" onclick="toggleForm('clavicleForm')">+ Ajouter une note</button></div>
-<form class="entry" id="clavicleForm" onsubmit="addClavicle(event)" style="display:none">
-<div><label>Date</label><input id="cDate" required="" type="date"/></div>
-<div><label>Douleur (0–10)</label><input id="cPain" max="10" min="0" step="1" type="number"/></div>
-<div><label>Mobilité</label>
-<select id="cMobility"><option>Très limitée</option><option>Limitée</option><option selected="">En amélioration</option><option>Presque normale</option><option>Normale</option></select>
-</div>
-<div><label>Kiné</label><select id="cKine"><option>Non</option><option>Oui</option></select></div>
-<div class="full"><label>Note</label><textarea id="cNote" placeholder="Douleur, mouvement du bras, radio, avis du médecin…"></textarea></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="list" id="clavicleList"></div>
-</div>
-</section>
-<section class="section tone-sport" id="exerciseSection">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🏃</span><span class="section-title-text" style="color:#7DFF9B!important;-webkit-text-fill-color:#7DFF9B!important;border-bottom:3px solid #7DFF9B;padding-bottom:2px;letter-spacing:.15px">Sport &amp; activité physique</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="card" style="margin-bottom:10px">
-  <div class="item-title">🚶 Pas &amp; distance</div>
-  <div class="small" style="margin-top:6px">Les pas viennent des données enregistrées/importées. La distance directe est utilisée si elle existe ; sinon le carnet affiche une estimation à partir des pas.</div>
-  <div class="compare-grid" style="margin-top:10px">
-    <div class="compare-card"><b id="activityStepsToday">—</b><span>Pas du jour</span></div>
-    <div class="compare-card"><b id="activityDistanceToday">—</b><span>Distance du jour</span></div>
-    <div class="compare-card"><b id="activityStepsLatest">—</b><span>Derniers pas</span></div>
-    <div class="compare-card"><b id="activityDistanceLatest">—</b><span>Dernière distance</span></div>
+  <div class="dashboard">
+    <div class="card">
+      <div class="metric-title">Dernière glycémie</div>
+      <div class="metric-value" id="lastGlucose">—</div>
+      <div class="metric-note" id="lastGlucoseNote">Aucune donnée</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Mesures aujourd’hui</div>
+      <div class="metric-value" id="todayCount">0</div>
+      <div class="metric-note">glycémie</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Dernière note clavicule</div>
+      <div class="metric-value" style="font-size:17px" id="lastClavicle">—</div>
+      <div class="metric-note" id="lastClavicleNote">Aucune donnée</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Sommeil</div>
+      <div class="metric-value" id="lastSleep">—</div>
+      <div class="metric-note" id="lastSleepNote">Aucune donnée</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">Dernière tension</div>
+      <div class="metric-value" id="lastBP">—</div>
+      <div class="metric-note" id="lastBPNote">Aucune donnée</div>
+    </div>
   </div>
-</div>
-<div class="chart-wrap" id="stepsChartBox">
-  <div class="chart-title">Évolution des pas</div>
-  <canvas height="220" id="stepsChart" width="760"></canvas>
-  <div class="chart-legend">Nombre de pas par jour d’après les données enregistrées dans Connexions santé.</div>
-</div>
-<div class="chart-wrap" id="distanceChartBox">
-  <div class="chart-title">Évolution de la distance</div>
-  <canvas height="220" id="distanceChart" width="760"></canvas>
-  <div class="chart-legend">Distance en m ou km. Si aucune distance directe n’est disponible, une estimation est calculée à partir des pas.</div>
-</div>
-<div class="card" style="margin-bottom:10px">
-<div class="item-title">Programme de récupération</div>
-<div class="small" style="margin-top:6px">
+
+  <section class="section open" id="todaySection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">☀️</span>Aujourd’hui</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title" id="todayDateTitle">Aujourd’hui</div>
+        <div class="small" id="todaySummary">Résumé de la journée</div>
+      </div>
+
+      <div class="dashboard" style="margin-bottom:10px">
+        <div class="card">
+          <div class="metric-title">Glycémie</div>
+          <div class="metric-value" id="todayGlucose">—</div>
+          <div class="metric-note" id="todayGlucoseNote">Aucune mesure</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Repas</div>
+          <div class="metric-value" id="todayMeals">0</div>
+          <div class="metric-note">notes alimentaires</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Médicaments</div>
+          <div class="metric-value" id="todayMeds">0</div>
+          <div class="metric-note">entrées du jour</div>
+        </div>
+        <div class="card">
+          <div class="metric-title">Clavicule</div>
+          <div class="metric-value" style="font-size:17px" id="todayClavicle">—</div>
+          <div class="metric-note" id="todayClavicleNote">Aucune note</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="action primary" onclick="quickAddGlucose()">+ Glycémie</button>
+        <button class="action" onclick="quickAddFood()">+ Repas</button>
+        <button class="action" onclick="quickAddMed()">+ Médicament</button>
+        <button class="action warn" onclick="quickAddNote()">+ Note rapide</button>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Chronologie du jour</div>
+        <div id="todayTimeline" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section open">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🩸</span>Glycémie & repas</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar">
+        <button class="action primary" onclick="toggleForm('glucoseForm')">+ Nouvelle mesure</button>
+        <button class="action" onclick="scrollGlucoseChart()">Voir le graphique</button>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick"><b id="gAvg">—</b><span>Moyenne 7 jours</span></div>
+        <div class="quick"><b id="gMin">—</b><span>Plus basse</span></div>
+        <div class="quick"><b id="gMax">—</b><span>Plus haute</span></div>
+      </div>
+
+      <form class="entry" id="glucoseForm" style="display:none" onsubmit="addGlucose(event)">
+        <div><label>Valeur (mg/dL)</label><input id="gValue" type="number" min="20" max="600" required></div>
+        <div><label>Moment</label>
+          <select id="gMoment">
+            <option>À jeun</option><option>Avant repas</option><option>1 h après repas</option>
+            <option selected>2 h après repas</option><option>3 h après repas</option><option>Autre</option>
+          </select>
+        </div>
+        <div><label>Date</label><input id="gDate" type="date" required></div>
+        <div><label>Heure</label><input id="gTime" type="time" required></div>
+        <div><label>Type de repas</label>
+          <select id="gMeal">
+            <option value="">—</option>
+            <option>Petit-déjeuner</option>
+            <option>Déjeuner</option>
+            <option>Dîner</option>
+            <option>Collation</option>
+          </select>
+        </div>
+        <div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"></div>
+        <div class="full"><label>Photo du lecteur de glycémie (facultatif)</label><input id="gPhoto" type="file" accept="image/*" capture="environment" onchange="previewGlucosePhoto(this,'gPreview')"><img id="gPreview" class="photo-preview" alt="Aperçu glycémie"><div class="small">Astuce photo : après la prise, utilisez « Texte en direct » de l’iPhone si disponible pour copier le chiffre, puis collez-le dans Valeur.</div></div>
+        <div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Analyse par moment de la journée</div>
+        <div class="compare-grid">
+          <div class="compare-card"><b id="avgFasting">—</b><span>À jeun</span></div>
+          <div class="compare-card"><b id="avgPremeal">—</b><span>Avant repas</span></div>
+          <div class="compare-card"><b id="avg2h">—</b><span>2 h après repas</span></div>
+          <div class="compare-card"><b id="avg3h">—</b><span>3 h après repas</span></div>
+        </div>
+        <div id="mealComparison"></div>
+      </div>
+
+      <div id="glucoseList" class="list"></div>
+
+      <div class="chart-wrap" id="glucoseChartBox">
+        <div class="chart-title">Évolution de la glycémie</div>
+        <canvas id="glucoseChart" width="760" height="220"></canvas>
+        <div class="chart-legend">Les points sont tracés dans l’ordre des mesures enregistrées. Le graphique sert au suivi de tendance, pas au diagnostic.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🦴</span>Rééducation / récupération</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('clavicleForm')">+ Ajouter une note</button></div>
+      <form class="entry" id="clavicleForm" style="display:none" onsubmit="addClavicle(event)">
+        <div><label>Date</label><input id="cDate" type="date" required></div>
+        <div><label>Douleur (0–10)</label><input id="cPain" type="number" min="0" max="10" step="1"></div>
+        <div><label>Mobilité</label>
+          <select id="cMobility"><option>Très limitée</option><option>Limitée</option><option selected>En amélioration</option><option>Presque normale</option><option>Normale</option></select>
+        </div>
+        <div><label>Kiné</label><select id="cKine"><option>Non</option><option>Oui</option></select></div>
+        <div class="full"><label>Note</label><textarea id="cNote" placeholder="Douleur, mouvement du bras, radio, avis du médecin…"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="clavicleList" class="list"></div>
+    </div>
+  </section>
+
+
+  <section class="section" id="exerciseSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🏃</span>Sport & activité physique</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Programme de récupération</div>
+        <div class="small" style="margin-top:6px">
           Les exercices proposés ici sont doux et servent de carnet de suivi. Avec une fracture déplacée en consolidation,
           validez avec votre kinésithérapeute ou orthopédiste les mouvements d’épaule autorisés avant de progresser.
         </div>
-</div>
-<div class="toolbar">
-<button class="action primary" id="openExerciseLog" type="button">+ Enregistrer une séance</button>
-<button class="action" id="openCustomExercise" type="button">+ Ajouter un exercice</button>
-</div>
-<form class="entry" id="exerciseLogForm" onsubmit="addExerciseLog(event)" style="display:none">
-<div><label>Date</label><input id="exDate" required="" type="date"/></div>
-<div><label>Exercice</label><select id="exName" required=""></select></div>
-<div><label>Répétitions / durée</label><input id="exDose" placeholder="Ex. 10 répétitions"/></div>
-<div><label>Amplitude</label>
-<select id="exRange">
-<option>Très petite</option><option>Petite</option><option selected="">Confortable</option>
-<option>Jusqu’à hauteur d’épaule</option><option>Plus haut — seulement si autorisé</option>
-</select>
-</div>
-<div>
-<label>Douleur avant (0–10)</label>
-<div class="range-row"><input id="exPainBefore" max="10" min="0" oninput="exPainBeforeVal.value=this.value" type="range" value="0"/><output id="exPainBeforeVal">0</output></div>
-</div>
-<div>
-<label>Douleur après (0–10)</label>
-<div class="range-row"><input id="exPainAfter" max="10" min="0" oninput="exPainAfterVal.value=this.value" type="range" value="0"/><output id="exPainAfterVal">0</output></div>
-</div>
-<div><label>Facilité (0–10)</label>
-<div class="range-row"><input id="exEase" max="10" min="0" oninput="exEaseVal.value=this.value" type="range" value="5"/><output id="exEaseVal">5</output></div>
-</div>
-<div><label>Fait sans aide ?</label><select id="exHelp"><option>Oui</option><option>Non</option></select></div>
-<div class="full"><label>Remarque</label><textarea id="exNote" placeholder="Raideur, douleur, mouvement plus facile qu’hier…"></textarea></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer la séance</button></div>
-</form>
-<form class="entry" id="customExerciseForm" onsubmit="addCustomExercise(event)" style="display:none">
-<div><label>Nom de l’exercice</label><input id="cxName" required=""/></div>
-<div><label>Statut</label>
-<select id="cxStatus"><option>À valider avec le kiné</option><option>Validé par le kiné</option><option>En pause</option></select>
-</div>
-<div class="full"><label>Consigne</label><textarea id="cxDesc" placeholder="Écrivez ici la consigne donnée par votre kiné."></textarea></div>
-<div class="full"><button class="action primary" type="submit">Ajouter l’exercice</button></div>
-</form>
-<div id="exerciseLibrary"></div>
-<div class="chart-wrap">
-<div class="chart-title">Évolution des séances</div>
-<div class="compare-grid">
-<div class="compare-card"><b id="exSessionCount">0</b><span>Séances enregistrées</span></div>
-<div class="compare-card"><b id="exAvgEase">—</b><span>Facilité moyenne</span></div>
-<div class="compare-card"><b id="exAvgPain">—</b><span>Douleur après</span></div>
-<div class="compare-card"><b id="exLastDate">—</b><span>Dernière séance</span></div>
-</div>
-<canvas height="220" id="exerciseChart" width="760"></canvas>
-<div class="chart-legend">Le graphique suit la facilité et la douleur après chaque séance. Une progression lente et régulière est plus utile qu’une augmentation forcée.</div>
-</div>
-<div class="chart-wrap">
-<div class="chart-title">Historique</div>
-<div class="list" id="exerciseLogList"></div>
-</div>
-</div>
-</section>
-<section class="section tone-pressure" id="bpSection">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">❤️</span><span class="section-title-text" style="color:#55D6FF!important;-webkit-text-fill-color:#55D6FF!important;border-bottom:3px solid #55D6FF;padding-bottom:2px;letter-spacing:.15px">Tension artérielle</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar">
-<button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button>
-<button class="action" onclick="bpImportApple()" type="button">🍎 Apple Santé (à configurer)</button>
-<button class="action" onclick="bpImportHuawei()" type="button">⬇️ Importer tension HUAWEI</button>
-</div>
-<div class="integration-status" id="bpImportStatus" style="display:none;margin:0 0 12px"></div>
-<form class="entry" id="bpForm" onsubmit="addBP(event)" style="display:none">
-<div><label>Systolique</label><input id="bpSys" max="260" min="50" placeholder="Ex. 125" required="" type="number"/></div>
-<div><label>Diastolique</label><input id="bpDia" max="160" min="30" placeholder="Ex. 78" required="" type="number"/></div>
-<div><label>Pouls / min</label><input id="bpPulse" max="220" min="30" placeholder="Ex. 68" type="number"/></div>
-<div><label>Date</label><input id="bpDate" required="" type="date"/></div>
-<div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
-<div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
-<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('bp')">🎯 Cibler l’écran</button><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres</button></div><div class="small" id="bpOcrStatus">V34k : ciblez le centre de l’écran. SYS, DIA et pouls sont lus séparément, puis toujours proposés pour confirmation.</div></div>
-<div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="small" style="margin:6px 0 12px">La photo reste attachée à la mesure. La lecture automatique est une aide : vérifiez toujours les chiffres proposés avant d’enregistrer.</div>
-<div class="list" id="bpList"></div>
-<div class="chart-wrap" id="bpChartBox">
-<div class="chart-title">Évolution de la tension</div>
-<canvas height="220" id="bpChart" width="760"></canvas>
-<div class="chart-legend">Systolique et diastolique au fil des mesures. Les données importées de type « Tension artérielle » sont incluses lorsqu’elles contiennent une valeur de type 128/78.</div>
-</div>
-</div>
-</section>
-<section class="section tone-meds">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">💊</span><span class="section-title-text" style="color:#D98CFF!important;-webkit-text-fill-color:#D98CFF!important;border-bottom:3px solid #D98CFF;padding-bottom:2px;letter-spacing:.15px">Médicaments &amp; compléments</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar"><button class="action primary" onclick="toggleForm('medForm')">+ Ajouter</button></div>
-<form class="entry" id="medForm" onsubmit="addMedication(event)" style="display:none">
-<div><label>Nom</label><input id="medTitle" required=""/></div>
-<div><label>Dose</label><input id="medDose" placeholder="Ex. 1 comprimé"/></div>
-<div><label>Date</label><input id="medDate" required="" type="date"/></div>
-<div><label>Heure</label><input id="medTime" type="time"/></div>
-<div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
-<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" capture="environment" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="list" id="medList"></div>
-</div>
-</section>
-<section class="section tone-analyses">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🧪</span><span class="section-title-text" style="color:#FF9F5A!important;-webkit-text-fill-color:#FF9F5A!important;border-bottom:3px solid #FF9F5A;padding-bottom:2px;letter-spacing:.15px">Analyses &amp; examens</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar"><button class="action primary" onclick="toggleForm('analysisForm')">+ Ajouter</button></div>
-<form class="entry" id="analysisForm" onsubmit="addAnalysis(event)" style="display:none">
-<div><label>Examen</label><input id="analysisTitle" required=""/></div>
-<div><label>Date</label><input id="analysisDate" required="" type="date"/></div>
-<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" capture="environment" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="list" id="analysisList"></div>
-</div>
-</section>
-<section class="section tone-food">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🍽️</span><span class="section-title-text" style="color:#FFE066!important;-webkit-text-fill-color:#FFE066!important;border-bottom:3px solid #FFE066;padding-bottom:2px;letter-spacing:.15px">Alimentation &amp; recettes</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar"><button class="action primary" onclick="toggleForm('foodForm')">+ Ajouter</button></div>
-<form class="entry" id="foodForm" onsubmit="addFood(event)" style="display:none">
-<div><label>Type</label><select id="foodType" onchange="foodTypeChanged()"><option>Repas</option><option>Recette TM7</option><option>Recette</option><option>Réaction alimentaire</option></select></div>
-<div><label>Titre</label><input id="foodTitle" required=""/></div>
-<div><label>Date</label><input id="foodDate" required="" type="date"/></div>
-<div><label>Moment</label><select id="foodMoment"><option value="">—</option><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
-<div class="recipe-only" style="display:none"><label>Durée</label><input id="foodDuration" placeholder="Ex. 35 min"/></div>
-<div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"/></div>
-<div class="recipe-only" style="display:none"><label>Calories estimées / portion</label><input id="foodCalories" inputmode="decimal" placeholder="Ex. 225 kcal"/><div class="small">Valeur indicative : vous pouvez la corriger à tout moment avec « Modifier ».</div></div>
-<div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
-<div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
-<div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" placeholder="Collez ici le lien de la recette Cookidoo" type="url"/></div>
-<div class="full recipe-only" style="display:none"><button class="action" onclick="openCookidooFromField()" type="button">↗️ Ouvrir la recette Cookidoo</button></div>
-<div class="full recipe-only feature-note" style="display:none">Après enregistrement : <b>Modifier</b>, <b>Programmer 📅</b>, <b>Liste de courses 🛒</b> et <b>Partager</b> sont disponibles directement sur la fiche.</div>
-<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" capture="environment" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
-<div class="full"><button class="action primary" id="foodSubmitBtn" type="submit">Enregistrer</button><button class="action" id="foodCancelEditBtn" onclick="cancelFoodEdit()" style="display:none;margin-left:8px" type="button">Annuler la modification</button></div>
-</form>
-<div class="list" id="foodList"></div>
-</div>
-</section>
-<section class="section tone-sleep">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🌙</span><span class="section-title-text" style="color:#A8A4FF!important;-webkit-text-fill-color:#A8A4FF!important;border-bottom:3px solid #A8A4FF;padding-bottom:2px;letter-spacing:.15px">Sommeil</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar">
-<button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
-<button class="action" onclick="startSleepAppleImport()" type="button">🍎 Importer via Apple Santé</button>
-<button class="action" onclick="importSleepFromClipboard()" type="button">📋 Importer le sommeil copié</button>
-</div>
-<div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
-<form class="entry" id="sleepForm" onsubmit="addSleep(event)" style="display:none">
-<div><label>Date</label><input id="sDate" required="" type="date"/></div>
-<div><label>Durée (heures)</label><input id="sHours" max="24" min="0" required="" step="0.1" type="number"/></div>
-<div><label>Qualité</label><select id="sQuality"><option>Mauvaise</option><option>Moyenne</option><option selected="">Bonne</option><option>Très bonne</option></select></div>
-<div><label>Réveils</label><input id="sWake" max="20" min="0" type="number"/></div>
-<div class="full"><label>Remarque</label><textarea id="sNote"></textarea></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="list" id="sleepList"></div>
-<div class="chart-wrap" id="sleepChartBox">
-<div class="chart-title">Évolution du sommeil</div>
-<canvas height="220" id="sleepChart" width="760"></canvas>
-<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil. V35g regroupe les segments courts (par exemple 15 min) pour afficher la durée totale de la nuit.</div>
-</div>
-</div>
-</section>
-<section class="section tone-notes">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">📝</span><span class="section-title-text" style="color:#63E6BE!important;-webkit-text-fill-color:#63E6BE!important;border-bottom:3px solid #63E6BE;padding-bottom:2px;letter-spacing:.15px">Notes &amp; rendez-vous</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="toolbar"><button class="action primary" onclick="toggleForm('noteForm')">+ Ajouter</button></div>
-<form class="entry" id="noteForm" onsubmit="addNote(event)" style="display:none">
-<div><label>Type</label><select id="noteType"><option>Note</option><option>Rendez-vous</option></select></div>
-<div><label>Titre</label><input id="noteTitle" required=""/></div>
-<div><label>Date</label><input id="noteDate" required="" type="date"/></div>
-<div><label>Heure</label><input id="noteTime" type="time"/></div>
-<div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
-<div class="full"><label>📷 Photo (facultatif)</label><input accept="image/*" capture="environment" id="notePhoto" onchange="genericPhoto(this,'notePreview','note')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="notePreview"/><button class="action danger" onclick="clearPendingPhoto('note','notePhoto','notePreview')" type="button">Retirer la photo</button></div></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
-</form>
-<div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
-<div class="list" id="noteList"></div>
-</div>
-</section>
-<section class="section tone-calendar" id="calendarShareSection">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">📅</span><span class="section-title-text" style="color:#F4E06D!important;-webkit-text-fill-color:#F4E06D!important;border-bottom:3px solid #F4E06D;padding-bottom:2px;letter-spacing:.15px">Calendrier / Partager</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="card" style="margin-bottom:10px">
-<div class="item-title">Calendrier &amp; partage</div>
-<div class="small" style="margin-top:6px">
-          Ces boutons sont actifs. Vous pouvez ouvrir directement « Notes &amp; rendez-vous », préparer un nouveau rendez-vous,
+      </div>
+
+      <div class="toolbar">
+        <button class="action primary" type="button" id="openExerciseLog">+ Enregistrer une séance</button>
+        <button class="action" type="button" id="openCustomExercise">+ Ajouter un exercice</button>
+      </div>
+
+      <form class="entry" id="exerciseLogForm" style="display:none" onsubmit="addExerciseLog(event)">
+        <div><label>Date</label><input id="exDate" type="date" required></div>
+        <div><label>Exercice</label><select id="exName" required></select></div>
+        <div><label>Répétitions / durée</label><input id="exDose" placeholder="Ex. 10 répétitions"></div>
+        <div><label>Amplitude</label>
+          <select id="exRange">
+            <option>Très petite</option><option>Petite</option><option selected>Confortable</option>
+            <option>Jusqu’à hauteur d’épaule</option><option>Plus haut — seulement si autorisé</option>
+          </select>
+        </div>
+        <div>
+          <label>Douleur avant (0–10)</label>
+          <div class="range-row"><input id="exPainBefore" type="range" min="0" max="10" value="0" oninput="exPainBeforeVal.value=this.value"><output id="exPainBeforeVal">0</output></div>
+        </div>
+        <div>
+          <label>Douleur après (0–10)</label>
+          <div class="range-row"><input id="exPainAfter" type="range" min="0" max="10" value="0" oninput="exPainAfterVal.value=this.value"><output id="exPainAfterVal">0</output></div>
+        </div>
+        <div><label>Facilité (0–10)</label>
+          <div class="range-row"><input id="exEase" type="range" min="0" max="10" value="5" oninput="exEaseVal.value=this.value"><output id="exEaseVal">5</output></div>
+        </div>
+        <div><label>Fait sans aide ?</label><select id="exHelp"><option>Oui</option><option>Non</option></select></div>
+        <div class="full"><label>Remarque</label><textarea id="exNote" placeholder="Raideur, douleur, mouvement plus facile qu’hier…"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer la séance</button></div>
+      </form>
+
+      <form class="entry" id="customExerciseForm" style="display:none" onsubmit="addCustomExercise(event)">
+        <div><label>Nom de l’exercice</label><input id="cxName" required></div>
+        <div><label>Statut</label>
+          <select id="cxStatus"><option>À valider avec le kiné</option><option>Validé par le kiné</option><option>En pause</option></select>
+        </div>
+        <div class="full"><label>Consigne</label><textarea id="cxDesc" placeholder="Écrivez ici la consigne donnée par votre kiné."></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Ajouter l’exercice</button></div>
+      </form>
+
+      <div id="exerciseLibrary"></div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Évolution des séances</div>
+        <div class="compare-grid">
+          <div class="compare-card"><b id="exSessionCount">0</b><span>Séances enregistrées</span></div>
+          <div class="compare-card"><b id="exAvgEase">—</b><span>Facilité moyenne</span></div>
+          <div class="compare-card"><b id="exAvgPain">—</b><span>Douleur après</span></div>
+          <div class="compare-card"><b id="exLastDate">—</b><span>Dernière séance</span></div>
+        </div>
+        <canvas id="exerciseChart" width="760" height="220"></canvas>
+        <div class="chart-legend">Le graphique suit la facilité et la douleur après chaque séance. Une progression lente et régulière est plus utile qu’une augmentation forcée.</div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Historique</div>
+        <div id="exerciseLogList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="bpSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">❤️</span>Tension artérielle</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button></div>
+      <form class="entry" id="bpForm" style="display:none" onsubmit="addBP(event)">
+        <div><label>Systolique</label><input id="bpSys" type="number" min="50" max="260" required placeholder="Ex. 125"></div>
+        <div><label>Diastolique</label><input id="bpDia" type="number" min="30" max="160" required placeholder="Ex. 78"></div>
+        <div><label>Pouls / min</label><input id="bpPulse" type="number" min="30" max="220" placeholder="Ex. 68"></div>
+        <div><label>Date</label><input id="bpDate" type="date" required></div>
+        <div><label>Heure</label><input id="bpTime" type="time" required></div>
+        <div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
+        <div class="full"><label>Photo du tensiomètre (facultatif)</label><input id="bpPhoto" type="file" accept="image/*" capture="environment" onchange="previewPhoto(this,'bpPreview')"><img id="bpPreview" class="photo-preview" alt="Aperçu"><div class="small">Astuce photo : « Texte en direct » peut aider à copier les chiffres du tensiomètre avant confirmation.</div></div>
+        <div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div class="small" style="margin:6px 0 12px">La photo est conservée avec la mesure sur cet appareil comme repère visuel. La lecture automatique des chiffres depuis une photo n’est pas activée dans cette version hors ligne.</div>
+      <div id="bpList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">💊</span>Médicaments & compléments</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('medForm')">+ Ajouter</button></div>
+      <form class="entry" id="medForm" style="display:none" onsubmit="addMedication(event)">
+        <div><label>Nom</label><input id="medTitle" required></div>
+        <div><label>Dose</label><input id="medDose" placeholder="Ex. 1 comprimé"></div>
+        <div><label>Date</label><input id="medDate" type="date" required></div>
+        <div><label>Heure</label><input id="medTime" type="time"></div>
+        <div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
+        <div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input id="medPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'medPreview','med')"><div class="photo-tools"><img id="medPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')">Retirer la photo</button></div></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="medList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🧪</span>Analyses & examens</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('analysisForm')">+ Ajouter</button></div>
+      <form class="entry" id="analysisForm" style="display:none" onsubmit="addAnalysis(event)">
+        <div><label>Examen</label><input id="analysisTitle" required></div>
+        <div><label>Date</label><input id="analysisDate" type="date" required></div>
+        <div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input id="analysisPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'analysisPreview','analysis')"><div class="photo-tools"><img id="analysisPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')">Retirer la photo</button></div></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="analysisList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🍽️</span>Alimentation & recettes</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('foodForm')">+ Ajouter</button></div>
+      <form class="entry" id="foodForm" style="display:none" onsubmit="addFood(event)">
+        <div><label>Type</label><select id="foodType" onchange="foodTypeChanged()"><option>Repas</option><option>Recette TM7</option><option>Recette</option><option>Réaction alimentaire</option></select></div>
+        <div><label>Titre</label><input id="foodTitle" required></div>
+        <div><label>Date</label><input id="foodDate" type="date" required></div>
+        <div><label>Moment</label><select id="foodMoment"><option value="">—</option><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+        <div class="recipe-only" style="display:none"><label>Durée</label><input id="foodDuration" placeholder="Ex. 35 min"></div>
+        <div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"></div>
+        <div class="recipe-only" style="display:none"><label>Calories estimées / portion</label><input id="foodCalories" inputmode="decimal" placeholder="Ex. 225 kcal"><div class="small">Valeur indicative : vous pouvez la corriger à tout moment avec « Modifier ».</div></div>
+        <div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
+        <div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
+        <div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" type="url" placeholder="Collez ici le lien de la recette Cookidoo"></div>
+        <div class="full recipe-only" style="display:none"><button class="action" type="button" onclick="openCookidooFromField()">↗️ Ouvrir la recette Cookidoo</button></div>
+        <div class="full recipe-only feature-note" style="display:none">Après enregistrement : <b>Modifier</b>, <b>Programmer 📅</b>, <b>Liste de courses 🛒</b> et <b>Partager</b> sont disponibles directement sur la fiche.</div>
+        <div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input id="foodPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'foodPreview','food')"><div class="photo-tools"><img id="foodPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')">Retirer la photo</button></div></div>
+        <div class="full"><button class="action primary" id="foodSubmitBtn" type="submit">Enregistrer</button><button class="action" id="foodCancelEditBtn" type="button" onclick="cancelFoodEdit()" style="display:none;margin-left:8px">Annuler la modification</button></div>
+      </form>
+      <div id="foodList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🌙</span>Sommeil</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar">
+        <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
+        <button class="action" type="button" onclick="startSleepAppleImport()">🍎 Importer via Apple Santé</button>
+      </div>
+      <div id="sleepImportStatus" class="small" style="margin:0 0 10px"></div>
+      <form class="entry" id="sleepForm" style="display:none" onsubmit="addSleep(event)">
+        <div><label>Date</label><input id="sDate" type="date" required></div>
+        <div><label>Durée (heures)</label><input id="sHours" type="number" min="0" max="24" step="0.1" required></div>
+        <div><label>Qualité</label><select id="sQuality"><option>Mauvaise</option><option>Moyenne</option><option selected>Bonne</option><option>Très bonne</option></select></div>
+        <div><label>Réveils</label><input id="sWake" type="number" min="0" max="20"></div>
+        <div class="full"><label>Remarque</label><textarea id="sNote"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div id="sleepList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">📝</span>Notes & rendez-vous</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="toolbar"><button class="action primary" onclick="toggleForm('noteForm')">+ Ajouter</button></div>
+      <form class="entry" id="noteForm" style="display:none" onsubmit="addNote(event)">
+        <div><label>Type</label><select id="noteType"><option>Note</option><option>Rendez-vous</option></select></div>
+        <div><label>Titre</label><input id="noteTitle" required></div>
+        <div><label>Date</label><input id="noteDate" type="date" required></div>
+        <div><label>Heure</label><input id="noteTime" type="time"></div>
+        <div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+      </form>
+      <div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
+      <div id="noteList" class="list"></div>
+    </div>
+  </section>
+
+
+
+  <section class="section" id="calendarShareSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">📅</span>Calendrier / Partager</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Calendrier & partage</div>
+        <div class="small" style="margin-top:6px">
+          Ces boutons sont actifs. Vous pouvez ouvrir directement « Notes & rendez-vous », préparer un nouveau rendez-vous,
           ou exporter la sauvegarde du carnet.
         </div>
-</div>
-<div class="toolbar">
-<button class="action primary" onclick="openNotesAppointments()" type="button">📝 Notes &amp; rendez-vous</button>
-<button class="action warn" onclick="newAppointment()" type="button">📅 Nouveau rendez-vous</button>
-<button class="action" onclick="exportData()" type="button">↗️ Partager / sauvegarder</button>
-</div>
-</div>
-</section>
-<section class="section tone-objectives">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🎯</span><span class="section-title-text" style="color:#FF8CE7!important;-webkit-text-fill-color:#FF8CE7!important;border-bottom:3px solid #FF8CE7;padding-bottom:2px;letter-spacing:.15px">Objectifs &amp; repères</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="card" style="margin-bottom:10px">
-<div class="item-title">Glycémie</div>
-<div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet sert à les noter et à suivre les tendances.</div>
-<div class="item-text" id="objGlucoseText" style="margin-top:8px"></div>
-<div class="toolbar"><button class="action" onclick="openObjectiveForm('glucose')" type="button">Ajouter / modifier mon repère</button></div>
-</div>
-<div class="card" style="margin-bottom:10px">
-<div class="item-title">Clavicule</div>
-<div class="small" style="margin-top:6px">Notez ici les repères personnels donnés par le kinésithérapeute / orthopédiste.</div>
-<div class="item-text" id="objClavicleText" style="margin-top:8px"></div>
-<div class="toolbar"><button class="action" onclick="openObjectiveForm('clavicle')" type="button">Ajouter / modifier mon repère</button></div>
-</div>
-<div class="card" style="margin-bottom:10px">
-<div class="item-title">Sommeil</div>
-<div class="small" style="margin-top:6px">Notez ici vos propres repères de durée, qualité ou régularité.</div>
-<div class="item-text" id="objSleepText" style="margin-top:8px"></div>
-<div class="toolbar"><button class="action" onclick="openObjectiveForm('sleep')" type="button">Ajouter / modifier mon repère</button></div>
-</div>
-<form class="entry" id="objectiveForm" onsubmit="saveObjective(event)" style="display:none">
-<input id="objCategory" type="hidden"/>
-<div class="full"><label>Mon objectif / repère</label><textarea id="objValue" placeholder="Écrivez ici votre objectif ou la consigne reçue"></textarea></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer le repère</button></div>
-</form>
-</div>
-</section>
-<section class="section tone-connections" id="healthConnectionsSection">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">🔗</span><span class="section-title-text" style="color:#4DE1D2!important;-webkit-text-fill-color:#4DE1D2!important;border-bottom:3px solid #4DE1D2;padding-bottom:2px;letter-spacing:.15px">Connexions santé</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<div class="card" style="margin-bottom:10px">
-<div class="item-title">Connexions santé — V18</div>
-<div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
-</div>
-<div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
-<div class="integration-grid">
-<div class="integration-card">
-<b>Apple Santé</b>
-<div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
-<div class="integration-actions">
-<button class="action" onclick="openHealthImport('Apple Santé',this)" type="button">Ajouter une donnée ici</button>
-</div>
-</div>
-<div class="integration-card">
-<b>HUAWEI Health</b>
-<div class="small">Import automatique via « HUAWEI vers CARNET ». La V28 conserve l’import par raccourci et le secours par presse-papiers.</div>
-<div class="integration-actions">
-<button class="action primary" onclick="startHuaweiImport()" type="button">Importer depuis HUAWEI</button>
-<button class="action" onclick="importHuaweiClipboard()" type="button">Importer le total copié</button>
-<button class="action" onclick="openHealthImport('HUAWEI Health',this)" type="button">Saisie manuelle</button>
-</div>
-</div>
-<div class="integration-card">
-<b>HUM Health</b>
-<div class="small">Choisissez un type pour préremplir le formulaire. La V31 accepte les imports envoyés par Raccourcis Apple Santé, notamment Poids et Fréquence cardiaque depuis Hume.</div>
-<div class="integration-actions">
-<button class="action" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)" type="button">Tension</button>
-<button class="action" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)" type="button">Fréquence cardiaque</button>
-<button class="action" onclick="presetHealth('HUM Health','Sommeil','h',this)" type="button">Sommeil</button>
-<button class="action" onclick="openHealthImport('HUM Health',this)" type="button">Autre donnée</button>
-</div>
-</div>
-<div class="integration-card">
-<b>Quirónsalud</b>
-<div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
-<div class="integration-actions">
-<button class="action" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)" type="button">Analyse sanguine</button>
-<button class="action" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)" type="button">Radio / scanner / IRM</button>
-<button class="action" onclick="presetHealth('Quirónsalud','Compte rendu','',this)" type="button">Compte rendu</button>
-<button class="action" onclick="presetHealth('Quirónsalud','Ordonnance','',this)" type="button">Ordonnance</button>
-<button class="action" onclick="presetHealth('Quirónsalud','Rendez-vous / consultation','',this)" type="button">Consultation</button>
-</div>
-</div>
-</div>
-<div class="integration-status" id="shortcutHelp" style="display:none;margin-bottom:10px"></div>
-<form class="entry" id="healthImportForm" onsubmit="addHealthImport(event)" style="display:none">
-<div><label>Source</label>
-<select id="hiSource" onchange="healthFormChanged()">
-<option>Apple Santé</option>
-<option>HUAWEI Health</option>
-<option>HUM Health</option>
-<option>Quirónsalud</option>
-</select>
-</div>
-<div><label>Type de donnée</label><input id="hiType" oninput="healthFormChanged()" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required=""/></div>
-<div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"/></div>
-<div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"/></div>
-<div><label>Date</label><input id="hiDate" required="" type="date"/></div>
-<div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"/></div>
-<div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
-<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" capture="environment" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
-<div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" onclick="healthAppointmentToCalendar()" type="button">📅 Ajouter au calendrier</button></div>
-<div class="full" id="hiHuaweiImportWrap" style="display:none"><button class="action primary" onclick="startHuaweiImport()" type="button">⬇️ Importer depuis HUAWEI</button></div>
-<div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
-</form>
-<div class="chart-wrap" id="healthSelectedChartBox" style="display:none">
-<div class="chart-title" id="healthSelectedChartTitle">Évolution</div>
-<canvas height="220" id="healthSelectedChart" width="760"></canvas>
-<div class="chart-legend" id="healthSelectedChartLegend">La courbe utilise les données santé enregistrées/importées correspondant au type sélectionné.</div>
-</div>
-<div class="chart-wrap">
-<div class="chart-title">Données santé ajoutées / importées</div>
-<div class="list" id="healthImportList"></div>
-<div class="small" style="margin-top:10px">Les courbes Pas &amp; Distance sont maintenant affichées dans <b>Sport &amp; activité physique</b>.</div>
-</div>
-</div>
-</section>
-<section class="section tone-backup" id="backupSection" style="margin-bottom:120px">
-<button class="section-head" type="button">
-<span class="left"><span class="icon">⚙️</span><span class="section-title-text" style="color:#E0E4EA!important;-webkit-text-fill-color:#E0E4EA!important;border-bottom:3px solid #E0E4EA;padding-bottom:2px;letter-spacing:.15px">Sauvegarde</span></span><span class="chev">›</span>
-</button>
-<div class="section-body">
-<p class="small">Les données restent enregistrées dans ce navigateur sur cet appareil. Pour éviter toute perte, exportez régulièrement une sauvegarde JSON que vous pourrez réimporter plus tard.</p>
-<div class="toolbar">
-<button class="action" onclick="exportData()">Exporter mes données</button>
-<label class="action" style="cursor:pointer">Importer
-          <input accept=".json,application/json" id="importFile" onchange="importData(event)" style="display:none" type="file"/>
-</label>
-<button class="action danger" onclick="clearAll()">Effacer toutes les données</button>
-</div>
-</div>
-</section>
+      </div>
+      <div class="toolbar">
+        <button class="action primary" type="button" onclick="openNotesAppointments()">📝 Notes & rendez-vous</button>
+        <button class="action warn" type="button" onclick="newAppointment()">📅 Nouveau rendez-vous</button>
+        <button class="action" type="button" onclick="exportData()">↗️ Partager / sauvegarder</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🎯</span>Objectifs & repères</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Glycémie</div>
+        <div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet sert à les noter et à suivre les tendances.</div>
+        <div id="objGlucoseText" class="item-text" style="margin-top:8px"></div>
+        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('glucose')">Ajouter / modifier mon repère</button></div>
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Clavicule</div>
+        <div class="small" style="margin-top:6px">Notez ici les repères personnels donnés par le kinésithérapeute / orthopédiste.</div>
+        <div id="objClavicleText" class="item-text" style="margin-top:8px"></div>
+        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('clavicle')">Ajouter / modifier mon repère</button></div>
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Sommeil</div>
+        <div class="small" style="margin-top:6px">Notez ici vos propres repères de durée, qualité ou régularité.</div>
+        <div id="objSleepText" class="item-text" style="margin-top:8px"></div>
+        <div class="toolbar"><button class="action" type="button" onclick="openObjectiveForm('sleep')">Ajouter / modifier mon repère</button></div>
+      </div>
+      <form class="entry" id="objectiveForm" style="display:none" onsubmit="saveObjective(event)">
+        <input id="objCategory" type="hidden">
+        <div class="full"><label>Mon objectif / repère</label><textarea id="objValue" placeholder="Écrivez ici votre objectif ou la consigne reçue"></textarea></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer le repère</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="section" id="healthConnectionsSection">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">🔗</span>Connexions santé</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <div class="card" style="margin-bottom:10px">
+        <div class="item-title">Connexions santé — V18</div>
+        <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
+      </div>
+      <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
+      <div class="integration-grid">
+        <div class="integration-card">
+          <b>Apple Santé</b>
+          <div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
+          <div class="integration-actions">
+            <button class="action" type="button" onclick="openHealthImport('Apple Santé',this)">Ajouter une donnée ici</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <b>HUAWEI Health</b>
+          <div class="small">Import automatique via « HUAWEI vers CARNET ». La V28 conserve l’import par raccourci et le secours par presse-papiers.</div>
+          <div class="integration-actions">
+            <button class="action primary" type="button" onclick="startHuaweiImport()">Importer depuis HUAWEI</button>
+            <button class="action" type="button" onclick="importHuaweiClipboard()">Importer le total copié</button>
+            <button class="action" type="button" onclick="openHealthImport('HUAWEI Health',this)">Saisie manuelle</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <b>HUM Health</b>
+          <div class="small">Choisissez un type pour préremplir le formulaire. La V31 accepte les imports envoyés par Raccourcis Apple Santé, notamment Poids et Fréquence cardiaque depuis Hume.</div>
+          <div class="integration-actions">
+            <button class="action" type="button" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)">Tension</button>
+            <button class="action" type="button" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)">Fréquence cardiaque</button>
+            <button class="action" type="button" onclick="presetHealth('HUM Health','Sommeil','h',this)">Sommeil</button>
+            <button class="action" type="button" onclick="openHealthImport('HUM Health',this)">Autre donnée</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <b>Quirónsalud</b>
+          <div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
+          <div class="integration-actions">
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)">Analyse sanguine</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)">Radio / scanner / IRM</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Compte rendu','',this)">Compte rendu</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Ordonnance','',this)">Ordonnance</button>
+            <button class="action" type="button" onclick="presetHealth('Quirónsalud','Rendez-vous / consultation','',this)">Consultation</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="shortcutHelp" class="integration-status" style="display:none;margin-bottom:10px"></div>
+
+      <form class="entry" id="healthImportForm" style="display:none" onsubmit="addHealthImport(event)">
+        <div><label>Source</label>
+          <select id="hiSource">
+            <option>Apple Santé</option>
+            <option>HUAWEI Health</option>
+            <option>HUM Health</option>
+            <option>Quirónsalud</option>
+          </select>
+        </div>
+        <div><label>Type de donnée</label><input id="hiType" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required></div>
+        <div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"></div>
+        <div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"></div>
+        <div><label>Date</label><input id="hiDate" type="date" required></div>
+        <div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"></div>
+        <div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
+        <div class="full"><label>Photo / capture (facultatif)</label><input id="hiPhoto" type="file" accept="image/*" capture="environment" onchange="genericPhoto(this,'hiPhotoPreview','health')"><div class="photo-tools"><img id="hiPhotoPreview" class="photo-preview" alt="Aperçu"><button type="button" class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')">Retirer la photo</button></div></div>
+        <div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" type="button" onclick="healthAppointmentToCalendar()">📅 Ajouter au calendrier</button></div>
+        <div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
+      </form>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Données santé ajoutées / importées</div>
+        <div id="healthImportList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="backupSection" style="margin-bottom:120px">
+    <button class="section-head" type="button">
+      <span class="left"><span class="icon">⚙️</span>Sauvegarde</span><span class="chev">›</span>
+    </button>
+    <div class="section-body">
+      <p class="small">Les données restent enregistrées dans ce navigateur sur cet appareil. Pour éviter toute perte, exportez régulièrement une sauvegarde JSON que vous pourrez réimporter plus tard.</p>
+      <div class="toolbar">
+        <button class="action" onclick="exportData()">Exporter mes données</button>
+        <label class="action" style="cursor:pointer">Importer
+          <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+        </label>
+        <button class="action danger" onclick="clearAll()">Effacer toutes les données</button>
+      </div>
+    </div>
+  </section>
 </main>
+
 <footer>
-<button class="action primary" onclick="openSectionByText('Aujourd’hui')">☀️ Aujourd’hui</button>
-<button class="action" onclick="openSectionByText('Glycémie')">🩸 Glycémie</button>
-<button class="action warn" onclick="openSectionByText('Notes')">📝 Note</button>
+  <button class="action primary" onclick="openSectionByText('Aujourd’hui')">☀️ Aujourd’hui</button>
+  <button class="action" onclick="openSectionByText('Glycémie')">🩸 Glycémie</button>
+  <button class="action warn" onclick="openSectionByText('Notes')">📝 Note</button>
 </footer>
+
 <script>
 const KEY='monCarnetDeBord_v2';
 const OLD_KEY='monCarnetDeBord_v1';
@@ -853,14 +804,6 @@ const defaultData={
   objectives:{glucose:'',clavicle:'',sleep:''}
 };
 let data=loadData();
-reconcileImportedHealth(data);
-try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){}
-// V34r : adapte la fiche existante « poulet TM7 aux légumes » au poulet fermier congelé.
-// La migration est volontairement ciblée : elle ne touche qu'une recette dont le titre contient
-// « poulet » et « légumes » (ou « TM7 »), et conserve les autres fiches intactes.
-if(updateFrozenChickenRecipe(data)){
-  try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){ }
-}
 
 function loadData(){
   try{
@@ -884,47 +827,8 @@ function loadData(){
     };
   }catch(e){return structuredClone(defaultData)}
 }
-function updateFrozenChickenRecipe(target){
-  try{
-    const foods=target?.foods||[];
-    let changed=false;
-    foods.forEach(x=>{
-      if(!x) return;
-      const title=String(x.title||'');
-      const type=String(x.type||'');
-      if(!/recette/i.test(type)) return;
-      if(!/poulet/i.test(title)) return;
-      if(!/(l[eé]gumes?|tm7)/i.test(title)) return;
-      const marker='v34r-poulet-fermier-congele';
-      if(x.recipeMigration===marker) return;
-      x.duration='45 à 50 min';
-      x.portions='2 personnes';
-      x.ingredients=[
-        '500 à 600 g de poulet fermier congelé (de préférence en morceaux)',
-        '500 g d’eau pour le bol',
-        'Courgette, carotte, poivron, oignon et/ou aubergine, coupés en morceaux réguliers',
-        'Sel, poivre, origan ou paprika doux, selon goût',
-        'Facultatif : 1 c. à café d’huile d’olive par personne après cuisson'
-      ].join('\n');
-      x.steps=[
-        '1. Mettre 500 g d’eau dans le bol du TM7.',
-        '2. Installer le poulet fermier encore congelé dans le Varoma, en laissant circuler la vapeur. Répartir les légumes autour sans boucher toutes les ouvertures.',
-        '3. Cuire 35 min / Varoma / vitesse 1.',
-        '4. Vérifier la cuisson du poulet. S’il est encore insuffisamment cuit près de l’os, poursuivre 10 à 15 min / Varoma / vitesse 1.',
-        '5. Vérifier que le poulet est bien cuit à cœur avant de servir.',
-        '6. Assaisonner après cuisson. Ajouter éventuellement un peu d’huile d’olive au moment de servir.'
-      ].join('\n');
-      x.text='Version adaptée au poulet fermier congelé. Le temps final dépend de la taille et de l’épaisseur des morceaux.';
-      x.recipeMigration=marker;
-      changed=true;
-    });
-    return changed;
-  }catch(_){ return false; }
-}
-
 function save(){
   try{
-    reconcileImportedHealth(data);
     localStorage.setItem(KEY,JSON.stringify(data));
     render();
     return true;
@@ -934,45 +838,10 @@ function save(){
     return false;
   }
 }
-
-// V34r : lorsqu'un Raccourci ouvre une autre instance du carnet pour importer
-// une donnée, l'onglet déjà ouvert peut garder une ancienne copie en mémoire.
-// À chaque retour au carnet, on relit donc localStorage puis on redessine les courbes.
-let lastSyncedStorage='';
-function syncFromStorageAndRender(force=false){
-  try{
-    const raw=localStorage.getItem(KEY)||'';
-    if(!force && raw===lastSyncedStorage) return;
-    if(raw){
-      data=loadData();
-      reconcileImportedHealth(data);
-      if(updateFrozenChickenRecipe(data)){
-        try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){ }
-      }
-      lastSyncedStorage=localStorage.getItem(KEY)||raw;
-      render();
-    }
-  }catch(_){ }
-}
-window.addEventListener('pageshow',()=>syncFromStorageAndRender(true));
-window.addEventListener('focus',()=>syncFromStorageAndRender());
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncFromStorageAndRender();});
-window.addEventListener('storage',(e)=>{if(e.key===KEY)syncFromStorageAndRender(true);});
 document.getElementById('openExerciseLog')?.addEventListener('click',()=>toggleForm('exerciseLogForm'));
 document.getElementById('openCustomExercise')?.addEventListener('click',()=>toggleForm('customExerciseForm'));
 document.querySelectorAll('.section-head').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const sec=btn.parentElement;
-    sec.classList.toggle('open');
-    if(sec.classList.contains('open')){
-      requestAnimationFrame(()=>{
-        if(sec.classList.contains('tone-pressure')) drawBPChart();
-        if(sec.classList.contains('tone-glucose')) drawGlucoseChart();
-        if(sec.classList.contains('tone-sleep')) drawSleepChart();
-        if(sec.classList.contains('tone-sport')){ drawStepsCharts(); drawExerciseChart(); }
-      });
-    }
-  });
+  btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open'));
 });
 function toggleForm(id){
   const el=document.getElementById(id);
@@ -990,7 +859,6 @@ function setTodayDefaults(){
 }
 let pendingGlucosePhoto='';
 function previewGlucosePhoto(input,imgId){
-  ocrTargetGlucose=null;
   const img=document.getElementById(imgId);
   const file=input.files && input.files[0];
   if(!file){pendingGlucosePhoto='';img.removeAttribute('src');img.style.display='none';return;}
@@ -1029,7 +897,6 @@ function addClavicle(e){
 }
 let pendingBPPhoto='';
 function previewPhoto(input,imgId){
-  ocrTargetBP=null;
   const img=document.getElementById(imgId);
   const file=input.files && input.files[0];
   if(!file){pendingBPPhoto='';img.removeAttribute('src');img.style.display='none';return;}
@@ -1062,7 +929,7 @@ function addSleep(e){
   data.sleep.unshift({date:sDate.value,hours:Number(sHours.value),quality:sQuality.value,wake:sWake.value,note:sNote.value.trim()});
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
-let pendingGenericPhotos={med:'',analysis:'',food:'',health:'',note:''};
+let pendingGenericPhotos={med:'',analysis:'',food:'',health:''};
 let editingFoodIndex=-1;
 function clearPendingPhoto(key,inputId,imgId){
   pendingGenericPhotos[key]='';
@@ -1183,9 +1050,7 @@ function addFood(e){
 }
 function addNote(e){
   e.preventDefault();
-  data.notes.unshift({title:noteTitle.value.trim(),date:noteDate.value,time:noteTime.value,type:noteType.value,text:noteText.value.trim(),photo:pendingGenericPhotos.note||''});
-  pendingGenericPhotos.note='';
-  const prev=document.getElementById('notePreview'); if(prev){prev.removeAttribute('src');prev.style.display='none';}
+  data.notes.unshift({title:noteTitle.value.trim(),date:noteDate.value,time:noteTime.value,type:noteType.value,text:noteText.value.trim()});
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
 function runShortcut(name,inputText=''){
@@ -1200,56 +1065,6 @@ function healthImportStatus(message){
   box.textContent=message;
   box.style.display='block';
 }
-
-function healthFormChanged(){
-  const source=document.getElementById('hiSource')?.value||'';
-  const type=(document.getElementById('hiType')?.value||'').trim();
-  const wrap=document.getElementById('hiHuaweiImportWrap');
-  if(wrap) wrap.style.display=/huawei/i.test(source)?'block':'none';
-  const box=document.getElementById('healthSelectedChartBox');
-  if(box) box.style.display=type?'block':'none';
-  const title=document.getElementById('healthSelectedChartTitle');
-  if(title) title.textContent=type?'Évolution — '+type:'Évolution';
-  requestAnimationFrame(drawSelectedHealthChart);
-}
-function drawSelectedHealthChart(){
-  const canvas=document.getElementById('healthSelectedChart'); if(!canvas)return;
-  const type=(document.getElementById('hiType')?.value||'').trim();
-  if(!type)return;
-  if(/tension|blood\s*pressure/i.test(type)){
-    const old=canvas.id; canvas.id='bpChartTemp';
-    const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
-    const rows=bpRows(),pad={l:48,r:16,t:24,b:42},W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
-    if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Aucune tension importée exploitable.',pad.l,pad.t+30);canvas.id=old;return;}
-    const vals=rows.flatMap(r=>[r.sys,r.dia]);let min=Math.min(60,Math.floor((Math.min(...vals)-10)/20)*20),max=Math.max(160,Math.ceil((Math.max(...vals)+10)/20)*20);
-    const X=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)),Y=v=>pad.t+H-(v-min)/(max-min)*H;
-    ctx.strokeStyle='#45505f';ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';for(let v=min;v<=max;v+=20){let y=Y(v);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+W,y);ctx.stroke();ctx.fillText(String(v),5,y+3)}
-    [['sys','#7ddfff'],['dia','#ffb86b']].forEach(([k,c])=>{ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=3;ctx.beginPath();rows.forEach((r,i)=>i?ctx.lineTo(X(i),Y(r[k])):ctx.moveTo(X(i),Y(r[k])));ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[k]),rows.length===1?7:4.5,0,Math.PI*2);ctx.fill()})});
-    ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';rows.forEach((r,i)=>{if(i===0||i===rows.length-1)ctx.fillText(r.date.slice(5),X(i)-15,pad.t+H+18)});canvas.id=old;return;
-  }
-  const norm=v=>{const m=String(v??'').replace(',','.').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):NaN};
-  const wanted=type.toLowerCase();
-  const rows=(data.healthImports||[]).filter(x=>x?.date&&String(x.type||'').toLowerCase()===wanted).map(x=>({date:x.date,value:norm(x.value)})).filter(x=>Number.isFinite(x.value)).sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
-  drawSimpleSeries('healthSelectedChart',rows,'');
-}
-function bpImportHuawei(){
-  const st=document.getElementById('bpImportStatus');
-  if(st){st.style.display='block';st.textContent='Ouverture du raccourci exact « HUAWEI vers CARNET Tension »…';}
-  const callback=window.location.href.split(/[?#]/)[0]
-    +'?healthSource='+encodeURIComponent('HUAWEI Health')
-    +'&healthType='+encodeURIComponent('Tension artérielle')
-    +'&healthUnit='+encodeURIComponent('mmHg');
-  runShortcut('HUAWEI vers CARNET Tension',callback);
-}
-function bpImportApple(){
-  // V35d : aucun raccourci Apple Santé dédié n'est installé sur cet iPhone.
-  // Ne plus lancer un nom inexistant : cela évite l'alerte « Le fichier n'existe pas ».
-  const st=document.getElementById('bpImportStatus');
-  if(st){
-    st.style.display='block';
-    st.textContent='Apple Santé : le raccourci d’import de tension n’est pas encore installé. Utilisez pour l’instant « Importer tension HUAWEI » ou « + Nouvelle mesure ».';
-  }
-}
 function startHuaweiImport(){
   // Envoie au raccourci l'adresse de retour du carnet.
   // Le raccourci pourra rouvrir cette adresse avec les paramètres healthSource,
@@ -1263,10 +1078,6 @@ function extractHuaweiNumber(value){
   if(value===null || value===undefined) return '';
   let s=String(value).trim();
   try{s=decodeURIComponent(s)}catch(_){}
-  // V34k : conserve une tension complète transmise sous la forme 130/80.
-  // La version précédente ne gardait que le premier nombre (130).
-  const bp=s.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-  if(bp) return bp[1]+'/'+bp[2];
   // Accepte "8 776", "8776", "8776healthSource=...", etc.
   const m=s.match(/-?\d[\d\s\u00A0.,]*/);
   if(!m) return '';
@@ -1310,19 +1121,15 @@ function formatHealthImportValue(type,value,unit){
   const typ=String(type||'').trim();
   const val=String(value||'').trim();
   const u=String(unit||'').trim();
-  if(/sommeil|sleep/i.test(typ)){
+  if(/sommeil|sleep/i.test(typ) && /^(seconds?|secondes?|sec|s)$/i.test(u)){
     const n=Number(val.replace(',','.'));
     if(Number.isFinite(n) && n>=0){
-      let totalMinutes;
-      if(/^(seconds?|secondes?|sec|s)$/i.test(u)) totalMinutes=Math.round(n/60);
-      else if(/^(h|heure|heures|hour|hours)$/i.test(u) || !u) totalMinutes=Math.round(n*60);
-      if(Number.isFinite(totalMinutes)){
-        const h=Math.floor(totalMinutes/60);
-        const m=totalMinutes%60;
-        if(h>0 && m>0) return `${h} h ${m} min`;
-        if(h>0) return `${h} h`;
-        return `${m} min`;
-      }
+      const totalMinutes=Math.round(n/60);
+      const h=Math.floor(totalMinutes/60);
+      const m=totalMinutes%60;
+      if(h>0 && m>0) return `${h} h ${m} min`;
+      if(h>0) return `${h} h`;
+      return `${m} min`;
     }
   }
   return val+(u?' '+u:'');
@@ -1338,24 +1145,10 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   let u=(unit||'').trim();
   if(!u && /poids|weight/i.test(typ)) u='kg';
   else if(!u && /fréquence cardiaque|heart rate|pouls/i.test(typ)) u='bpm';
-  else if(!u && /(tension|pression artérielle|blood pressure)/i.test(typ)) u='mmHg';
-  else if(!u && /spo₂|spo2|saturation/i.test(typ)) u='%';
+  else if(!u && /tension|blood pressure/i.test(typ)) u='mmHg';
   else if(!u && /pas|steps/i.test(typ)) u='pas';
   else if(!u && /sommeil|sleep/i.test(typ)) u='h';
-  const defaultNote=/huawei/i.test(src)?'Import automatique via HUAWEI vers CARNET':'Import automatique via Apple Santé';
-  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||defaultNote,photo:''};
-  // V35d : une tension complète reçue sous forme SYS/DIA est aussi enregistrée
-  // automatiquement dans l'historique Tension, afin d'alimenter immédiatement la courbe.
-  if(/tension|pression artérielle|blood pressure/i.test(typ)){
-    const bpm=String(clean).match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-    if(bpm){
-      data.bp=data.bp||[];
-      const sys=Number(bpm[1]), dia=Number(bpm[2]);
-      const already=data.bp.findIndex(x=>x && x.date===d && Number(x.sys)===sys && Number(x.dia)===dia);
-      const bpEntry={sys,dia,pulse:'',date:d,time:'',context:'Import Santé',note:note||defaultNote,photo:''};
-      if(already>=0) data.bp.splice(already,1,bpEntry); else data.bp.unshift(bpEntry);
-    }
-  }
+  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||'Import automatique via Apple Santé',photo:''};
   const existing=data.healthImports.findIndex(x=>x && x.source===src && x.type===typ && x.date===d);
   if(existing>=0) data.healthImports.splice(existing,1,entry);
   else data.healthImports.unshift(entry);
@@ -1363,59 +1156,26 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   const sec=document.getElementById('healthConnectionsSection');
   if(sec) sec.classList.add('open');
   healthImportStatus('Donnée importée : '+src+' • '+typ+' • '+formatHealthImportValue(typ,clean,u));
-  if(/tension|blood\s*pressure/i.test(typ)){ requestAnimationFrame(drawBPChart); }
   setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
   return true;
 }
 
 function readHealthParam(name){
-  // V34w : lecture très tolérante des retours iOS/Raccourcis.
-  // Accepte aussi les paramètres accidentellement collés sans « & » :
-  // healthValue=130healthSource=Apple SantéhealthType=Fréquence cardiaque...
-  const key=String(name||'').trim();
+  // Lecture robuste des paramètres, même si Raccourcis/iOS laisse des espaces
+  // ou des caractères accentués non encodés dans l’URL.
   try{
     const q=new URLSearchParams(window.location.search||'');
     const h=new URLSearchParams((window.location.hash||'').replace(/^#/,''));
-    const normal=q.get(key) ?? h.get(key);
+    const normal=q.get(name) ?? h.get(name);
     if(normal!==null && normal!==undefined && String(normal).trim()!=='') return String(normal).trim();
   }catch(_){}
-
-  let href=String(window.location.href||'');
-  try{href=decodeURIComponent(href.replace(/\+/g,' '));}catch(_){href=href.replace(/\+/g,' ');}
-
-  // Voie normale, avec séparateur URL.
-  let re=new RegExp('[?&#]'+key+'\\s*=\\s*([^&#]*)','i');
-  let m=href.match(re);
-  if(m && String(m[1]||'').trim()){
-    let v=String(m[1]||'').trim();
-    // Coupe si un autre paramètre health... a été collé à la valeur.
-    v=v.split(/(?=health(?:Source|Type|Value|Unit|Date|Note|Payload)\s*=)/i)[0].trim();
-    if(v) return v;
-  }
-
-  // Secours : le nom du paramètre peut lui-même être collé au précédent.
-  re=new RegExp(key+'\\s*=\\s*([\\s\\S]*?)(?=health(?:Source|Type|Value|Unit|Date|Note|Payload)\\s*=|[&#]|$)','i');
-  m=href.match(re);
-  return m ? String(m[1]||'').trim() : '';
-}
-
-function inferHealthType(type,unit,rawValue,source){
-  let typ=canonicalHealthType(type);
-  const u=String(unit||'').trim();
-  const raw=String(rawValue||'').trim();
-  const joined=(typ+' '+u+' '+raw+' '+String(source||'')).toLowerCase();
-  if(typ && typ!=='Donnée Santé') return typ;
-  if(/\bbpm\b|nombre\s*\/\s*min|frequence\s*cardiaque|fréquence\s*cardiaque|heart\s*rate|\bpouls\b/i.test(joined)) return 'Fréquence cardiaque';
-  if(/\bkg\b|\bpoids\b|\bweight\b/i.test(joined)) return 'Poids';
-  if(/\bpas\b|\bsteps?\b|nombre\s*de\s*pas/i.test(joined)) return 'Pas';
-  if(/sommeil|sleep|heures?\s*de\s*sommeil/i.test(joined)) return 'Sommeil';
-  if(/spo2|spo₂|saturation/i.test(joined)) return 'SpO₂';
-  if(/mmhg|tension|pression\s*arterielle|pression\s*artérielle|blood\s*pressure/i.test(joined)){
-    if(/systol/i.test(joined)) return 'Pression artérielle systolique';
-    if(/diastol/i.test(joined)) return 'Pression artérielle diastolique';
-    return 'Tension artérielle';
-  }
-  return 'Donnée Santé';
+  const href=String(window.location.href||'');
+  const re=new RegExp('[?&#]'+name+'=([^&#]*)','i');
+  const m=href.match(re);
+  if(!m) return '';
+  let v=m[1].replace(/\+/g,' ').trim();
+  try{v=decodeURIComponent(v)}catch(_){}
+  return v.trim();
 }
 function canonicalHealthType(type){
   const raw=String(type||'').trim();
@@ -1424,10 +1184,7 @@ function canonicalHealthType(type){
   if(simple==='poids' || simple==='weight') return 'Poids';
   if(simple==='sommeil' || simple==='sleep') return 'Sommeil';
   if(simple==='pas' || simple==='steps' || simple==='nombredepas') return 'Pas';
-  if(simple==='pressionarteriellesystolique' || simple==='tensionarteriellesystolique' || simple==='systolicbloodpressure') return 'Pression artérielle systolique';
-  if(simple==='pressionarteriellediastolique' || simple==='tensionarteriellediastolique' || simple==='diastolicbloodpressure') return 'Pression artérielle diastolique';
-  if(simple==='tension' || simple==='tensionarterielle' || simple==='pressionarterielle' || simple==='bloodpressure') return 'Tension artérielle';
-  if(simple==='spo2' || simple==='saturationenoxygene' || simple==='oxygensaturation') return 'SpO₂';
+  if(simple==='tension' || simple==='tensionarterielle' || simple==='bloodpressure') return 'Tension artérielle';
   return raw || 'Donnée Santé';
 }
 function importHealthFromUrl(){
@@ -1440,25 +1197,19 @@ function importHealthFromUrl(){
     // contient des accents ou des espaces (ex. "Fréquence cardiaque").
     let decodedHref=href;
     try{decodedHref=decodeURIComponent(href.replace(/\+/g,' '));}catch(_){decodedHref=href.replace(/\+/g,' ');}
-    const fastValue=decodedHref.match(/[?&#]healthValue\s*=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
+    const fastValue=decodedHref.match(/[?&#]healthValue\s*=\s*([-+]?\d+(?:[.,]\d+)?)/i);
     if(fastValue){
-      const getRaw=(key)=>readHealthParam(key);
+      const getRaw=(key)=>{
+        const re=new RegExp('[?&#]'+key+'\\s*=\\s*([^&#]*)','i');
+        const m=decodedHref.match(re);
+        return m ? String(m[1]||'').trim() : '';
+      };
       let fastSource=getRaw('healthSource') || 'Apple Santé';
+      let fastType=canonicalHealthType(getRaw('healthType'));
       let fastUnit=getRaw('healthUnit');
-      // V35f : si Raccourcis envoie SYS et DIA séparément, on les réunit AVANT
-      // la voie rapide. Cela évite qu'un healthValue=130 soit enregistré seul
-      // et que la fonction quitte avant de voir healthDia=80.
-      const fastSys=getRaw('healthSys')||getRaw('systolic');
-      const fastDia=getRaw('healthDia')||getRaw('diastolic');
-      let fastRawValue=fastValue[1];
-      if(fastSys && fastDia && !String(fastRawValue||'').includes('/')){
-        fastRawValue=String(fastSys).trim()+'/'+String(fastDia).trim();
-      }
-      let fastType=inferHealthType(getRaw('healthType'),fastUnit,fastRawValue,fastSource);
-      if(fastSys && fastDia) fastType='Tension artérielle';
       const fastDate=getRaw('healthDate') || localDateString();
       const fastNote=getRaw('healthNote');
-      const fastClean=extractHuaweiNumber(fastRawValue);
+      const fastClean=extractHuaweiNumber(fastValue[1]);
 
       // Si le type a été mal transmis mais que l'unité identifie clairement
       // la mesure, on privilégie l'unité. C'est le cas du rythme cardiaque.
@@ -1469,13 +1220,10 @@ function importHealthFromUrl(){
 
       if(fastClean){
         let fastOk=false;
-        // V34s : HUAWEI n'est plus synonyme de « Pas ».
-        // Seul le vrai type Pas utilise saveHuaweiImport ; les autres mesures
-        // HUAWEI gardent leur type (tension, sommeil, fréquence, poids, SpO2...).
-        if((/huawei/i.test(fastSource) || !fastSource) && fastType==='Pas'){
+        if(/huawei/i.test(fastSource) || (!fastSource && fastType==='Pas')){
           fastOk=saveHuaweiImport(fastClean,'Import automatique via HUAWEI vers CARNET');
         }else{
-          fastOk=saveDirectHealthImport(fastSource||'Apple Santé',fastType||'Donnée Santé',fastClean,fastUnit,fastDate,fastNote);
+          fastOk=saveDirectHealthImport(fastSource,fastType||'Donnée Santé',fastClean,fastUnit,fastDate,fastNote);
         }
         if(fastOk){
           if(window.history && history.replaceState){
@@ -1486,15 +1234,11 @@ function importHealthFromUrl(){
       }
     }
     const directSource=readHealthParam('healthSource');
+    let directType=canonicalHealthType(readHealthParam('healthType'));
     let directUnit=readHealthParam('healthUnit');
-    let directType=inferHealthType(readHealthParam('healthType'),directUnit,readHealthParam('healthValue'),directSource);
     const directDate=readHealthParam('healthDate')||localDateString();
     const directNote=readHealthParam('healthNote');
     let rawValue=readHealthParam('healthValue');
-    // V35d : accepte aussi deux paramètres séparés envoyés par Raccourcis.
-    const directSys=readHealthParam('healthSys')||readHealthParam('systolic');
-    const directDia=readHealthParam('healthDia')||readHealthParam('diastolic');
-    if(directSys && directDia && !String(rawValue||'').includes('/')) rawValue=String(directSys).trim()+'/'+String(directDia).trim();
 
     // V30 : secours spécial Raccourcis/iOS. Certaines URL contenant des accents
     // ou des espaces arrivent partiellement décodées. Si l'unité est bpm et la
@@ -1509,7 +1253,7 @@ function importHealthFromUrl(){
       }
     }
     if(!rawValue){
-      const vm=href.match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
+      const vm=href.match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?)/i);
       if(vm) rawValue=vm[1];
     }
     if(/hume/i.test(directSource) && /^(bpm|nombre\s*\/\s*min)$/i.test(String(directUnit||'').trim())){
@@ -1535,7 +1279,7 @@ function importHealthFromUrl(){
     }
     if(!value){
       // Dernier secours : cherche healthValue directement dans toute l’URL.
-      const m=String(window.location.href||'').match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)?)/i);
+      const m=String(window.location.href||'').match(/[?&#]healthValue=\s*([-+]?\d+(?:[.,]\d+)?)/i);
       if(m) value=extractHuaweiNumber(m[1]);
     }
     if(!value){
@@ -1549,31 +1293,21 @@ function importHealthFromUrl(){
       else if(directType==='Fréquence cardiaque') directUnit='bpm';
       else if(directType==='Sommeil') directUnit='h';
       else if(directType==='Pas') directUnit='pas';
-      else if(/^(Tension artérielle|Pression artérielle systolique|Pression artérielle diastolique)$/.test(directType)) directUnit='mmHg';
-      else if(directType==='SpO₂') directUnit='%';
+      else if(directType==='Tension artérielle') directUnit='mmHg';
     }
 
     let ok=false;
-    // V34s : on ne force plus toutes les données HUAWEI dans « Pas ».
-    if((/huawei/i.test(directSource) || !directSource) && directType==='Pas'){
+    if(/huawei/i.test(directSource) || (!directSource && directType==='Pas')){
       ok=saveHuaweiImport(value,'Import automatique via HUAWEI vers CARNET');
     }else if(/apple/i.test(directSource) && directType==='Sommeil'){
       const hours=Number(String(value).replace(',','.'));
-      if(Number.isFinite(hours) && hours>=0 && hours<=24){
+      if(Number.isFinite(hours)){
         data.sleep=data.sleep||[];
+        const entry={date:directDate,hours,quality:'Bonne',wake:'',note:directNote||'Import Apple Santé'};
         const existing=data.sleep.findIndex(x=>x && x.date===directDate && /Import Apple Santé/i.test(x.note||''));
-        let total=hours;
-        // V35g : Apple Santé peut renvoyer le sommeil par segments (souvent 15 min = 0,25 h).
-        // Dans ce cas on additionne les petits segments du même jour au lieu de remplacer
-        // la nuit entière par le dernier segment de 15 minutes.
-        if(existing>=0 && hours<=1){
-          const previous=Number(data.sleep[existing]?.hours);
-          if(Number.isFinite(previous) && previous>=0 && previous<24) total=Math.min(24,previous+hours);
-        }
-        const entry={date:directDate,hours:Number(total.toFixed(3)),quality:'Importé',wake:'',note:directNote||'Import Apple Santé'};
         if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
         save();
-        const st=document.getElementById('sleepImportStatus'); if(st)st.textContent='Sommeil importé depuis Apple Santé : '+formatSleepDuration(total)+'.';
+        const st=document.getElementById('sleepImportStatus'); if(st)st.textContent='Sommeil importé depuis Apple Santé : '+hours+' h.';
         ok=true;
       }
     }else{
@@ -1671,157 +1405,8 @@ function delItem(arr,i,btn){
     if(document.body.contains(btn)){btn.dataset.confirmDelete='';btn.textContent='Suppr.';}
   },5000);
 }
-function entryDateTimeKey(x){
-  const d=String(x?.date||'0000-00-00');
-  const t=String(x?.time||'00:00').padStart(5,'0');
-  return d+'T'+t;
-}
-function indexedNewest(arr){
-  return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(b.x).localeCompare(entryDateTimeKey(a.x)));
-}
-function indexedOldest(arr){
-  return (arr||[]).map((x,i)=>({x,i})).sort((a,b)=>entryDateTimeKey(a.x).localeCompare(entryDateTimeKey(b.x)));
-}
-// V34r : les imports Santé ne restent plus isolés dans « Données santé ».
-// Les types reconnus sont aussi répercutés dans leur rubrique principale afin
-// que les cartes et les courbes utilisent immédiatement les mesures récentes.
-function cleanupAmbiguousHealthImports(){
-  // V34w : retire uniquement les faux doublons évidents créés par les anciennes
-  // versions : « Apple Santé • Donnée Santé • N » identique, le même jour,
-  // à un vrai import HUAWEI « Pas • N ». Aucune donnée typée n'est supprimée.
-  const arr=data.healthImports||[];
-  if(!arr.length) return false;
-  const before=arr.length;
-  data.healthImports=arr.filter((x,idx)=>{
-    if(!x || !/apple/i.test(x.source||'') || canonicalHealthType(x.type)!=='Donnée Santé' || String(x.unit||'').trim()) return true;
-    const v=String(x.value||'').trim(), d=String(x.date||'');
-    const dup=arr.some((y,j)=>j!==idx && y && /huawei/i.test(y.source||'') && canonicalHealthType(y.type)==='Pas' && String(y.value||'').trim()===v && String(y.date||'')===d);
-    return !dup;
-  });
-  return data.healthImports.length!==before;
-}
-
-function healthImportKey(x){
-  return [String(x?.source||''),String(x?.type||''),String(x?.date||''),String(x?.time||''),String(x?.value||''),String(x?.unit||'')].join('|');
-}
-// V34t : réparation automatique de la tension à partir des imports Santé déjà présents.
-// Cette migration ne dépend pas du raccourci : elle récupère notamment les anciennes
-// entrées « 130/80 mmHg » et peut associer une systolique + une diastolique du même jour.
-function repairBloodPressureImports(target=data){
-  try{
-    if(!target) return false;
-    target.healthImports=target.healthImports||[];
-    target.bp=target.bp||[];
-    let changed=false;
-    const byDate={};
-    for(const x of target.healthImports){
-      if(!x || !x.date) continue;
-      const typ=canonicalHealthType(x.type||'');
-      const unit=String(x.unit||'').trim();
-      const raw=String(x.value||'').trim();
-      const full=raw.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-      if(full){
-        const sys=Number(full[1]), dia=Number(full[2]);
-        if(sys>=70 && sys<=260 && dia>=35 && dia<=160){
-          const exists=target.bp.some(b=>b && b.date===x.date && Number(b.sys)===sys && Number(b.dia)===dia);
-          if(!exists){
-            target.bp.push({sys,dia,pulse:'',date:x.date,time:x.time||'',context:'Import Santé',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:'repairbp|'+healthImportKey(x)});
-            changed=true;
-          }
-          continue;
-        }
-      }
-      const n=Number(raw.replace(',','.'));
-      if(!Number.isFinite(n)) continue;
-      const clearlyBP=/pression artérielle|tension|blood pressure/i.test(typ) || /mmhg/i.test(unit);
-      if(!clearlyBP) continue;
-      byDate[x.date]=byDate[x.date]||{sys:null,dia:null,src:[]};
-      if(/systolique|systolic/i.test(typ) && n>=70 && n<=260) byDate[x.date].sys=n;
-      if(/diastolique|diastolic/i.test(typ) && n>=35 && n<=160) byDate[x.date].dia=n;
-      byDate[x.date].src.push(x);
-    }
-    for(const [date,v] of Object.entries(byDate)){
-      if(v.sys==null || v.dia==null) continue;
-      const exists=target.bp.some(b=>b && b.date===date && Number(b.sys)===Number(v.sys) && Number(b.dia)===Number(v.dia));
-      if(!exists){
-        const first=v.src[0]||{};
-        target.bp.push({sys:Number(v.sys),dia:Number(v.dia),pulse:'',date,time:first.time||'',context:'Import Santé',note:'Tension reconstruite automatiquement depuis les imports Santé',photo:'',importKey:'repairbp-pair|'+date+'|'+v.sys+'|'+v.dia});
-        changed=true;
-      }
-    }
-    return changed;
-  }catch(_){ return false; }
-}
-
-function reconcileImportedHealth(target=data){
-  if(!target) return target;
-  repairBloodPressureImports(target);
-  target.healthImports=target.healthImports||[];
-  target.bp=target.bp||[]; target.sleep=target.sleep||[]; target.glucose=target.glucose||[];
-  // D'abord les tensions complètes 130/80.
-  for(const x of target.healthImports){
-    if(!x?.date) continue;
-    const typ=canonicalHealthType(x.type||'');
-    const ik=healthImportKey(x);
-    if(/tension artérielle|blood\s*pressure/i.test(typ)){
-      const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-      if(m && !target.bp.some(b=>b.importKey===ik)){
-        target.bp.push({sys:Number(m[1]),dia:Number(m[2]),pulse:'',date:x.date,time:x.time||'',context:'Import Santé',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:ik});
-      }
-    }
-  }
-  // Puis les mesures HUAWEI/HealthKit séparées en systolique et diastolique.
-  const bpParts=new Map();
-  for(const x of target.healthImports){
-    if(!x?.date) continue;
-    const typ=canonicalHealthType(x.type||'');
-    if(!/pression artérielle (systolique|diastolique)/i.test(typ)) continue;
-    const n=Number(String(x.value||'').replace(',','.'));
-    if(!Number.isFinite(n)) continue;
-    const key=[x.source||'Santé',x.date,x.time||''].join('|');
-    const o=bpParts.get(key)||{source:x.source||'Santé',date:x.date,time:x.time||'',note:x.note||'',sys:null,dia:null,keys:[]};
-    if(/systolique/i.test(typ)) o.sys=n; else o.dia=n;
-    o.keys.push(healthImportKey(x));
-    bpParts.set(key,o);
-  }
-  // Si l'heure n'est pas identique entre les deux composantes, rapproche aussi par source+date.
-  const byDay=new Map();
-  for(const o of bpParts.values()){
-    const dayKey=[o.source,o.date].join('|');
-    const d=byDay.get(dayKey)||{source:o.source,date:o.date,time:o.time||'',note:o.note||'',sys:null,dia:null,keys:[]};
-    if(o.sys!=null) d.sys=o.sys;
-    if(o.dia!=null) d.dia=o.dia;
-    d.keys.push(...o.keys);
-    byDay.set(dayKey,d);
-  }
-  for(const o of byDay.values()){
-    if(o.sys==null || o.dia==null) continue;
-    const ik='bp-pair|'+o.keys.sort().join('~');
-    if(!target.bp.some(b=>b.importKey===ik)){
-      target.bp.push({sys:o.sys,dia:o.dia,pulse:'',date:o.date,time:o.time||'',context:'Import Santé',note:o.note||`Importé depuis ${o.source}`,photo:'',importKey:ik});
-    }
-  }
-  for(const x of target.healthImports){
-    if(!x?.date) continue;
-    const typ=canonicalHealthType(x.type||'');
-    const ik=healthImportKey(x);
-    if(/sommeil|sleep/i.test(typ)){
-      const h=sleepHoursFromHealthImport(x);
-      if(Number.isFinite(h) && !target.sleep.some(z=>z.importKey===ik)){
-        target.sleep.push({hours:Number(h.toFixed(2)),quality:'Importé',date:x.date,wake:'',note:x.note||`Importé depuis ${x.source||'Santé'}`,importKey:ik});
-      }
-    }else if(/glyc[eé]mie|glucose|blood\s*glucose/i.test(typ)){
-      const v=numericHealthValue(x.value);
-      if(Number.isFinite(v) && !target.glucose.some(g=>g.importKey===ik)){
-        target.glucose.push({value:v,moment:'Import Santé',date:x.date,time:x.time||'',meal:'',mealTag:'',note:x.note||`Importé depuis ${x.source||'Santé'}`,photo:'',importKey:ik});
-      }
-    }
-  }
-  return target;
-}
-
 function render(){
-  glucoseList.innerHTML=data.glucose.length?indexedNewest(data.glucose).map(({x,i})=>`<div class="item">
+  glucoseList.innerHTML=data.glucose.length?data.glucose.map((x,i)=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
     <button class="action danger" style="padding:5px 8px" onclick="delItem('glucose',${i},this)">Suppr.</button></div>
     ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
@@ -1830,30 +1415,21 @@ function render(){
   clavicleList.innerHTML=data.clavicle.length?data.clavicle.map((x,i)=>itemHtml(
     `Clavicule${x.pain!==''?' • douleur '+x.pain+'/10':''}`,
     `${x.date} • ${x.mobility||''}${x.kine?' • Kiné: '+x.kine:''}`,x.note,'clavicle',i)).join(''):'<div class="empty">Aucune note.</div>';
-  {
-    const manual=indexedNewest(data.bp||[]).map(({x,i})=>({date:x.date||'',time:x.time||'',html:`<div class="item">
-      <div class="item-top"><div><div class="item-title">${esc(`${x.sys}/${x.dia} mmHg${x.pulse!==''?' • '+x.pulse+'/min':''}`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.context||''}`)}</div></div>
-      <button class="action danger" style="padding:5px 8px" onclick="delItem('bp',${i},this)">Suppr.</button></div>
-      ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
-      ${x.photo?`<img src="${x.photo}" alt="Photo du tensiomètre" class="saved-thumb"><div><button class="action danger" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('bp',${i})">Supprimer la photo</button></div>`:''}
-    </div>`}));
-    const imported=indexedNewest(data.healthImports||[]).map(({x,i})=>{
-      if(!x?.date || !/tension|blood\s*pressure/i.test(String(x.type||''))) return null;
-      const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/); if(!m) return null;
-      return {date:x.date||'',time:x.time||'',html:itemHtml(`${m[1]}/${m[2]} mmHg • importé`,`${x.date}${x.time?' • '+x.time:''} • ${x.source||'Santé'}`,x.note||'Donnée importée','healthImports',i)};
-    }).filter(Boolean);
-    const all=manual.concat(imported).sort((a,b)=>`${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
-    bpList.innerHTML=all.length?all.map(o=>o.html).join(''):'<div class="empty">Aucune mesure.</div>';
-  }
+  bpList.innerHTML=(data.bp||[]).length?(data.bp||[]).map((x,i)=>`<div class="item">
+    <div class="item-top"><div><div class="item-title">${esc(`${x.sys}/${x.dia} mmHg${x.pulse!==''?' • '+x.pulse+'/min':''}`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.context||''}`)}</div></div>
+    <button class="action danger" style="padding:5px 8px" onclick="delItem('bp',${i},this)">Suppr.</button></div>
+    ${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}
+    ${x.photo?`<img src="${x.photo}" alt="Photo du tensiomètre" class="saved-thumb"><div><button class="action danger" style="margin-top:6px;padding:5px 8px" onclick="removePhoto('bp',${i})">Supprimer la photo</button></div>`:''}
+  </div>`).join(''):'<div class="empty">Aucune mesure.</div>';
   medList.innerHTML=data.meds.length?data.meds.map((x,i)=>itemHtml(x.title,`${x.date}${x.time?' • '+x.time:''}${x.dose?' • '+x.dose:''}${x.taken?' • '+x.taken:''}`,x.text,'meds',i)+photoBlock(x,'meds',i)).join(''):'<div class="empty">Aucune entrée.</div>';
   renderGeneric('analyses','analysisList');
   const hil=document.getElementById('healthImportList');
   if(hil){
     hil.innerHTML=(data.healthImports||[]).length
-      ? indexedNewest(data.healthImports).map(({x,i})=>{
+      ? (data.healthImports||[]).map((x,i)=>{
           const base=itemHtml(
             `${x.source} • ${x.type}`,
-            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${formatHealthImportValue(x.type,x.value,x.unit)}`:''}${isStepEntry(x)?` • ≈ ${formatDistanceFromSteps(x.value)}`:''}`,
+            `${x.date}${x.time?' • '+x.time:''}${x.value?` • ${formatHealthImportValue(x.type,x.value,x.unit)}`:''}`,
             x.note||'','healthImports',i
           );
           const photo=photoBlock(x,'healthImports',i);
@@ -1865,13 +1441,9 @@ function render(){
   }
 
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
-  noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>${photoBlock(x,'notes',i)}`).join(''):'<div class="empty">Aucune entrée.</div>';
-  {
-    const manual=indexedNewest(data.sleep).map(({x,i})=>({date:x.date||'',html:itemHtml(`${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)}));
-    const imported=indexedNewest(data.healthImports).map(({x,i})=>({x,i,h:sleepHoursFromHealthImport(x)})).filter(o=>o.x?.date&&Number.isFinite(o.h)).map(o=>({date:o.x.date||'',html:itemHtml(`${o.h.toLocaleString('fr-FR',{maximumFractionDigits:2})} h • importé`,`${o.x.date} • ${o.x.source||'Santé'}`,o.x.note||'Donnée importée','healthImports',o.i)}));
-    const all=manual.concat(imported).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-    sleepList.innerHTML=all.length?all.map(o=>o.html).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
-  }
+  noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
+  sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
+    `${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
 
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
   const og=document.getElementById('objGlucoseText'),oc=document.getElementById('objClavicleText'),os=document.getElementById('objSleepText');
@@ -1880,7 +1452,7 @@ function render(){
   if(os)os.textContent=data.objectives.sleep||'Aucun repère personnel enregistré.';
 
   if(data.glucose.length){
-    const g=indexedNewest(data.glucose)[0].x;
+    const g=data.glucose[0];
     const [st,cls]=glucoseStatus(Number(g.value));
     lastGlucose.textContent=g.value+' mg/dL';
     lastGlucoseNote.innerHTML=esc(g.moment+' • '+g.date)+' • <span class="'+cls+'">'+st+'</span>';
@@ -1890,22 +1462,15 @@ function render(){
   if(data.clavicle.length){
     const c=data.clavicle[0];lastClavicle.textContent=c.mobility||'Suivi';lastClavicleNote.textContent=c.date;
   }else{lastClavicle.textContent='—';lastClavicleNote.textContent='Aucune donnée'}
-  {
-    const sr=combinedSleepRows();
-    const s=sr.length?sr[sr.length-1]:null;
-    if(s){lastSleep.textContent=formatSleepDuration(s.value);lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
-    else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
-  }
-  { const br=bpRows(); const b=br.length?br[br.length-1]:null; if(b){lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.time?b.time+' • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'} }
+  if(data.sleep.length){
+    const s=data.sleep[0];lastSleep.textContent=s.hours+' h';lastSleepNote.textContent=s.quality+' • '+s.date;
+  }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
+  if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
   renderGlucoseIntelligence();
   renderExercises();
   renderToday();
   requestAnimationFrame(drawGlucoseChart);
-  requestAnimationFrame(drawSleepChart);
-  requestAnimationFrame(drawStepsCharts);
-  requestAnimationFrame(drawBPChart);
-  requestAnimationFrame(healthFormChanged);
 }
 function renderGeneric(arr,listId){
   const el=document.getElementById(listId);
@@ -1971,19 +1536,12 @@ function openExternal(url){
     window.location.href=url;
   }
 }
-function openAppleHealthBridge(){
-  // V34r : envoie l’adresse EXACTE de cette copie du carnet au raccourci.
-  // Ainsi Apple Santé revient dans le même index/origine et écrit dans le même localStorage.
-  const callback=window.location.href.split(/[?#]/)[0];
-  healthImportStatus('Ouverture de « Carnet - Apple Santé »… retour vers cette version du carnet.');
-  runShortcut('Carnet - Apple Santé',callback);
-}
+function openAppleHealthBridge(){runShortcut('Carnet - Apple Santé');}
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
-  if(st){
-    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34g empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
-    st.style.display='block';
-  }
+  if(st) st.textContent='Ouverture du raccourci Apple Santé pour récupérer le sommeil…';
+  const callback=window.location.href.split(/[?#]/)[0];
+  runShortcut('Carnet - Apple Santé','Sommeil | '+callback);
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
@@ -2433,690 +1991,17 @@ function renderGlucoseStats(){
   gMin.textContent=Math.min(...arr);
   gMax.textContent=Math.max(...arr);
 }
-
-function isStepEntry(x){
-  return !!x && /^(pas|steps?|nombre\s*de\s*pas)$/i.test(String(x.type||'').trim());
-}
-function isDistanceEntry(x){
-  return !!x && /(distance|walking.*distance|marche.*distance|distance.*marche)/i.test(String(x.type||'').trim());
-}
-function numericHealthValue(v){
-  const n=Number(String(v??'').replace(/\s/g,'').replace(',','.'));
-  return Number.isFinite(n)?n:NaN;
-}
-function directDistanceMeters(x){
-  if(!isDistanceEntry(x)) return NaN;
-  const n=numericHealthValue(x.value); if(!Number.isFinite(n)) return NaN;
-  const u=String(x.unit||'').trim().toLowerCase();
-  if(/km|kilom/.test(u)) return n*1000;
-  if(/^m$|mètre|metre/.test(u)) return n;
-  return n<50 ? n*1000 : n;
-}
-function distanceMetersFromSteps(v){
-  const n=numericHealthValue(v);
-  return Number.isFinite(n)?Math.max(0,n)*0.70:NaN;
-}
-function formatDistanceMeters(m){
-  if(!Number.isFinite(m)) return '—';
-  if(m<1000) return Math.round(m)+' m';
-  return (m/1000).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:2})+' km';
-}
-function formatDistanceFromSteps(v){ return formatDistanceMeters(distanceMetersFromSteps(v)); }
-function activityRows(){
-  const map=new Map();
-  (data.healthImports||[]).forEach(x=>{
-    if(!x?.date) return;
-    const r=map.get(x.date)||{date:x.date,steps:NaN,directDistance:NaN};
-    if(isStepEntry(x)){ const v=numericHealthValue(x.value); if(Number.isFinite(v)) r.steps=v; }
-    if(isDistanceEntry(x)){ const m=directDistanceMeters(x); if(Number.isFinite(m)) r.directDistance=m; }
-    map.set(x.date,r);
-  });
-  return [...map.values()].map(r=>{
-    const estimated=Number.isFinite(r.steps)?distanceMetersFromSteps(r.steps):NaN;
-    return {...r,distanceMeters:Number.isFinite(r.directDistance)?r.directDistance:estimated};
-  }).sort((a,b)=>a.date.localeCompare(b.date));
-}
-function drawSimpleSeries(canvasId, rows, valueLabel, options={}){
-  const canvas=document.getElementById(canvasId); if(!canvas)return;
-  rows=[...(rows||[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).slice(-14);
-  const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
-  const pad={l:48,r:16,t:22,b:42}; const W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
-  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Aucune mesure de tension exploitable.',pad.l,pad.t+30);return;}
-  const vals=rows.map(r=>Number(r.value)).filter(Number.isFinite); if(!vals.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Pas encore assez de données.',pad.l,pad.t+30);return;}
-  let min=Number.isFinite(options.min)?options.min:Math.min(...vals), max=Number.isFinite(options.max)?options.max:Math.max(...vals);
-  if(min===max){min=Math.max(0,min*0.8);max=max*1.2+1;}
-  if(options.step){ min=Math.floor(min/options.step)*options.step; max=Math.ceil(max/options.step)*options.step; if(max<=min)max=min+options.step; }
-  const x=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)); const y=v=>pad.t+H-(v-min)/(max-min)*H;
-  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';
-  const ticks=options.ticks||5;
-  for(let i=0;i<=ticks;i++){
-    const val=min+i*(max-min)/ticks, yy=y(val);
-    ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(pad.l+W,yy);ctx.stroke();
-    const label=options.formatTick?options.formatTick(val):((Math.abs(val)>=1000)?Math.round(val).toLocaleString('fr-FR'):(Math.round(val*10)/10).toLocaleString('fr-FR'));
-    ctx.fillText(label,4,yy+3);
-  }
-  ctx.strokeStyle='#d6dde8';ctx.lineWidth=2;ctx.beginPath();rows.forEach((r,i)=>{const X=x(i),Y=y(Number(r.value));if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y)});ctx.stroke();
-  ctx.fillStyle='#d6dde8'; rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(x(i),y(Number(r.value)),3,0,Math.PI*2);ctx.fill();});
-  ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui'; const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i); picks.forEach(i=>ctx.fillText(String(rows[i].date||'').slice(5),Math.max(2,x(i)-16),pad.t+H+18));
-  ctx.fillText(valueLabel,pad.l,pad.t-8);
-}
-function sleepHoursFromHealthImport(x){
-  if(!x || !/sommeil|sleep/i.test(String(x.type||''))) return NaN;
-  const raw=String(x.value??'').trim();
-  const unit=String(x.unit||'').trim().toLowerCase();
-  let n=numericHealthValue(raw);
-  if(Number.isFinite(n)){
-    if(/^(seconds?|secondes?|sec|s)$/.test(unit)) return n/3600;
-    if(/^(minutes?|mins?|min)$/.test(unit)) return n/60;
-    return n;
-  }
-  const h=raw.match(/(\d+(?:[.,]\d+)?)\s*h/i);
-  const m=raw.match(/(\d+(?:[.,]\d+)?)\s*min/i);
-  if(h||m){
-    const hv=h?Number(h[1].replace(',','.')):0;
-    const mv=m?Number(m[1].replace(',','.')):0;
-    return (Number.isFinite(hv)?hv:0)+(Number.isFinite(mv)?mv:0)/60;
-  }
-  return NaN;
-}
-function combinedSleepRows(){
-  const map=new Map();
-  // Regroupe d'abord les imports Santé par date. Plusieurs segments courts d'une
-  // même nuit (par ex. 0,25 h = 15 min) sont additionnés au lieu de s'écraser.
-  (data.healthImports||[]).forEach(x=>{
-    const v=sleepHoursFromHealthImport(x);
-    if(!x?.date || !Number.isFinite(v) || v<0) return;
-    const prev=map.get(x.date);
-    if(prev && prev.imported){
-      prev.value=Math.min(24,prev.value+v);
-      if(!prev.source && x.source) prev.source=x.source;
-    }else{
-      map.set(x.date,{date:x.date,value:v,source:x.source||'Santé',imported:true});
-    }
-  });
-  // Une valeur déjà consolidée dans la rubrique Sommeil a priorité sur les imports bruts.
-  (data.sleep||[]).forEach(x=>{
-    const v=Number(x.hours);
-    if(x?.date && Number.isFinite(v)) map.set(x.date,{date:x.date,value:v,source:/Import Apple Santé/i.test(x.note||'')?'Apple Santé':'Sommeil',imported:false});
-  });
-  return [...map.values()].map(({imported,...r})=>r).sort((a,b)=>a.date.localeCompare(b.date));
-}
-function formatSleepDuration(hours){
-  const n=Number(hours);
-  if(!Number.isFinite(n) || n<0) return '—';
-  const total=Math.round(n*60);
-  const h=Math.floor(total/60), m=total%60;
-  if(h && m) return h+' h '+m+' min';
-  if(h) return h+' h';
-  return m+' min';
-}
-async function importSleepFromClipboard(){
-  const st=document.getElementById('sleepImportStatus');
-  try{
-    const txt=await navigator.clipboard.readText();
-    let value='';
-    const urlMatch=String(txt||'').match(/[?&#]healthValue=([-+]?\d+(?:[.,]\d+)?)/i);
-    if(urlMatch) value=urlMatch[1];
-    if(!value){
-      const hm=String(txt||'').match(/(\d+(?:[.,]\d+)?)\s*h(?:eures?)?(?:\s*(\d+(?:[.,]\d+)?)\s*min)?/i);
-      if(hm){
-        const hv=Number(hm[1].replace(',','.'))||0;
-        const mv=hm[2]?Number(hm[2].replace(',','.'))||0:0;
-        value=String(hv+mv/60);
-      }
-    }
-    if(!value){
-      const n=String(txt||'').match(/[-+]?\d+(?:[.,]\d+)?/);
-      if(n) value=n[0];
-    }
-    const hours=Number(String(value).replace(',','.'));
-    if(!Number.isFinite(hours) || hours<0 || hours>24) throw new Error('Valeur de sommeil introuvable');
-    const d=localDateString();
-    data.sleep=data.sleep||[];
-    const entry={date:d,hours,quality:'Bonne',wake:'',note:'Import Apple Santé via presse-papiers'};
-    const existing=data.sleep.findIndex(x=>x && x.date===d && /Import Apple Santé/i.test(x.note||''));
-    if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
-    data.healthImports=data.healthImports||[];
-    const hEntry={source:'Apple Santé',type:'Sommeil',value:String(hours),unit:'h',date:d,note:'Import Apple Santé via presse-papiers',photo:''};
-    const hi=data.healthImports.findIndex(x=>x && x.date===d && /apple/i.test(x.source||'') && /sommeil|sleep/i.test(x.type||''));
-    if(hi>=0) data.healthImports.splice(hi,1,hEntry); else data.healthImports.unshift(hEntry);
-    save();
-    if(st) st.textContent='Sommeil importé : '+formatSleepDuration(hours)+'.';
-  }catch(err){
-    if(st) st.textContent='Impossible de lire le sommeil copié. Copiez d’abord la valeur ou l’adresse créée par le raccourci, puis réessayez.';
-  }
-}
-function drawSleepChart(){
-  drawSimpleSeries('sleepChart',combinedSleepRows(),'heures',{min:0,max:10,ticks:5,formatTick:v=>Math.round(v)+' h'});
-}
-function bpRows(){
-  const map=new Map();
-  const add=r=>{
-    const k=[r.date||'',r.time||'',Number(r.sys),Number(r.dia)].join('|');
-    map.set(k,r);
-  };
-  (data.bp||[]).forEach(x=>{
-    const sys=Number(x.sys),dia=Number(x.dia);
-    if(x?.date && Number.isFinite(sys) && Number.isFinite(dia)) add({date:x.date,time:x.time||'',sys,dia});
-  });
-  (data.healthImports||[]).forEach(x=>{
-    if(!x?.date || !/tension|blood\s*pressure/i.test(String(x.type||''))) return;
-    const m=String(x.value||'').match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
-    if(m) add({date:x.date,time:x.time||'',sys:Number(m[1]),dia:Number(m[2])});
-  });
-  return [...map.values()].sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b))).slice(-14);
-}
-function normalizedGlucoseRows(){
-  const out=[];
-  const add=(x)=>{
-    if(!x || !x.date) return;
-    const v=Number(String(x.value??'').replace(',','.').match(/\d+(?:\.\d+)?/)?.[0]);
-    if(Number.isFinite(v) && v>=20 && v<=600) out.push({...x,value:v});
-  };
-  (data.glucose||[]).forEach(add);
-  (data.healthImports||[]).forEach(x=>{
-    if(!x?.date || !/glyc|glucose/i.test(String(x.type||''))) return;
-    add({value:x.value,date:x.date,time:x.time||'',moment:'Import Santé'});
-  });
-  const seen=new Set();
-  return out.filter(x=>{const k=[x.date,x.time||'',x.value].join('|');if(seen.has(k))return false;seen.add(k);return true;})
-    .sort((a,b)=>entryDateTimeKey(a).localeCompare(entryDateTimeKey(b)));
-}
-function resizeCanvasForChart(canvas,height=220){
-  const ctx=canvas.getContext('2d');
-  const dpr=window.devicePixelRatio||1;
-  const rect=canvas.getBoundingClientRect();
-  const cssW=Math.max(280,Math.round(rect.width||canvas.parentElement?.clientWidth||760));
-  canvas.style.height=height+'px';
-  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(height*dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,cssW,height);
-  return {ctx,cssW,cssH:height};
-}
-function drawBPChart(){
-  const canvas=document.getElementById('bpChart'); if(!canvas)return;
-  const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
-  const rows=bpRows(), pad={l:48,r:16,t:24,b:42}, W=cssW-pad.l-pad.r,H=cssH-pad.t-pad.b;
-  if(!rows.length){ctx.fillStyle='#9aa4b2';ctx.font='13px system-ui';ctx.fillText('Aucune mesure de tension exploitable.',pad.l,pad.t+30);return;}
-  const vals=rows.flatMap(r=>[r.sys,r.dia]);
-  let min=Math.min(60,Math.floor((Math.min(...vals)-10)/20)*20), max=Math.max(160,Math.ceil((Math.max(...vals)+10)/20)*20);
-  const X=i=>pad.l+(rows.length===1?W/2:i*W/(rows.length-1)), Y=v=>pad.t+H-(v-min)/(max-min)*H;
-  ctx.strokeStyle='#45505f';ctx.lineWidth=1;ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';
-  for(let v=min;v<=max;v+=20){const yy=Y(v);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(pad.l+W,yy);ctx.stroke();ctx.fillText(String(v),5,yy+3);}
-  const series=[['sys','#7ddfff'],['dia','#ffb86b']];
-  series.forEach(([key,color])=>{ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=3;ctx.beginPath();rows.forEach((r,i)=>{const x=X(i),y=Y(r[key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();rows.forEach((r,i)=>{ctx.beginPath();ctx.arc(X(i),Y(r[key]),rows.length===1?7:4.5,0,Math.PI*2);ctx.fill();});});
-  if(rows.length===1){ctx.fillStyle='#aeb5c0';ctx.font='11px system-ui';ctx.fillText('1 mesure enregistrée — la courbe apparaîtra dès la 2e mesure.',pad.l,pad.t+H+34);}
-  ctx.fillStyle='#aeb5c0';ctx.font='10px system-ui';const picks=[0,Math.floor((rows.length-1)/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i);picks.forEach(i=>ctx.fillText(rows[i].date.slice(5),Math.max(2,X(i)-16),pad.t+H+18));
-  ctx.fillStyle='#7ddfff';ctx.fillText('SYS',pad.l,pad.t-8);ctx.fillStyle='#ffb86b';ctx.fillText('DIA',pad.l+38,pad.t-8);
-  ctx.fillStyle='#aeb5c0';ctx.fillText('mmHg',4,pad.t-8);
-}
-function renderActivitySummary(){
-  const rows=activityRows();
-  const today=localDateString();
-  const todayRow=rows.find(r=>r.date===today);
-  const latest=[...rows].reverse().find(r=>Number.isFinite(r.steps)||Number.isFinite(r.distanceMeters));
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
-  set('activityStepsToday',todayRow&&Number.isFinite(todayRow.steps)?Math.round(todayRow.steps).toLocaleString('fr-FR'):'—');
-  set('activityDistanceToday',todayRow?formatDistanceMeters(todayRow.distanceMeters):'—');
-  set('activityStepsLatest',latest&&Number.isFinite(latest.steps)?Math.round(latest.steps).toLocaleString('fr-FR'):'—');
-  set('activityDistanceLatest',latest?formatDistanceMeters(latest.distanceMeters):'—');
-}
-function drawStepsCharts(){
-  const rows=activityRows().slice(-14);
-  drawSimpleSeries('stepsChart',rows.filter(r=>Number.isFinite(r.steps)).map(r=>({date:r.date,value:r.steps})),'pas');
-  drawSimpleSeries('distanceChart',rows.filter(r=>Number.isFinite(r.distanceMeters)).map(r=>({date:r.date,value:r.distanceMeters/1000})),'km');
-  renderActivitySummary();
-}
-let ocrTargetMode='';
-let ocrTargetTemp=null;
-let ocrTargetGlucose=null;
-let ocrTargetBP=null;
-function targetOcrDisplay(mode){
-  const src=mode==='glucose'?pendingGlucosePhoto:pendingBPPhoto;
-  const status=document.getElementById(mode==='glucose'?'gOcrStatus':'bpOcrStatus');
-  if(!src){ if(status)status.textContent='Choisissez d’abord une photo.'; return; }
-  ocrTargetMode=mode; ocrTargetTemp=null;
-  const modal=document.getElementById('ocrTargetModal'), img=document.getElementById('ocrTargetImg'), dot=document.getElementById('ocrTargetDot'), use=document.getElementById('ocrTargetUse');
-  document.getElementById('ocrTargetTitle').textContent=mode==='glucose'?'Touchez le grand chiffre de glycémie':'Touchez le centre des grands chiffres';
-  document.getElementById('ocrTargetHelp').textContent=mode==='glucose'?'Touchez une fois au milieu du grand nombre (par exemple 137), pas sur la date ni l’heure.':'Touchez une fois au milieu de la zone SYS / DIA / pouls.';
-  img.src=src; dot.style.display='none'; use.disabled=true; modal.style.display='flex';
-  const pick=(ev)=>{
-    const r=img.getBoundingClientRect();
-    if(!r.width||!r.height)return;
-    const pt=ev.touches&&ev.touches[0]?ev.touches[0]:ev;
-    const x=Math.max(0,Math.min(1,(pt.clientX-r.left)/r.width));
-    const y=Math.max(0,Math.min(1,(pt.clientY-r.top)/r.height));
-    ocrTargetTemp={x,y};
-    const wrap=document.getElementById('ocrTargetWrap').getBoundingClientRect();
-    dot.style.left=(r.left-wrap.left+x*r.width)+'px';
-    dot.style.top=(r.top-wrap.top+y*r.height)+'px';
-    dot.style.display='block'; use.disabled=false;
-    ev.preventDefault();
-  };
-  img.onpointerdown=pick;
-}
-function closeOcrTarget(use){
-  const modal=document.getElementById('ocrTargetModal');
-  if(use&&ocrTargetTemp){
-    if(ocrTargetMode==='glucose')ocrTargetGlucose={...ocrTargetTemp};
-    else if(ocrTargetMode==='bp')ocrTargetBP={...ocrTargetTemp};
-    const status=document.getElementById(ocrTargetMode==='glucose'?'gOcrStatus':'bpOcrStatus');
-    if(status)status.textContent='Zone ciblée. Touchez maintenant « Lire '+(ocrTargetMode==='glucose'?'le chiffre':'les chiffres')+' ».';
-  }
-  modal.style.display='none';
-  document.getElementById('ocrTargetImg').onpointerdown=null;
-}
-function preprocessOcrTarget(dataUrl,target,mode='glucose',threshold=145,invert=false,binary=true){
-  return new Promise((resolve,reject)=>{
-    const img=new Image();
-    img.onload=()=>{
-      const W=img.naturalWidth,H=img.naturalHeight;
-      const cx=(target?.x??0.5)*W, cy=(target?.y??0.5)*H;
-      // Glycémie : rectangle assez serré autour du nombre touché. Tension : écran plus large.
-      const fracW=mode==='glucose'?0.46:0.72, fracH=mode==='glucose'?0.28:0.62;
-      let sw=Math.round(W*fracW), sh=Math.round(H*fracH);
-      let sx=Math.round(cx-sw/2), sy=Math.round(cy-sh/2);
-      sx=Math.max(0,Math.min(W-sw,sx)); sy=Math.max(0,Math.min(H-sh,sy));
-      const scale=Math.min(7,Math.max(3,2200/Math.max(sw,sh)));
-      const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(sw*scale)); c.height=Math.max(1,Math.round(sh*scale));
-      const ctx=c.getContext('2d',{willReadFrequently:true}); ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-      ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
-      const im=ctx.getImageData(0,0,c.width,c.height),d=im.data;
-      for(let i=0;i<d.length;i+=4){
-        let g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-        g=Math.max(0,Math.min(255,(g-128)*1.85+128));
-        let v=binary?(g>threshold?255:0):g; if(invert)v=255-v; d[i]=d[i+1]=d[i+2]=v;
-      }
-      ctx.putImageData(im,0,0); resolve(c.toDataURL('image/png'));
-    };
-    img.onerror=reject; img.src=dataUrl;
-  });
-}
-function preprocessOcrImage(dataUrl, cropMode='center', threshold=145, invert=false, binary=true){
-  return new Promise((resolve,reject)=>{
-    const img=new Image();
-    img.onload=()=>{
-      let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
-      // Plusieurs cadrages : certains lecteurs ont un petit écran LCD au centre/bas de la photo.
-      if(cropMode==='center'){
-        sx=Math.round(sw*0.12); sy=Math.round(sh*0.18); sw=Math.round(sw*0.76); sh=Math.round(sh*0.68);
-      }else if(cropMode==='lcd'){
-        sx=Math.round(sw*0.20); sy=Math.round(sh*0.28); sw=Math.round(sw*0.60); sh=Math.round(sh*0.48);
-      }else if(cropMode==='lcdTight'){
-        sx=Math.round(sw*0.27); sy=Math.round(sh*0.38); sw=Math.round(sw*0.46); sh=Math.round(sh*0.32);
-      }else if(cropMode==='lowerCenter'){
-        sx=Math.round(sw*0.18); sy=Math.round(sh*0.34); sw=Math.round(sw*0.64); sh=Math.round(sh*0.52);
-      }else if(cropMode==='displayRight'){
-        // Lecteurs photographiés légèrement de côté : l'écran est souvent dans la moitié droite.
-        sx=Math.round(sw*0.38); sy=Math.round(sh*0.37); sw=Math.round(sw*0.50); sh=Math.round(sh*0.40);
-      }else if(cropMode==='displayRightTight'){
-        // Cadrage très serré sur les grands chiffres, en évitant l'heure/date du haut.
-        sx=Math.round(sw*0.42); sy=Math.round(sh*0.43); sw=Math.round(sw*0.45); sh=Math.round(sh*0.30);
-      }
-      const scale=Math.min(6, Math.max(2.5, 1900/Math.max(sw,sh)));
-      const c=document.createElement('canvas');
-      c.width=Math.max(1,Math.round(sw*scale));
-      c.height=Math.max(1,Math.round(sh*scale));
-      const ctx=c.getContext('2d',{willReadFrequently:true});
-      ctx.imageSmoothingEnabled=true;
-      ctx.imageSmoothingQuality='high';
-      ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
-      const im=ctx.getImageData(0,0,c.width,c.height), d=im.data;
-      // Contraste renforcé pour les chiffres LCD / 7 segments.
-      for(let i=0;i<d.length;i+=4){
-        let g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-        g=Math.max(0,Math.min(255,(g-128)*1.65+128));
-        let v=binary?(g>threshold?255:0):g;
-        if(invert) v=255-v;
-        d[i]=d[i+1]=d[i+2]=v;
-      }
-      ctx.putImageData(im,0,0);
-      resolve(c.toDataURL('image/png'));
-    };
-    img.onerror=reject; img.src=dataUrl;
-  });
-}
-function preprocessOcrBox(dataUrl,target,mode='glucose',yOffset=0,wFrac=null,hFrac=null,threshold=145,invert=false,binary=true,contrast=2.15){
-  return new Promise((resolve,reject)=>{
-    const img=new Image();
-    img.onload=()=>{
-      const W=img.naturalWidth,H=img.naturalHeight;
-      const cx=(target?.x??0.5)*W, cy=((target?.y??0.5)+yOffset)*H;
-      const fw=wFrac??(mode==='glucose'?0.34:0.48), fh=hFrac??(mode==='glucose'?0.18:0.16);
-      let sw=Math.max(20,Math.round(W*fw)), sh=Math.max(20,Math.round(H*fh));
-      let sx=Math.round(cx-sw/2), sy=Math.round(cy-sh/2);
-      sx=Math.max(0,Math.min(W-sw,sx)); sy=Math.max(0,Math.min(H-sh,sy));
-      const scale=Math.min(9,Math.max(4,2600/Math.max(sw,sh)));
-      const c=document.createElement('canvas'); c.width=Math.round(sw*scale); c.height=Math.round(sh*scale);
-      const ctx=c.getContext('2d',{willReadFrequently:true});
-      ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
-      ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
-      const im=ctx.getImageData(0,0,c.width,c.height),d=im.data;
-      for(let i=0;i<d.length;i+=4){
-        let g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-        g=Math.max(0,Math.min(255,(g-128)*contrast+128));
-        let v=binary?(g>threshold?255:0):g; if(invert)v=255-v;
-        d[i]=d[i+1]=d[i+2]=v;
-      }
-      ctx.putImageData(im,0,0); resolve(c.toDataURL('image/png'));
-    };
-    img.onerror=reject; img.src=dataUrl;
-  });
-}
-async function recognizeVariants(worker,variants,psms=['8','7','13']){
-  const chunks=[];
-  for(const v of variants){
-    for(const psm of psms){
-      await worker.setParameters({tessedit_pageseg_mode:psm});
-      const ret=await worker.recognize(v);
-      const t=String(ret?.data?.text||'').replace(/[^0-9\s]/g,' ').trim();
-      if(t) chunks.push(t);
-    }
-  }
-  return chunks;
-}
-function topCandidate(text,min,max,preferDigits=0){
-  const freq=new Map();
-  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
-    const n=Number(m); if(n<min||n>max)continue;
-    let score=(freq.get(n)||0)+1;
-    if(preferDigits && String(n).length===preferDigits)score+=0.35;
-    freq.set(n,score);
-  }
-  return [...freq.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0] ?? null;
-}
-async function ocrImageData(dataUrl,statusId,target=null,mode='glucose'){
-  const status=document.getElementById(statusId);
-  if(!dataUrl){if(status)status.textContent='Choisissez d’abord une photo.';return ''}
-  if(!window.Tesseract){if(status)status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return ''}
-  try{
-    if(status)status.textContent='Lecture V34k : analyse renforcée de l’écran… cela peut prendre quelques secondes.';
-    const worker=await Tesseract.createWorker('eng');
-    await worker.setParameters({
-      tessedit_char_whitelist:'0123456789',
-      preserve_interword_spaces:'1',
-      user_defined_dpi:'300'
-    });
-    const variants=[];
-    if(target){
-      const targetJobs=[[105,false,true],[120,false,true],[135,false,true],[150,false,true],[165,false,true],[140,true,true],[145,false,false]];
-      for(const j of targetJobs){ try{variants.push(await preprocessOcrTarget(dataUrl,target,mode,...j));}catch(e){} }
-    }
-    // Les cadrages serrés sont essayés en premier : ils évitent que la date/heure du lecteur
-    // soit confondue avec la valeur principale.
-    const jobs=[
-      // En priorité : cadrages décalés à droite, adaptés aux photos réelles du lecteur.
-      ['displayRightTight',105,false,true],
-      ['displayRightTight',125,false,true],
-      ['displayRightTight',145,false,true],
-      ['displayRightTight',165,false,true],
-      ['displayRight',115,false,true],
-      ['displayRight',140,false,true],
-      ['displayRight',165,false,true],
-      ['displayRightTight',140,true,true],
-      ['displayRightTight',145,false,false],
-      ['lcdTight',128,false,true],
-      ['lcdTight',155,false,true],
-      ['lcd',128,false,true],
-      ['lcd',160,false,true],
-      ['lowerCenter',145,false,true],
-      ['center',145,false,true],
-      ['lcdTight',145,true,true],
-      ['center',145,false,false],
-      ['full',145,false,false]
-    ];
-    for(const j of jobs){
-      try{variants.push(await preprocessOcrImage(dataUrl,...j));}catch(e){}
-    }
-    variants.push(dataUrl);
-    const chunks=[];
-    for(const v of variants){
-      // 7 = une ligne, 13 = ligne brute, 6 = bloc compact.
-      for(const psm of ['8','7','13','6']){
-        await worker.setParameters({tessedit_pageseg_mode:psm});
-        const ret=await worker.recognize(v);
-        const t=String(ret?.data?.text||'').replace(/[^0-9\s]/g,' ').trim();
-        if(t) chunks.push(t);
-      }
-    }
-    await worker.terminate();
-    if(status)status.textContent='Lecture terminée. Vérifiez la valeur proposée.';
-    return chunks.join(' | ');
-  }catch(err){
-    if(status)status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir les chiffres manuellement.';
-    return ''
-  }
-}
-function candidateNumbers(text,min,max){
-  const freq=new Map();
-  // On conserve aussi les groupes d’un chiffre uniquement pour la tension/pouls,
-  // mais la glycémie privilégie ensuite les groupes de 2–3 chiffres.
-  for(const m of (String(text||'').match(/\d{1,3}/g)||[])){
-    const n=Number(m);
-    if(n>=min&&n<=max) freq.set(n,(freq.get(n)||0)+1);
-  }
-  return [...freq.entries()].sort((a,b)=>b[1]-a[1]).map(([n])=>n);
-}
-function glucoseScore(n,text){
-  let score=0;
-  const occurrences=(String(text||'').match(new RegExp('(^|\\D)'+n+'(?=\\D|$)','g'))||[]).length;
-  score+=occurrences*10;
-  if(n>=40&&n<=400)score+=8;
-  if(n>=60&&n<=250)score+=7;
-  // Pour un lecteur mg/dL photographié, le grand résultat est très souvent sur 3 chiffres.
-  if(String(n).length===3)score+=18;
-  if(String(n).length===2)score-=8;
-  // Les petites valeurs sont souvent l’heure/date imprimée en haut de l’écran.
-  if(n<40)score-=14;
-  return score;
-}
-
-// V34k — lecteur LCD / 7 segments dédié à la glycémie.
-// Il n'utilise pas la date/heure : il analyse uniquement une petite zone autour
-// du point touché par l'utilisateur et compare les 7 segments de chaque chiffre.
-function otsuThreshold(gray){
-  const hist=new Array(256).fill(0); for(const v of gray) hist[v]++;
-  const total=gray.length; let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i];
-  let sumB=0,wB=0,best=0,maxVar=-1;
-  for(let t=0;t<256;t++){
-    wB+=hist[t]; if(!wB)continue; const wF=total-wB; if(!wF)break;
-    sumB+=t*hist[t]; const mB=sumB/wB, mF=(sum-sumB)/wF;
-    const v=wB*wF*(mB-mF)*(mB-mF); if(v>maxVar){maxVar=v;best=t;}
-  }
-  return best;
-}
-function sevenSegMaskDigit(bits){
-  const maps={
-    0:[1,1,1,1,1,1,0],1:[0,1,1,0,0,0,0],2:[1,1,0,1,1,0,1],
-    3:[1,1,1,1,0,0,1],4:[0,1,1,0,0,1,1],5:[1,0,1,1,0,1,1],
-    6:[1,0,1,1,1,1,1],7:[1,1,1,0,0,0,0],8:[1,1,1,1,1,1,1],
-    9:[1,1,1,1,0,1,1]
-  };
-  let best=null,bestScore=-1e9;
-  for(const [d,m] of Object.entries(maps)){
-    let score=0;
-    for(let i=0;i<7;i++) score += m[i] ? (bits[i]*2.3) : ((1-bits[i])*0.8 - bits[i]*1.25);
-    if(score>bestScore){bestScore=score;best=Number(d);}
-  }
-  return {digit:best,score:bestScore};
-}
-function rectDensity(bin,w,h,x0,y0,x1,y1){
-  const xa=Math.max(0,Math.floor(x0*w)), xb=Math.min(w,Math.ceil(x1*w));
-  const ya=Math.max(0,Math.floor(y0*h)), yb=Math.min(h,Math.ceil(y1*h));
-  let n=0,s=0; for(let y=ya;y<yb;y++)for(let x=xa;x<xb;x++){s+=bin[y*w+x];n++;}
-  return n?s/n:0;
-}
-function classifySevenSegCell(bin,w,h){
-  // a,b,c,d,e,f,g. Rectangles volontairement larges pour tolérer perspective et flou.
-  const raw=[
-    rectDensity(bin,w,h,.20,.03,.80,.20),
-    rectDensity(bin,w,h,.68,.14,.98,.49),
-    rectDensity(bin,w,h,.68,.51,.98,.86),
-    rectDensity(bin,w,h,.20,.80,.80,.98),
-    rectDensity(bin,w,h,.02,.51,.32,.86),
-    rectDensity(bin,w,h,.02,.14,.32,.49),
-    rectDensity(bin,w,h,.20,.40,.80,.61)
-  ];
-  // Convertit la densité en "présence" continue. Les LCD ont souvent des segments fins.
-  const bits=raw.map(v=>Math.max(0,Math.min(1,(v-.035)/.18)));
-  const r=sevenSegMaskDigit(bits); r.bits=bits; return r;
-}
-function extractBinaryCell(bin,w,h,x0,x1,y0=.04,y1=.96){
-  const xa=Math.max(0,Math.floor(x0*w)),xb=Math.min(w,Math.ceil(x1*w));
-  const ya=Math.max(0,Math.floor(y0*h)),yb=Math.min(h,Math.ceil(y1*h));
-  const cw=Math.max(1,xb-xa),ch=Math.max(1,yb-ya),arr=new Uint8Array(cw*ch);
-  for(let y=0;y<ch;y++)for(let x=0;x<cw;x++)arr[y*cw+x]=bin[(ya+y)*w+(xa+x)];
-  return {bin:arr,w:cw,h:ch};
-}
-function trimBinary(bin,w,h){
-  const col=new Array(w).fill(0),row=new Array(h).fill(0);
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(bin[y*w+x]){col[x]++;row[y]++;}
-  const cThr=Math.max(2,Math.floor(h*.018)), rThr=Math.max(2,Math.floor(w*.018));
-  let l=0,r=w-1,t=0,b=h-1;
-  while(l<r&&col[l]<cThr)l++; while(r>l&&col[r]<cThr)r--;
-  while(t<b&&row[t]<rThr)t++; while(b>t&&row[b]<rThr)b--;
-  // petite marge pour ne pas couper les segments extrêmes
-  const mx=Math.max(2,Math.round(w*.025)),my=Math.max(2,Math.round(h*.03));
-  l=Math.max(0,l-mx);r=Math.min(w-1,r+mx);t=Math.max(0,t-my);b=Math.min(h-1,b+my);
-  const nw=r-l+1,nh=b-t+1,out=new Uint8Array(nw*nh);
-  for(let y=0;y<nh;y++)for(let x=0;x<nw;x++)out[y*nw+x]=bin[(t+y)*w+(l+x)];
-  return {bin:out,w:nw,h:nh};
-}
-async function sevenSegGlucoseRead(dataUrl,target){
-  return new Promise((resolve)=>{
-    const img=new Image();
-    img.onload=()=>{
-      const W=img.naturalWidth,H=img.naturalHeight,cx=(target?.x??.5)*W,cy=(target?.y??.5)*H;
-      const results=[];
-      const boxes=[[.22,.105],[.26,.12],[.30,.135],[.34,.15],[.38,.17]];
-      for(const [fw,fh] of boxes){
-        let sw=Math.round(W*fw),sh=Math.round(H*fh),sx=Math.round(cx-sw/2),sy=Math.round(cy-sh/2);
-        sx=Math.max(0,Math.min(W-sw,sx));sy=Math.max(0,Math.min(H-sh,sy));
-        const scale=Math.min(6,Math.max(2,1200/Math.max(sw,sh)));
-        const c=document.createElement('canvas');c.width=Math.max(120,Math.round(sw*scale));c.height=Math.max(70,Math.round(sh*scale));
-        const ctx=c.getContext('2d',{willReadFrequently:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-        ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
-        const im=ctx.getImageData(0,0,c.width,c.height),g=new Uint8Array(c.width*c.height);
-        for(let i=0,j=0;i<im.data.length;i+=4,j++)g[j]=Math.round(.299*im.data[i]+.587*im.data[i+1]+.114*im.data[i+2]);
-        const o=otsuThreshold(g);
-        for(const delta of [-28,-18,-10,0,10,18,28]){
-          const th=Math.max(25,Math.min(230,o+delta)),bin=new Uint8Array(g.length);
-          for(let i=0;i<g.length;i++)bin[i]=g[i]<th?1:0; // chiffres LCD foncés sur fond clair
-          const tr=trimBinary(bin,c.width,c.height);
-          if(tr.w<30||tr.h<25)continue;
-          for(const count of [3,2]){
-            // Teste de légers décalages du découpage pour tolérer un "1" étroit.
-            for(const shift of [-.025,0,.025]){
-              let value='',score=0,ok=true;
-              for(let k=0;k<count;k++){
-                const x0=Math.max(0,k/count+shift),x1=Math.min(1,(k+1)/count+shift);
-                const cell=extractBinaryCell(tr.bin,tr.w,tr.h,x0,x1,.02,.98);
-                const rr=classifySevenSegCell(cell.bin,cell.w,cell.h);
-                if(rr.digit===null){ok=false;break;} value+=rr.digit; score+=rr.score;
-              }
-              const n=Number(value);
-              if(ok&&Number.isFinite(n)&&n>=20&&n<=600){
-                // bonus réaliste : glycémie mg/dL est souvent 2–3 chiffres, ici 3 chiffres favorisés.
-                score += count===3?4.5:0; if(n>=60&&n<=250)score+=2.5;
-                results.push({value:n,score,kind:'7seg'});
-              }
-            }
-          }
-        }
-      }
-      results.sort((a,b)=>b.score-a.score);
-      // dédoublonne en gardant le meilleur score pour chaque valeur
-      const seen=new Set(),out=[];for(const r of results){if(!seen.has(r.value)){seen.add(r.value);out.push(r);}if(out.length>=8)break;}
-      resolve(out);
-    };
-    img.onerror=()=>resolve([]);img.src=dataUrl;
-  });
-}
-
-async function readGlucosePhoto(){
-  const status=document.getElementById('gOcrStatus');
-  if(!pendingGlucosePhoto){status.textContent='Choisissez d’abord une photo.';return;}
-  if(!ocrTargetGlucose){status.textContent='Touchez d’abord « Cibler le grand chiffre » et visez le milieu du nombre.';return;}
-  if(!window.Tesseract){status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return;}
-  try{
-    status.textContent='Lecture V34k : analyse LCD dédiée du grand nombre…';
-    const segCandidates=await sevenSegGlucoseRead(pendingGlucosePhoto,ocrTargetGlucose);
-    const worker=await Tesseract.createWorker('eng');
-    await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1',user_defined_dpi:'300'});
-    const vars=[];
-    for(const wh of [[0.30,0.14],[0.34,0.16],[0.38,0.18],[0.42,0.20]]){
-      for(const t of [90,105,120,135,150,165,180]){
-        try{vars.push(await preprocessOcrBox(pendingGlucosePhoto,ocrTargetGlucose,'glucose',0,wh[0],wh[1],t,false,true,2.35));}catch(e){}
-      }
-      try{vars.push(await preprocessOcrBox(pendingGlucosePhoto,ocrTargetGlucose,'glucose',0,wh[0],wh[1],145,true,true,2.2));}catch(e){}
-      try{vars.push(await preprocessOcrBox(pendingGlucosePhoto,ocrTargetGlucose,'glucose',0,wh[0],wh[1],145,false,false,2.5));}catch(e){}
-    }
-    const chunks=await recognizeVariants(worker,vars,['8','7','13']);
-    await worker.terminate();
-    const text=chunks.join(' | ');
-    const nums=candidateNumbers(text,20,600);
-    if(!nums.length && !segCandidates.length){status.textContent='Aucun chiffre fiable détecté. Déplacez la cible exactement au milieu du grand nombre et réessayez, ou saisissez la valeur manuellement.';return;}
-    const tessRanked=[...nums].sort((a,b)=>glucoseScore(b,text)-glucoseScore(a,text));
-    const merged=[]; const seen=new Set();
-    for(const r of segCandidates){ if(!seen.has(r.value)){seen.add(r.value);merged.push(r.value);} }
-    for(const n of tessRanked){ if(!seen.has(n)){seen.add(n);merged.push(n);} }
-    if(!merged.length){status.textContent='Aucun chiffre fiable détecté. Déplacez la cible exactement au milieu du grand nombre et réessayez, ou saisissez la valeur manuellement.';return;}
-    const preview=merged.slice(0,6), v=merged[0];
-    const answer=prompt('Valeurs possibles détectées : '+preview.join(', ')+'\nVérifiez puis entrez la glycémie à utiliser :',String(v));
-    if(answer===null)return;
-    const n=Number(String(answer).replace(',','.'));
-    if(!Number.isFinite(n)||n<20||n>600){status.textContent='Valeur non valide. Saisissez la glycémie manuellement.';return;}
-    document.getElementById('gValue').value=Math.round(n);
-    status.textContent='Valeur proposée : '+Math.round(n)+' mg/dL. Vérifiez-la avant d’enregistrer.';
-  }catch(e){status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir la valeur manuellement.';}
-}
-async function readBPPhoto(){
-  const status=document.getElementById('bpOcrStatus');
-  if(!pendingBPPhoto){status.textContent='Choisissez d’abord une photo.';return;}
-  if(!ocrTargetBP){status.textContent='Touchez d’abord « Cibler l’écran » au centre des trois grands nombres.';return;}
-  if(!window.Tesseract){status.textContent='Lecture automatique indisponible. Vérifiez la connexion Internet.';return;}
-  try{
-    status.textContent='Lecture V34k : lecture séparée de SYS, DIA et pouls…';
-    const worker=await Tesseract.createWorker('eng');
-    await worker.setParameters({tessedit_char_whitelist:'0123456789',preserve_interword_spaces:'1',user_defined_dpi:'300'});
-    async function lineValue(offset,min,max,prefer){
-      const vars=[];
-      for(const t of [95,115,135,155,175]){
-        try{vars.push(await preprocessOcrBox(pendingBPPhoto,ocrTargetBP,'bp',offset,0.42,0.14,t,false,true,2.3));}catch(e){}
-      }
-      try{vars.push(await preprocessOcrBox(pendingBPPhoto,ocrTargetBP,'bp',offset,0.42,0.14,145,true,true,2.1));}catch(e){}
-      try{vars.push(await preprocessOcrBox(pendingBPPhoto,ocrTargetBP,'bp',offset,0.42,0.14,145,false,false,2.5));}catch(e){}
-      const chunks=await recognizeVariants(worker,vars,['7','8','13']);
-      return {value:topCandidate(chunks.join(' | '),min,max,prefer),text:chunks.join(' | ')};
-    }
-    // Le point visé est au centre de l’écran : lignes haute / milieu / basse.
-    let top=await lineValue(-0.145,75,240,3);
-    let mid=await lineValue(0.000,35,150,2);
-    let bot=await lineValue(0.145,30,200,2);
-    // Petit balayage si une ligne n’est pas lue du premier coup.
-    if(top.value===null) top=await lineValue(-0.18,75,240,3);
-    if(mid.value===null) mid=await lineValue(0.02,35,150,2);
-    if(bot.value===null) bot=await lineValue(0.18,30,200,2);
-    await worker.terminate();
-    let sys=top.value,dia=mid.value,pulse=bot.value;
-    if(sys===null||dia===null){status.textContent='Je n’ai pas trouvé assez de chiffres fiables. Replacez la cible au centre de l’écran et réessayez.';return;}
-    const def=String(sys)+'/'+String(dia)+(pulse!==null?'/'+String(pulse):'');
-    const answer=prompt('Lecture proposée (SYS/DIA/Pouls). Vérifiez et corrigez si nécessaire :',def);
-    if(answer===null)return;
-    const p=answer.split(/[\/,;\s]+/).map(Number).filter(Number.isFinite);
-    if(p.length<2){status.textContent='Valeurs non valides. Saisissez-les manuellement.';return;}
-    document.getElementById('bpSys').value=Math.round(p[0]);
-    document.getElementById('bpDia').value=Math.round(p[1]);
-    if(p[2])document.getElementById('bpPulse').value=Math.round(p[2]);
-    status.textContent='Valeurs proposées : '+Math.round(p[0])+'/'+Math.round(p[1])+(p[2]?' • pouls '+Math.round(p[2]):'')+'. Vérifiez-les avant d’enregistrer.';
-  }catch(e){status.textContent='Lecture impossible sur cette photo. Vous pouvez saisir les valeurs manuellement.';}
-}
-
 function drawGlucoseChart(){
   const canvas=document.getElementById('glucoseChart');
   if(!canvas)return;
-  const {ctx,cssW,cssH}=resizeCanvasForChart(canvas,220);
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.clientWidth||760, cssH=220;
+  canvas.width=Math.floor(cssW*dpr); canvas.height=Math.floor(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
 
-  const points=normalizedGlucoseRows().slice(-20);
+  const points=[...data.glucose].reverse().slice(-20);
   if(points.length===0){
     ctx.fillStyle='#b7bdc8'; ctx.font='14px -apple-system,Arial';
     ctx.fillText('Aucune donnée à afficher.',14,28); return;
@@ -3174,7 +2059,6 @@ function scrollGlucoseChart(){
   document.getElementById('glucoseChartBox').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-if(cleanupAmbiguousHealthImports()) save();
 setTodayDefaults();
 foodTypeChanged();
 applySectionTones();
@@ -3182,24 +2066,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
-// V34r : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
-try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
-window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
+window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();});
 </script>
-
-<div id="ocrTargetModal" class="ocr-target-modal" role="dialog" aria-modal="true" aria-label="Cibler l’écran">
-  <div class="ocr-target-card">
-    <div class="ocr-target-title" id="ocrTargetTitle">Touchez le grand chiffre</div>
-    <div class="ocr-target-help" id="ocrTargetHelp">Touchez une fois au milieu du grand nombre affiché sur l’appareil.</div>
-    <div class="ocr-target-wrap" id="ocrTargetWrap">
-      <img id="ocrTargetImg" class="ocr-target-img" alt="Photo à cibler">
-      <div id="ocrTargetDot" class="ocr-target-dot"></div>
-    </div>
-    <div class="ocr-target-actions">
-      <button class="action" type="button" onclick="closeOcrTarget(false)">Annuler</button>
-      <button class="action primary" id="ocrTargetUse" type="button" onclick="closeOcrTarget(true)" disabled>Utiliser cette zone</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
