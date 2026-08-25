@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION PDF QUIRÓNSALUD iPHONE • 25 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION COURBES GLYCÉMIE + TENSION + SOMMEIL • 25 AOÛT</div>
 </header>
 
 <main>
@@ -610,6 +610,11 @@ footer .action{font-size:13px;padding:9px 8px}
         <div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
       </form>
       <div id="sleepList" class="list"></div>
+      <div class="chart-wrap" id="sleepChartBox">
+        <div class="chart-title">Évolution du sommeil</div>
+        <canvas id="sleepChart" width="760" height="220"></canvas>
+        <div class="chart-legend">Durée totale de sommeil, nuit par nuit, dans l’ordre chronologique.</div>
+      </div>
     </div>
   </section>
 
@@ -1503,6 +1508,24 @@ function delItem(arr,i,btn){
     if(document.body.contains(btn)){btn.dataset.confirmDelete='';btn.textContent='Suppr.';}
   },5000);
 }
+
+function uniqueSleepByDate(){
+  const byDate=new Map();
+  (data.sleep||[]).forEach(x=>{
+    if(!x || !x.date) return;
+    const current=byDate.get(x.date);
+    if(!current){
+      byDate.set(x.date,x);
+      return;
+    }
+    // Si deux entrées existent le même jour, garder celle qui contient
+    // le plus d'information et éviter les doublons visuels.
+    const score=v=>(v.note?2:0)+(v.quality?1:0)+(v.wake!==''&&v.wake!=null?1:0);
+    if(score(x)>score(current)) byDate.set(x.date,x);
+  });
+  return [...byDate.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+}
+
 function render(){
   glucoseList.innerHTML=data.glucose.length?data.glucose.map((x,i)=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
@@ -1541,8 +1564,11 @@ function render(){
 
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
-  sleepList.innerHTML=data.sleep.length?data.sleep.map((x,i)=>itemHtml(
-    `${formatSleepHours(x.hours)} • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+  const sleepUniqueDesc=uniqueSleepByDate().slice().reverse();
+  sleepList.innerHTML=sleepUniqueDesc.length?sleepUniqueDesc.map(x=>{
+    const originalIndex=(data.sleep||[]).findIndex(s=>s===x);
+    return itemHtml(`${formatSleepHours(x.hours)} • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',originalIndex);
+  }).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
 
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
   const og=document.getElementById('objGlucoseText'),oc=document.getElementById('objClavicleText'),os=document.getElementById('objSleepText');
@@ -1561,15 +1587,16 @@ function render(){
   if(data.clavicle.length){
     const c=data.clavicle[0];lastClavicle.textContent=c.mobility||'Suivi';lastClavicleNote.textContent=c.date;
   }else{lastClavicle.textContent='—';lastClavicleNote.textContent='Aucune donnée'}
-  if(data.sleep.length){
-    const s=data.sleep[0];lastSleep.textContent=formatSleepHours(s.hours);lastSleepNote.textContent=s.quality+' • '+s.date;
+  const sleepSeries=uniqueSleepByDate();
+  if(sleepSeries.length){
+    const s=sleepSeries[sleepSeries.length-1];lastSleep.textContent=formatSleepHours(s.hours);lastSleepNote.textContent=s.quality+' • '+s.date;
   }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
   renderGlucoseIntelligence();
   renderExercises();
   renderToday();
-  requestAnimationFrame(()=>{drawGlucoseChart();drawBPChart();});
+  requestAnimationFrame(()=>{drawGlucoseChart();drawBPChart();drawSleepChart();});
 }
 function renderGeneric(arr,listId){
   const el=document.getElementById(listId);
@@ -2233,6 +2260,92 @@ function drawGlucoseChart(){
   ctx.fillText(lastText,cssW-padR-tw,cssH-10);
 }
 
+
+function drawSleepChart(){
+  const canvas=document.getElementById('sleepChart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.clientWidth||760, cssH=220;
+  canvas.width=Math.floor(cssW*dpr);
+  canvas.height=Math.floor(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const points=uniqueSleepByDate()
+    .filter(x=>Number.isFinite(Number(x.hours)))
+    .slice(-20);
+
+  if(points.length===0){
+    ctx.fillStyle='#b7bdc8';
+    ctx.font='14px -apple-system,Arial';
+    ctx.fillText('Aucune nuit à afficher.',14,28);
+    return;
+  }
+
+  const vals=points.map(p=>Number(p.hours));
+  let min=Math.max(0,Math.floor(Math.min(...vals)-1));
+  let max=Math.min(24,Math.ceil(Math.max(...vals)+1));
+  if(max-min<4) max=Math.min(24,min+4);
+
+  const padL=46,padR=12,padT=16,padB=34;
+  const W=cssW-padL-padR,H=cssH-padT-padB;
+  const x=i=>padL+(points.length===1?W/2:i*W/(points.length-1));
+  const y=v=>padT+(max-v)*H/(max-min || 1);
+
+  ctx.strokeStyle='#3c424c';
+  ctx.lineWidth=1;
+  ctx.fillStyle='#aeb5c0';
+  ctx.font='11px -apple-system,Arial';
+
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const val=min+i*(max-min)/ticks;
+    const yy=y(val);
+    ctx.beginPath();
+    ctx.moveTo(padL,yy);
+    ctx.lineTo(cssW-padR,yy);
+    ctx.stroke();
+    const h=Math.floor(val);
+    const m=Math.round((val-h)*60);
+    ctx.fillText(m?`${h}h${String(m).padStart(2,'0')}`:`${h}h`,4,yy+4);
+  }
+
+  ctx.strokeStyle='#9d8cff';
+  ctx.fillStyle='#9d8cff';
+  ctx.lineWidth=2.6;
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const xx=x(i), yy=y(Number(p.hours));
+    if(i===0)ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+  });
+  ctx.stroke();
+
+  points.forEach((p,i)=>{
+    const xx=x(i), yy=y(Number(p.hours));
+    ctx.beginPath();
+    ctx.arc(xx,yy,4.5,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // Afficher plusieurs dates quand l'espace le permet.
+  ctx.fillStyle='#aeb5c0';
+  ctx.font='10px -apple-system,Arial';
+  const maxLabels=Math.min(points.length,5);
+  if(maxLabels===1){
+    const t=(points[0].date||'').slice(5);
+    const tw=ctx.measureText(t).width;
+    ctx.fillText(t,x(0)-tw/2,cssH-10);
+  }else{
+    for(let j=0;j<maxLabels;j++){
+      const idx=Math.round(j*(points.length-1)/(maxLabels-1));
+      const t=(points[idx].date||'').slice(5);
+      const tw=ctx.measureText(t).width;
+      ctx.fillText(t,Math.max(padL-tw/2,Math.min(cssW-padR-tw,x(idx)-tw/2)),cssH-10);
+    }
+  }
+}
+
 function drawBPChart(){
   const canvas=document.getElementById('bpChart');
   if(!canvas)return;
@@ -2336,7 +2449,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
 importHealthFromUrl();
-window.addEventListener('resize',()=>{drawGlucoseChart();drawBPChart();drawExerciseChart();});
+window.addEventListener('resize',()=>{drawGlucoseChart();drawBPChart();drawSleepChart();drawExerciseChart();});
 </script>
 </body>
 </html>
