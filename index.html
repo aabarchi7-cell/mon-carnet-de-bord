@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V38</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V39</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -636,6 +636,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="section-body">
 <div class="toolbar">
 <button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
+<button class="action primary" onclick="startSleepHuaweiImport()" type="button">⌚ Importer depuis HUAWEI</button>
 <button class="action" onclick="startSleepAppleImport()" type="button">🍎 Importer via Apple Santé</button>
 </div>
 <div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
@@ -651,7 +652,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="chart-wrap" id="sleepChartBox">
 <div class="chart-title">Évolution du sommeil</div>
 <canvas height="220" id="sleepChart" width="760"></canvas>
-<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
+<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis HUAWEI ou Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
 </div>
 </div>
 </section>
@@ -1273,20 +1274,28 @@ async function importHuaweiClipboard(){
   }
 }
 
+function formatSleepDuration(hours){
+  const n=Number(hours);
+  if(!Number.isFinite(n) || n<0) return '—';
+  const totalMinutes=Math.round(n*60);
+  const h=Math.floor(totalMinutes/60);
+  const m=totalMinutes%60;
+  if(h>0 && m>0) return `${h} h ${m} min`;
+  if(h>0) return `${h} h`;
+  return `${m} min`;
+}
+
 function formatHealthImportValue(type,value,unit){
   const typ=String(type||'').trim();
   const val=String(value||'').trim();
   const u=String(unit||'').trim();
   if(/sommeil|sleep/i.test(typ) && /^(seconds?|secondes?|sec|s)$/i.test(u)){
     const n=Number(val.replace(',','.'));
-    if(Number.isFinite(n) && n>=0){
-      const totalMinutes=Math.round(n/60);
-      const h=Math.floor(totalMinutes/60);
-      const m=totalMinutes%60;
-      if(h>0 && m>0) return `${h} h ${m} min`;
-      if(h>0) return `${h} h`;
-      return `${m} min`;
-    }
+    if(Number.isFinite(n) && n>=0) return formatSleepDuration(n/3600);
+  }
+  if(/sommeil|sleep/i.test(typ) && /^(h|heure|heures)$/i.test(u)){
+    const n=Number(val.replace(',','.'));
+    if(Number.isFinite(n) && n>=0) return formatSleepDuration(n);
   }
   return val+(u?' '+u:'');
 }
@@ -1295,9 +1304,13 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   const clean=extractHuaweiNumber(value);
   if(!clean) return false;
   data.healthImports=data.healthImports||[];
-  const src=(source||'Apple Santé').trim();
+  const rawSrc=(source||'Apple Santé').trim();
+  const src=/huawei/i.test(rawSrc)?'HUAWEI Health':rawSrc;
   const typ=(type||'Donnée Santé').trim();
-  const d=(date||localDateString()).trim();
+  let d=(date||localDateString()).trim();
+  // Une nuit HUAWEI importée par le raccourci est rattachée au jour du suivi.
+  // Cela évite que la nuit 24→25 août soit classée au 24 lors du retour Raccourcis.
+  if(/huawei/i.test(src) && /sommeil|sleep/i.test(typ)) d=localDateString();
   let u=(unit||'').trim();
   if(!u && /poids|weight/i.test(typ)) u='kg';
   else if(!u && /fréquence cardiaque|heart rate|pouls/i.test(typ)) u='bpm';
@@ -1306,7 +1319,9 @@ function saveDirectHealthImport(source,type,value,unit,date,note){
   else if(!u && /pas|steps/i.test(typ)) u='pas';
   else if(!u && /sommeil|sleep/i.test(typ)) u='h';
   const defaultNote=/huawei/i.test(src)?'Import automatique via HUAWEI vers CARNET':'Import automatique via Apple Santé';
-  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:note||defaultNote,photo:''};
+  let finalNote=(note||defaultNote).trim();
+  if(/huawei/i.test(src) && /apple\s*sant[eé]/i.test(finalNote)) finalNote=defaultNote;
+  const entry={source:src,type:typ,value:clean,unit:u,date:d,note:finalNote,photo:''};
   const existing=data.healthImports.findIndex(x=>x && x.source===src && x.type===typ && x.date===d);
   if(existing>=0) data.healthImports.splice(existing,1,entry);
   else data.healthImports.unshift(entry);
@@ -1348,47 +1363,6 @@ function canonicalHealthType(type){
   if(simple==='spo2' || simple==='saturationenoxygene' || simple==='oxygensaturation') return 'SpO₂';
   return raw || 'Donnée Santé';
 }
-// V38 : import direct du sommeil envoyé par le raccourci iPhone.
-// Format attendu : ?sommeil=7.58 (ou 7,58). Une date peut aussi être fournie
-// avec ?sommeilDate=AAAA-MM-JJ ; sans date, le carnet utilise la date locale.
-function importSleepShortcutParam(){
-  try{
-    const raw=readHealthParam('sommeil') || readHealthParam('sleep');
-    if(!raw) return false;
-    const normalized=String(raw).trim().replace(/\s/g,'').replace(',','.');
-    const hours=Number(normalized);
-    if(!Number.isFinite(hours) || hours<=0 || hours>24){
-      const st=document.getElementById('sleepImportStatus');
-      if(st) st.textContent='Import sommeil reçu, mais la durée est invalide.';
-      return false;
-    }
-    const suppliedDate=readHealthParam('sommeilDate') || readHealthParam('sleepDate');
-    const date=/^\d{4}-\d{2}-\d{2}$/.test(String(suppliedDate||'')) ? suppliedDate : localDateString();
-    data.sleep=data.sleep||[];
-    const entry={
-      date,
-      hours:Number(hours.toFixed(2)),
-      quality:'Importé',
-      wake:'',
-      note:'Import automatique via Apple Santé • Raccourci iPhone'
-    };
-    // Un seul import automatique par date : un nouveau lancement actualise la valeur.
-    const existing=data.sleep.findIndex(x=>x && x.date===date && /Raccourci iPhone|Import automatique via Apple Santé/i.test(x.note||''));
-    if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
-    save();
-    const st=document.getElementById('sleepImportStatus');
-    if(st) st.textContent='Sommeil importé depuis Apple Santé : '+entry.hours.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h.';
-    if(window.history && history.replaceState){
-      try{history.replaceState({},document.title,window.location.pathname);}catch(_){}
-    }
-    return true;
-  }catch(err){
-    const st=document.getElementById('sleepImportStatus');
-    if(st) st.textContent='Import sommeil impossible.';
-    return false;
-  }
-}
-
 function importHealthFromUrl(){
   try{
     const href=String(window.location.href||'');
@@ -1783,10 +1757,35 @@ function render(){
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>${photoBlock(x,'notes',i)}`).join(''):'<div class="empty">Aucune entrée.</div>';
   {
-    const manual=indexedNewest(data.sleep).map(({x,i})=>({date:x.date||'',html:itemHtml(`${x.hours} h • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)}));
-    const imported=indexedNewest(data.healthImports).map(({x,i})=>({x,i,h:sleepHoursFromHealthImport(x)})).filter(o=>o.x?.date&&Number.isFinite(o.h)).map(o=>({date:o.x.date||'',html:itemHtml(`${o.h.toLocaleString('fr-FR',{maximumFractionDigits:2})} h • importé`,`${o.x.date} • ${o.x.source||'Santé'}`,o.x.note||'Donnée importée','healthImports',o.i)}));
-    const all=manual.concat(imported).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-    sleepList.innerHTML=all.length?all.map(o=>o.html).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
+    const candidates=[];
+    indexedNewest(data.sleep).forEach(({x,i})=>{
+      const h=Number(x.hours);
+      if(!x?.date || !Number.isFinite(h)) return;
+      candidates.push({
+        date:x.date||'', h, priority:1,
+        html:itemHtml(`${formatSleepDuration(h)} • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',i)
+      });
+    });
+    indexedNewest(data.healthImports).forEach(({x,i})=>{
+      const h=sleepHoursFromHealthImport(x);
+      if(!x?.date || !Number.isFinite(h)) return;
+      const isHuawei=/huawei/i.test(String(x.source||''));
+      candidates.push({
+        date:x.date||'', h, priority:isHuawei?3:2,
+        html:itemHtml(`${formatSleepDuration(h)} • importé`,`${x.date} • ${isHuawei?'HUAWEI Health':(x.source||'Santé')}`,x.note||(isHuawei?'Import automatique via HUAWEI vers CARNET':'Donnée importée'),'healthImports',i)
+      });
+    });
+    // Masque les doublons visuels de la même nuit (ex. 7,5833 h et 7,58 h).
+    // Les données restent conservées en stockage ; HUAWEI est prioritaire à l'affichage.
+    candidates.sort((a,b)=>b.priority-a.priority || String(b.date).localeCompare(String(a.date)));
+    const seen=new Set(), unique=[];
+    candidates.forEach(o=>{
+      const key=`${o.date}|${Math.round(o.h*60)}`;
+      if(seen.has(key)) return;
+      seen.add(key); unique.push(o);
+    });
+    unique.sort((a,b)=>String(b.date).localeCompare(String(a.date)) || b.priority-a.priority);
+    sleepList.innerHTML=unique.length?unique.map(o=>o.html).join(''):'<div class="empty">Aucune nuit enregistrée.</div>';
   }
 
   data.objectives=data.objectives||{glucose:'',clavicle:'',sleep:''};
@@ -1809,7 +1808,7 @@ function render(){
   {
     const sr=combinedSleepRows();
     const s=sr.length?sr[sr.length-1]:null;
-    if(s){lastSleep.textContent=s.value.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h';lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
+    if(s){lastSleep.textContent=formatSleepDuration(s.value);lastSleepNote.textContent=(s.source||'Sommeil')+' • '+s.date;}
     else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
   }
   if((data.bp||[]).length){const b=indexedNewest(data.bp)[0].x;lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
@@ -1893,6 +1892,16 @@ function openAppleHealthBridge(){
   healthImportStatus('Ouverture de « Carnet - Apple Santé »… retour vers cette version du carnet.');
   runShortcut('Carnet - Apple Santé',callback);
 }
+function startSleepHuaweiImport(){
+  const st=document.getElementById('sleepImportStatus');
+  const callback=window.location.href.split(/[?#]/)[0];
+  if(st){
+    st.textContent='Ouverture de « HUAWEI Sommeil vers CARNET »…';
+    st.style.display='block';
+  }
+  runShortcut('HUAWEI Sommeil vers CARNET',callback);
+}
+
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
   if(st){
@@ -3024,8 +3033,7 @@ applySectionTones();
 document.getElementById('hiType')?.addEventListener('input',updateHealthAppointmentUI);
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
-const importedSleepShortcut=importSleepShortcutParam();
-if(!importedSleepShortcut) importHealthFromUrl();
+importHealthFromUrl();
 // V34r : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
 try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
