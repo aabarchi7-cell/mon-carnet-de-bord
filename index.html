@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V39</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V40</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -737,9 +737,10 @@ footer .action{font-size:13px;padding:9px 8px}
 <div class="integration-grid">
 <div class="integration-card">
 <b>Apple Santé</b>
-<div class="small">Ajoutez ici les données choisies depuis Apple Santé.</div>
+<div class="small">Import via le raccourci « Carnet - Apple Santé », avec retour automatique dans ce carnet. La saisie manuelle reste disponible en secours.</div>
 <div class="integration-actions">
-<button class="action" onclick="openHealthImport('Apple Santé',this)" type="button">Ajouter une donnée ici</button>
+<button class="action primary" onclick="openAppleHealthBridge()" type="button">Importer depuis Apple Santé</button>
+<button class="action" onclick="openHealthImport('Apple Santé',this)" type="button">Saisie manuelle</button>
 </div>
 </div>
 <div class="integration-card">
@@ -1904,10 +1905,15 @@ function startSleepHuaweiImport(){
 
 function startSleepAppleImport(){
   const st=document.getElementById('sleepImportStatus');
+  const callback=window.location.href.split(/[?#]/)[0];
   if(st){
-    st.innerHTML='Le raccourci dédié au sommeil Apple Santé n’est pas encore installé sur cet iPhone. Utilisez pour l’instant <b>+ Ajouter une nuit</b>. Cette V34g empêche l’ouverture du raccourci manquant et ne modifie pas HUME/HUAWEI.';
+    st.textContent='Ouverture de « Carnet - Apple Santé »… choisissez Sommeil si le raccourci le demande.';
     st.style.display='block';
   }
+  // Utilise le même pont Apple Santé que la rubrique Connexions santé.
+  // Le retour avec healthSource=Apple Santé & healthType=Sommeil est déjà
+  // pris en charge par importHealthFromUrl() et enregistré dans data.sleep.
+  runShortcut('Carnet - Apple Santé',callback);
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
