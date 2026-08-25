@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION COURBES GLYCÉMIE + TENSION + SOMMEIL • 25 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SOMMEIL DERNIÈRE NUIT • 25 AOÛT</div>
 </header>
 
 <main>
@@ -1198,7 +1198,7 @@ function syncSleepFromHealthImports(showMessage=false){
     if(hours===null) return;
     const date=x.date||localDateString();
     const existing=data.sleep.findIndex(s=>s && s.date===date && /Apple Santé/i.test(s.note||''));
-    const entry={date,hours:Number(hours.toFixed(4)),quality:'Bonne',wake:'',note:'Import Apple Santé'};
+    const entry={date,hours:Number(hours.toFixed(4)),quality:'Importé',wake:'',note:'Import automatique via Apple Santé'};
     if(existing>=0){
       if(Math.abs(Number(data.sleep[existing].hours)-entry.hours)>0.0001){
         data.sleep.splice(existing,1,entry); changed=true;
@@ -1527,6 +1527,7 @@ function uniqueSleepByDate(){
 }
 
 function render(){
+  syncSleepFromHealthImports(false);
   glucoseList.innerHTML=data.glucose.length?data.glucose.map((x,i)=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
     <button class="action danger" style="padding:5px 8px" onclick="delItem('glucose',${i},this)">Suppr.</button></div>
@@ -1565,6 +1566,16 @@ function render(){
   foodList.innerHTML=data.foods.length?data.foods.map((x,i)=>{const details=[x.ingredients?('Ingrédients : '+x.ingredients):'',x.steps?('Étapes : '+x.steps):'',x.text||''].filter(Boolean).join('\n\n'); const meta=`${x.date}${x.type?' • '+x.type:''}${x.moment?' • '+x.moment:''}${x.duration?' • '+x.duration:''}${x.portions?' • '+x.portions:''}${x.calories?' • '+x.calories+(String(x.calories).toLowerCase().includes('kcal')?'':' kcal')+'/portion':''}`; const isRecipe=['Recette TM7','Recette'].includes(x.type||''); const actions=isRecipe?`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button><button class="action warn" type="button" onclick="scheduleFood(${i})">📅 Programmer</button><button class="action" type="button" onclick="shareFoodIngredients(${i})">🛒 Liste de courses</button><button class="action" type="button" onclick="shareFoodRecipe(${i})">↗️ Partager</button>${x.cookidooUrl?`<button class="action" type="button" onclick="openSavedCookidoo(${i})">👨‍🍳 Cookidoo</button>`:''}</div>`:`<div class="recipe-actions"><button class="action primary" type="button" onclick="editFood(${i})">✏️ Modifier</button></div>`; return itemHtml(x.title,meta,details,'foods',i)+actions+photoBlock(x,'foods',i);}).join(''):'<div class="empty">Aucune entrée.</div>';
   noteList.innerHTML=data.notes.length?data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(`${x.date}${x.time?' • '+x.time:''}${x.type?' • '+x.type:''}`)}</div></div><button class="action danger" style="padding:5px 8px" onclick="delItem('notes',${i},this)">Suppr.</button></div>${x.text?`<div class="item-text">${esc(x.text)}</div>`:''}${x.type==='Rendez-vous'?`<div class="toolbar"><button class="action" onclick="calendarFile(${i})">📅 Ajouter au calendrier</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune entrée.</div>';
   const sleepUniqueDesc=uniqueSleepByDate().slice().reverse();
+  const sleepStatus=document.getElementById('sleepImportStatus');
+  if(sleepStatus){
+    if(sleepUniqueDesc.length){
+      const latestNight=sleepUniqueDesc[0];
+      sleepStatus.textContent='Dernière nuit relevée : '+formatSleepHours(latestNight.hours)+' • '+latestNight.date+
+        (latestNight.note && /Apple Santé/i.test(latestNight.note)?' • Apple Santé':'');
+    }else{
+      sleepStatus.textContent='Aucune nuit enregistrée ou importée.';
+    }
+  }
   sleepList.innerHTML=sleepUniqueDesc.length?sleepUniqueDesc.map(x=>{
     const originalIndex=(data.sleep||[]).findIndex(s=>s===x);
     return itemHtml(`${formatSleepHours(x.hours)} • ${x.quality}`,`${x.date}${x.wake!==''?' • '+x.wake+' réveil(s)':''}`,x.note,'sleep',originalIndex);
@@ -1892,7 +1903,7 @@ function addHealthImport(e){
     if(hours!==null){
       data.sleep=data.sleep||[];
       const existing=data.sleep.findIndex(s=>s && s.date===entry.date && /Apple Santé/i.test(s.note||''));
-      const sEntry={date:entry.date,hours:Number(hours.toFixed(4)),quality:'Bonne',wake:'',note:'Import Apple Santé'};
+      const sEntry={date:entry.date,hours:Number(hours.toFixed(4)),quality:'Importé',wake:'',note:'Import automatique via Apple Santé'};
       if(existing>=0)data.sleep.splice(existing,1,sEntry); else data.sleep.unshift(sEntry);
     }
   }
