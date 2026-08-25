@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V37</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V38</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -1348,6 +1348,47 @@ function canonicalHealthType(type){
   if(simple==='spo2' || simple==='saturationenoxygene' || simple==='oxygensaturation') return 'SpO₂';
   return raw || 'Donnée Santé';
 }
+// V38 : import direct du sommeil envoyé par le raccourci iPhone.
+// Format attendu : ?sommeil=7.58 (ou 7,58). Une date peut aussi être fournie
+// avec ?sommeilDate=AAAA-MM-JJ ; sans date, le carnet utilise la date locale.
+function importSleepShortcutParam(){
+  try{
+    const raw=readHealthParam('sommeil') || readHealthParam('sleep');
+    if(!raw) return false;
+    const normalized=String(raw).trim().replace(/\s/g,'').replace(',','.');
+    const hours=Number(normalized);
+    if(!Number.isFinite(hours) || hours<=0 || hours>24){
+      const st=document.getElementById('sleepImportStatus');
+      if(st) st.textContent='Import sommeil reçu, mais la durée est invalide.';
+      return false;
+    }
+    const suppliedDate=readHealthParam('sommeilDate') || readHealthParam('sleepDate');
+    const date=/^\d{4}-\d{2}-\d{2}$/.test(String(suppliedDate||'')) ? suppliedDate : localDateString();
+    data.sleep=data.sleep||[];
+    const entry={
+      date,
+      hours:Number(hours.toFixed(2)),
+      quality:'Importé',
+      wake:'',
+      note:'Import automatique via Apple Santé • Raccourci iPhone'
+    };
+    // Un seul import automatique par date : un nouveau lancement actualise la valeur.
+    const existing=data.sleep.findIndex(x=>x && x.date===date && /Raccourci iPhone|Import automatique via Apple Santé/i.test(x.note||''));
+    if(existing>=0) data.sleep.splice(existing,1,entry); else data.sleep.unshift(entry);
+    save();
+    const st=document.getElementById('sleepImportStatus');
+    if(st) st.textContent='Sommeil importé depuis Apple Santé : '+entry.hours.toLocaleString('fr-FR',{maximumFractionDigits:2})+' h.';
+    if(window.history && history.replaceState){
+      try{history.replaceState({},document.title,window.location.pathname);}catch(_){}
+    }
+    return true;
+  }catch(err){
+    const st=document.getElementById('sleepImportStatus');
+    if(st) st.textContent='Import sommeil impossible.';
+    return false;
+  }
+}
+
 function importHealthFromUrl(){
   try{
     const href=String(window.location.href||'');
@@ -2983,7 +3024,8 @@ applySectionTones();
 document.getElementById('hiType')?.addEventListener('input',updateHealthAppointmentUI);
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 render();
-importHealthFromUrl();
+const importedSleepShortcut=importSleepShortcutParam();
+if(!importedSleepShortcut) importHealthFromUrl();
 // V34r : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
 try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
