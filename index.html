@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION PDF QUIRÓNSALUD OUVERTURE CORRIGÉE • 25 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION PDF QUIRÓNSALUD LECTURE INTERNE • 25 AOÛT</div>
 </header>
 
 <main>
@@ -1776,18 +1776,9 @@ async function importQuironPdf(event){
     setTimeout(()=>document.getElementById('healthImportList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);
   }catch(err){console.error(err);alert('Le PDF n’a pas pu être enregistré. Réessayez avec le fichier téléchargé depuis Quirónsalud.');}
 }
+let currentQuironPdfUrl='';
 async function openQuironPdf(id){
-  let popup=null;
   try{
-    // Ouvrir immédiatement un onglet au toucher pour éviter le blocage iOS/Safari.
-    popup=window.open('about:blank','_blank');
-    if(popup){
-      try{
-        popup.document.write('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:-apple-system;padding:24px;background:#17191d;color:#fff"><h2>Ouverture du PDF…</h2><p>Veuillez patienter.</p></body>');
-        popup.document.close();
-      }catch(_){}
-    }
-
     const db=await quironDb();
     const rec=await new Promise((resolve,reject)=>{
       const tx=db.transaction('pdfs','readonly');
@@ -1797,31 +1788,45 @@ async function openQuironPdf(id){
     });
 
     if(!rec||!rec.blob){
-      if(popup) try{popup.close();}catch(_){}
       alert('Ce PDF n’est plus disponible sur cet appareil.');
       return;
     }
 
-    const url=URL.createObjectURL(rec.blob);
-
-    if(popup){
-      popup.location.replace(url);
-    }else{
-      const a=document.createElement('a');
-      a.href=url;
-      a.target='_blank';
-      a.rel='noopener';
-      a.download=rec.name||'document-quironsalud.pdf';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    if(currentQuironPdfUrl){
+      try{URL.revokeObjectURL(currentQuironPdfUrl);}catch(_){}
+      currentQuironPdfUrl='';
     }
 
-    setTimeout(()=>URL.revokeObjectURL(url),300000);
+    currentQuironPdfUrl=URL.createObjectURL(rec.blob);
+    const viewer=document.getElementById('pdfViewer');
+    const frame=document.getElementById('pdfViewerFrame');
+    const title=document.getElementById('pdfViewerTitle');
+    const dl=document.getElementById('pdfViewerDownload');
+
+    title.textContent=rec.name||'PDF Quirónsalud';
+    dl.href=currentQuironPdfUrl;
+    dl.download=rec.name||'document-quironsalud.pdf';
+
+    viewer.style.display='block';
+    document.body.style.overflow='hidden';
+
+    // Safari iPhone affiche mieux le PDF dans la même page qu'avec window.open(blob:...)
+    frame.src=currentQuironPdfUrl;
   }catch(err){
     console.error(err);
-    if(popup) try{popup.close();}catch(_){}
     alert('Impossible d’ouvrir ce PDF.');
+  }
+}
+
+function closeQuironPdf(){
+  const viewer=document.getElementById('pdfViewer');
+  const frame=document.getElementById('pdfViewerFrame');
+  if(frame) frame.removeAttribute('src');
+  if(viewer) viewer.style.display='none';
+  document.body.style.overflow='';
+  if(currentQuironPdfUrl){
+    try{URL.revokeObjectURL(currentQuironPdfUrl);}catch(_){}
+    currentQuironPdfUrl='';
   }
 }
 function openHealthImport(source,btn){
