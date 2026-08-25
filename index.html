@@ -267,7 +267,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
   <h1>Mon carnet de bord</h1>
   <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION SOMMEIL DERNIÈRE NUIT • 25 AOÛT</div>
+  <div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">VERSION DERNIÈRE TENSION + SOMMEIL • 25 AOÛT</div>
 </header>
 
 <main>
@@ -1187,10 +1187,74 @@ function healthImportHours(x){
   return n;
 }
 
+
+function parseImportedBP(x){
+  if(!x) return null;
+  const type=String(x.type||'');
+  if(!/tension|pression|blood pressure/i.test(type)) return null;
+
+  const raw=String(x.value||'').trim();
+  let sys=null,dia=null,pulse='';
+
+  let m=raw.match(/(\d{2,3})\s*[/\-]\s*(\d{2,3})(?:\D+(\d{2,3}))?/);
+  if(m){
+    sys=Number(m[1]); dia=Number(m[2]); if(m[3]) pulse=Number(m[3]);
+  }else{
+    const nums=raw.match(/\d{2,3}/g)||[];
+    if(nums.length>=2){sys=Number(nums[0]);dia=Number(nums[1]);if(nums.length>=3)pulse=Number(nums[2]);}
+  }
+  if(!Number.isFinite(sys)||!Number.isFinite(dia)) return null;
+  if(sys<70||sys>260||dia<35||dia>160) return null;
+
+  return {
+    sys,dia,pulse:Number.isFinite(Number(pulse))?Number(pulse):'',
+    date:x.date||localDateString(),
+    time:x.time||'',
+    context:'Import Santé',
+    note:'Importé depuis '+(x.source||'Santé')
+  };
+}
+
+function syncBPFromHealthImports(){
+  data.bp=data.bp||[];
+  let changed=false;
+  (data.healthImports||[]).forEach(x=>{
+    const b=parseImportedBP(x);
+    if(!b)return;
+    const duplicate=data.bp.some(v=>v &&
+      String(v.date||'')===String(b.date||'') &&
+      Number(v.sys)===Number(b.sys) &&
+      Number(v.dia)===Number(b.dia) &&
+      (!b.time || !v.time || String(v.time)===String(b.time))
+    );
+    if(!duplicate){data.bp.push(b);changed=true;}
+  });
+  // Éliminer les doublons évidents déjà présents (même date + mêmes valeurs),
+  // en préférant l'entrée qui possède une heure.
+  const grouped=new Map();
+  data.bp.forEach(v=>{
+    if(!v)return;
+    const key=[v.date,Number(v.sys),Number(v.dia)].join('|');
+    const cur=grouped.get(key);
+    if(!cur || (!cur.time && v.time)) grouped.set(key,v);
+  });
+  const cleaned=[...grouped.values()];
+  if(cleaned.length!==data.bp.length){data.bp=cleaned;changed=true;}
+  data.bp.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||'')));
+  if(changed){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){}}
+  return changed;
+}
+
+function latestBP(){
+  const arr=[...(data.bp||[])].filter(x=>x&&x.date);
+  arr.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')) || String(a.time||'').localeCompare(String(b.time||'')));
+  return arr.length?arr[arr.length-1]:null;
+}
+
 function syncSleepFromHealthImports(showMessage=false){
   data.sleep=data.sleep||[];
   const imports=(data.healthImports||[])
-    .filter(x=>x && /apple/i.test(x.source||'') && /sommeil|sleep/i.test(x.type||''))
+    .filter(x=>x && /sommeil|sleep/i.test(x.type||''))
     .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
   let changed=false;
   imports.forEach(x=>{
@@ -1528,6 +1592,7 @@ function uniqueSleepByDate(){
 
 function render(){
   syncSleepFromHealthImports(false);
+  syncBPFromHealthImports();
   glucoseList.innerHTML=data.glucose.length?data.glucose.map((x,i)=>`<div class="item">
     <div class="item-top"><div><div class="item-title">${esc(`${x.value} mg/dL`)}</div><div class="item-meta">${esc(`${x.date} • ${x.time||''} • ${x.moment}${x.meal?' • '+x.meal:''}${x.mealTag?' • '+x.mealTag:''}`)}</div></div>
     <button class="action danger" style="padding:5px 8px" onclick="delItem('glucose',${i},this)">Suppr.</button></div>
@@ -1571,7 +1636,7 @@ function render(){
     if(sleepUniqueDesc.length){
       const latestNight=sleepUniqueDesc[0];
       sleepStatus.textContent='Dernière nuit relevée : '+formatSleepHours(latestNight.hours)+' • '+latestNight.date+
-        (latestNight.note && /Apple Santé/i.test(latestNight.note)?' • Apple Santé':'');
+        (latestNight.note?' • '+latestNight.note:'');
     }else{
       sleepStatus.textContent='Aucune nuit enregistrée ou importée.';
     }
@@ -1602,7 +1667,7 @@ function render(){
   if(sleepSeries.length){
     const s=sleepSeries[sleepSeries.length-1];lastSleep.textContent=formatSleepHours(s.hours);lastSleepNote.textContent=s.quality+' • '+s.date;
   }else{lastSleep.textContent='—';lastSleepNote.textContent='Aucune donnée'}
-  if((data.bp||[]).length){const b=data.bp[0];lastBP.textContent=b.sys+'/'+b.dia;lastBPNote.textContent=(b.pulse!==''?b.pulse+'/min • ':'')+b.date;}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
+  const latestB=latestBP();if(latestB){lastBP.textContent=latestB.sys+'/'+latestB.dia;lastBPNote.textContent=(latestB.pulse!==''?latestB.pulse+'/min • ':'')+latestB.date+(latestB.time?' • '+latestB.time:'');}else{lastBP.textContent='—';lastBPNote.textContent='Aucune donnée'}
   renderGlucoseStats();
   renderGlucoseIntelligence();
   renderExercises();
