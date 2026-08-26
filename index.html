@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V42</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V43</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -735,7 +735,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </button>
 <div class="section-body">
 <div class="card" style="margin-bottom:10px">
-<div class="item-title">Connexions santé — V42</div>
+<div class="item-title">Connexions santé — V43</div>
 <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
 </div>
 <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
@@ -831,6 +831,7 @@ footer .action{font-size:13px;padding:9px 8px}
 function cloneData(x){try{if(typeof structuredClone==='function')return structuredClone(x);}catch(_){} return JSON.parse(JSON.stringify(x));}
 const KEY='monCarnetDeBord_v2';
 const OLD_KEY='monCarnetDeBord_v1';
+const HEALTH_LEDGER_KEY='monCarnetHealthImports_v43';
 const defaultData={
   glucose:[
     {value:133,moment:'3 h après repas',date:'2026-08-08',time:'15:19',note:'3 h après le petit-déjeuner'}
@@ -887,6 +888,7 @@ function mergeRecoveryData(target){
   return changed;
 }
 let data=loadData();
+try{mergeHealthLedger(data);}catch(_){}
 try{mergeRecoveryData(data);}catch(_){data=cloneData(recoveryData);}
 try{reconcileImportedHealth(data);}catch(_){}
 try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){}
@@ -957,9 +959,43 @@ function updateFrozenChickenRecipe(target){
   }catch(_){ return false; }
 }
 
+// V43 : journal indépendant des imports Santé.
+// Les données reçues depuis Apple Santé/HUAWEI sont conservées dans une seconde
+// sauvegarde locale puis refusionnées au carnet à chaque ouverture/retour.
+function healthLedgerKey(x){
+  x=x||{};
+  return [x.source||'',canonicalHealthType(x.type||''),x.date||'',x.time||'',x.value??'',x.unit||''].join('|');
+}
+function persistHealthLedger(target=data){
+  try{
+    const incoming=Array.isArray(target?.healthImports)?target.healthImports:[];
+    let ledger=[];
+    try{ledger=JSON.parse(localStorage.getItem(HEALTH_LEDGER_KEY)||'[]')}catch(_){ledger=[]}
+    if(!Array.isArray(ledger)) ledger=[];
+    const map=new Map();
+    ledger.forEach(x=>map.set(healthLedgerKey(x),x));
+    incoming.forEach(x=>map.set(healthLedgerKey(x),cloneData(x)));
+    localStorage.setItem(HEALTH_LEDGER_KEY,JSON.stringify([...map.values()]));
+  }catch(_){ }
+}
+function mergeHealthLedger(target=data){
+  try{
+    let ledger=[];
+    try{ledger=JSON.parse(localStorage.getItem(HEALTH_LEDGER_KEY)||'[]')}catch(_){ledger=[]}
+    if(!Array.isArray(ledger) || !ledger.length) return false;
+    target.healthImports=Array.isArray(target.healthImports)?target.healthImports:[];
+    const seen=new Set(target.healthImports.map(healthLedgerKey));
+    let changed=false;
+    ledger.forEach(x=>{const k=healthLedgerKey(x);if(!seen.has(k)){target.healthImports.push(cloneData(x));seen.add(k);changed=true;}});
+    if(changed) reconcileImportedHealth(target);
+    return changed;
+  }catch(_){return false;}
+}
+
 function save(){
   try{
     reconcileImportedHealth(data);
+    persistHealthLedger(data);
     localStorage.setItem(KEY,JSON.stringify(data));
     render();
     return true;
@@ -980,6 +1016,7 @@ function syncFromStorageAndRender(force=false){
     if(!force && raw===lastSyncedStorage) return;
     if(raw){
       data=loadData();
+      mergeHealthLedger(data);
       reconcileImportedHealth(data);
       if(updateFrozenChickenRecipe(data)){
         try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){ }
@@ -1490,6 +1527,7 @@ function importHealthFromUrl(){
           fastOk=saveDirectHealthImport(fastSource||'Apple Santé',fastType||'Donnée Santé',fastClean,fastUnit,fastDate,fastNote);
         }
         if(fastOk){
+          persistHealthLedger(data);
           if(window.history && history.replaceState){
             try{history.replaceState({},document.title,window.location.pathname);}catch(_){}
           }
@@ -1570,6 +1608,7 @@ function importHealthFromUrl(){
     }else{
       ok=saveDirectHealthImport(directSource||'Apple Santé',directType,value,directUnit,directDate,directNote);
     }
+    if(ok){ persistHealthLedger(data); }
     if(ok && window.history && history.replaceState){
       history.replaceState({},document.title,window.location.pathname);
     }
@@ -1580,7 +1619,7 @@ function importHealthFromUrl(){
   }
 }
 
-// V42 — reprise robuste après retour de Raccourcis iOS.
+// V43 — reprise robuste + conservation indépendante après retour de Raccourcis iOS.
 // Sur iPhone, un raccourci peut rendre la main à un onglet déjà ouvert sans
 // réexécuter tout le script. On retente donc l'import à chaque retour visible.
 let lastHealthReturnSignature='';
@@ -3141,7 +3180,7 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 consumeHealthReturn();
 render();
-// V42 : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
+// V43 : mémorise l’adresse de cette copie et conserve les imports dans un journal indépendant.
 try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
