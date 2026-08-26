@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V41</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V42</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -735,7 +735,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </button>
 <div class="section-body">
 <div class="card" style="margin-bottom:10px">
-<div class="item-title">Connexions santé — V18</div>
+<div class="item-title">Connexions santé — V42</div>
 <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
 </div>
 <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
@@ -989,9 +989,9 @@ function syncFromStorageAndRender(force=false){
     }
   }catch(_){ }
 }
-window.addEventListener('pageshow',()=>syncFromStorageAndRender(true));
-window.addEventListener('focus',()=>syncFromStorageAndRender());
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncFromStorageAndRender();});
+window.addEventListener('pageshow',()=>resumeCarnetAfterShortcut(true));
+window.addEventListener('focus',()=>resumeCarnetAfterShortcut());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeCarnetAfterShortcut();});
 window.addEventListener('storage',(e)=>{if(e.key===KEY)syncFromStorageAndRender(true);});
 document.getElementById('openExerciseLog')?.addEventListener('click',()=>toggleForm('exerciseLogForm'));
 document.getElementById('openCustomExercise')?.addEventListener('click',()=>toggleForm('customExerciseForm'));
@@ -1579,6 +1579,35 @@ function importHealthFromUrl(){
     return false;
   }
 }
+
+// V42 — reprise robuste après retour de Raccourcis iOS.
+// Sur iPhone, un raccourci peut rendre la main à un onglet déjà ouvert sans
+// réexécuter tout le script. On retente donc l'import à chaque retour visible.
+let lastHealthReturnSignature='';
+function consumeHealthReturn(){
+  try{
+    const href=String(window.location.href||'');
+    if(!/[?&#](healthValue|healthPayload)=/i.test(href)) return false;
+    const signature=href;
+    // Empêche les doubles traitements durant la même séquence focus/pageshow.
+    if(signature===lastHealthReturnSignature) return false;
+    lastHealthReturnSignature=signature;
+    const ok=importHealthFromUrl();
+    if(ok){
+      try{ lastSyncedStorage=localStorage.getItem(KEY)||''; }catch(_){}
+      render();
+    }
+    return ok;
+  }catch(_){ return false; }
+}
+
+function resumeCarnetAfterShortcut(force=false){
+  // Important : importer d'abord ce qui vient d'arriver dans l'URL,
+  // puis relire le stockage. L'ordre inverse pouvait restaurer une copie ancienne.
+  consumeHealthReturn();
+  syncFromStorageAndRender(force);
+}
+
 function calendarFile(i){
   const x=data.notes[i]; if(!x || x.type!=='Rendez-vous') return;
   // V23 : passage direct par le raccourci iPhone « Ajouter au calendrier ».
@@ -3110,9 +3139,9 @@ foodTypeChanged();
 applySectionTones();
 document.getElementById('hiType')?.addEventListener('input',updateHealthAppointmentUI);
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
+consumeHealthReturn();
 render();
-importHealthFromUrl();
-// V34r : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
+// V42 : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
 try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
