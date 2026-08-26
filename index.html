@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V44</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V45</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -735,7 +735,7 @@ footer .action{font-size:13px;padding:9px 8px}
 </button>
 <div class="section-body">
 <div class="card" style="margin-bottom:10px">
-<div class="item-title">Connexions santé — V44</div>
+<div class="item-title">Connexions santé — V45</div>
 <div class="small" style="margin-top:6px">La connexion HUAWEI peut maintenant passer par le raccourci « HUAWEI vers CARNET ». Le carnet accepte aussi un retour automatique des données par URL, puis les enregistre dans « Données santé ajoutées / importées ».</div>
 </div>
 <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
@@ -831,6 +831,15 @@ footer .action{font-size:13px;padding:9px 8px}
 function cloneData(x){try{if(typeof structuredClone==='function')return structuredClone(x);}catch(_){} return JSON.parse(JSON.stringify(x));}
 const KEY='monCarnetDeBord_v2';
 const OLD_KEY='monCarnetDeBord_v1';
+// V45 — sauvegarde redondante : localStorage + IndexedDB dans le même contexte navigateur.
+// Cela protège mieux contre les retours de Raccourcis et les fermetures/réouvertures du carnet.
+const DB_NAME='MonCarnetDeBordDB';
+const DB_STORE='backup';
+function idbOpen(){return new Promise((resolve,reject)=>{try{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
+async function idbSaveSnapshot(obj){try{const db=await idbOpen();await new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(JSON.stringify(obj),KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();return true}catch(_){return false}}
+async function idbLoadSnapshot(){try{const db=await idbOpen();const raw=await new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readonly');const r=tx.objectStore(DB_STORE).get(KEY);r.onsuccess=()=>resolve(r.result||'');r.onerror=()=>reject(r.error)});db.close();return raw?JSON.parse(raw):null}catch(_){return null}}
+async function restoreRedundantBackup(){const snap=await idbLoadSnapshot();if(!snap)return false;try{const current=localStorage.getItem(KEY);if(!current){localStorage.setItem(KEY,JSON.stringify(snap));data=loadData();reconcileImportedHealth(data);render();return true}const cur=JSON.parse(current);const score=o=>['glucose','bp','sleep','healthImports','foods','notes','meds','analyses','exerciseLogs'].reduce((n,k)=>n+(Array.isArray(o?.[k])?o[k].length:0),0);if(score(snap)>score(cur)){localStorage.setItem(KEY,JSON.stringify(snap));data=loadData();reconcileImportedHealth(data);render();return true}}catch(_){}return false}
+
 const defaultData={
   glucose:[
     {value:133,moment:'3 h après repas',date:'2026-08-08',time:'15:19',note:'3 h après le petit-déjeuner'}
@@ -961,6 +970,7 @@ function save(){
   try{
     reconcileImportedHealth(data);
     localStorage.setItem(KEY,JSON.stringify(data));
+    idbSaveSnapshot(data);
     render();
     return true;
   }catch(err){
@@ -3185,8 +3195,11 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 consumeHealthReturn();
 render();
+idbSaveSnapshot(data);
+restoreRedundantBackup();
 // V42 : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
 try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
+window.addEventListener('pagehide',()=>{try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){} idbSaveSnapshot(data);});
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
 
