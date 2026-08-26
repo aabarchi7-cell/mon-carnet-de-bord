@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V47</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V48</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -735,8 +735,8 @@ footer .action{font-size:13px;padding:9px 8px}
 </button>
 <div class="section-body">
 <div class="card" style="margin-bottom:10px">
-<div class="item-title">Connexions santé — V47</div>
-<div class="small" style="margin-top:6px">La V47 sécurise le retour après import : le reçu est enregistré avant toute restauration de sauvegarde et la copie active du carnet reste prioritaire.</div>
+<div class="item-title">Connexions santé — V48</div>
+<div class="small" style="margin-top:6px">La V48 verrouille le retour sur cette copie du carnet : avant d’ouvrir Raccourcis, elle mémorise cette adresse et sauvegarde les données. Le retour automatique ne dépend plus d’une ancienne adresse V44/V45 enregistrée dans le raccourci.</div>
 </div>
 <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
 <div class="integration-grid">
@@ -1222,8 +1222,30 @@ function addNote(e){
   const prev=document.getElementById('notePreview'); if(prev){prev.removeAttribute('src');prev.style.display='none';}
   e.target.reset(); e.target.style.display='none'; setTodayDefaults(); save();
 }
-function runShortcut(name,inputText=''){
-  const url='shortcuts://run-shortcut?name='+encodeURIComponent(name)+(inputText?'&input=text&text='+encodeURIComponent(inputText):'');
+// V48 — lance un raccourci en pouvant imposer le retour vers CETTE copie du carnet.
+// On évite ainsi qu'une ancienne adresse V44/V45 enregistrée dans le raccourci
+// devienne la page finale après l'import.
+function currentCarnetBaseUrl(){
+  return String(window.location.href||'').split(/[?#]/)[0];
+}
+function prepareShortcutReturn(intent={}){
+  try{
+    // Sauvegarder immédiatement avant de quitter la page.
+    localStorage.setItem(KEY,JSON.stringify(data));
+    idbSaveSnapshot(data);
+    const payload={...intent,returnUrl:currentCarnetBaseUrl(),at:Date.now()};
+    localStorage.setItem('monCarnetPendingImport_v48',JSON.stringify(payload));
+    localStorage.setItem('monCarnetDerniereAdresse_v48',payload.returnUrl);
+  }catch(_){}
+}
+function runShortcut(name,inputText='',returnToCarnet=false,intent={}){
+  const base='shortcuts://'+(returnToCarnet?'x-callback-url/':'')+'run-shortcut?name='+encodeURIComponent(name)+(inputText?'&input=text&text='+encodeURIComponent(inputText):'');
+  let url=base;
+  if(returnToCarnet){
+    prepareShortcutReturn(intent);
+    const success=currentCarnetBaseUrl()+'#shortcutReturned=1';
+    url += '&x-success='+encodeURIComponent(success)+'&x-cancel='+encodeURIComponent(success)+'&x-error='+encodeURIComponent(success);
+  }
   const a=document.createElement('a');
   a.href=url; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove();
 }
@@ -1240,7 +1262,7 @@ function startHuaweiImport(){
   // healthType, healthValue, healthUnit, healthDate et healthNote.
   const callback=safariBaseUrl();
   healthImportStatus('Ouverture de « HUAWEI vers CARNET »…');
-  runShortcut('HUAWEI vers CARNET',callback);
+  runShortcut('HUAWEI vers CARNET',callback,true,{source:'HUAWEI Health',type:'Pas',unit:'pas'});
 }
 
 function extractHuaweiNumber(value){
@@ -1461,7 +1483,9 @@ function canonicalHealthType(type){
 // Le résultat voyage DANS l'adresse (healthReceipt), donc il ne dépend plus
 // du localStorage éventuellement séparé du contexte ouvert par Raccourcis.
 function safariBaseUrl(){
-  const base=window.location.href.split(/[?#]/)[0];
+  // V48 : toujours partir de l'adresse réelle de la copie actuellement ouverte.
+  const base=currentCarnetBaseUrl();
+  try{localStorage.setItem('monCarnetDerniereAdresse_v48',base);}catch(_){}
   if(/^https:\/\//i.test(base)) return base.replace(/^https:\/\//i,'x-safari-https://');
   if(/^http:\/\//i.test(base)) return base.replace(/^http:\/\//i,'x-safari-http://');
   return base;
@@ -1687,6 +1711,44 @@ function importHealthFromUrl(){
   }
 }
 
+// V48 — si Raccourcis renvoie son résultat par x-callback-url, l'importer ici.
+function consumeShortcutCallbackResult(){
+  try{
+    const href=String(window.location.href||'');
+    const u=new URL(href);
+    let result=u.searchParams.get('result')||'';
+    if(!result && u.hash){
+      const hp=new URLSearchParams(u.hash.replace(/^#/,''));
+      result=hp.get('result')||'';
+    }
+    if(!result) return false;
+    try{result=decodeURIComponent(result)}catch(_){}
+
+    // Si le résultat contient déjà nos paramètres Santé, les traiter directement.
+    if(/healthReceipt=|healthValue=|healthPayload=/i.test(result)){
+      const base=currentCarnetBaseUrl();
+      const sep=result.startsWith('#')||result.startsWith('?')?'':(result.includes('=')?'#':'');
+      const target=base+sep+result.replace(/^https?:[^?#]+/i,'').replace(/^x-safari-https?:[^?#]+/i,'');
+      try{history.replaceState({},document.title,target);}catch(_){}
+      const ok=consumeHealthReturn();
+      if(ok) return true;
+    }
+
+    // Secours : résultat numérique simple + intention mémorisée avant le départ.
+    let pending={};
+    try{pending=JSON.parse(localStorage.getItem('monCarnetPendingImport_v48')||'{}')}catch(_){}
+    const clean=extractHuaweiNumber(result);
+    if(clean && pending && pending.type){
+      let ok=false;
+      if(canonicalHealthType(pending.type)==='Sommeil') ok=upsertSleepFromImport(pending.source,clean,pending.unit||'',localDateString(),'Import via Raccourcis — retour V48');
+      else if(/huawei/i.test(pending.source||'') && canonicalHealthType(pending.type)==='Pas') ok=saveHuaweiImport(clean,'Import via Raccourcis — retour V48');
+      else ok=saveDirectHealthImport(pending.source||'Apple Santé',pending.type,clean,pending.unit||'',localDateString(),'Import via Raccourcis — retour V48');
+      if(ok){try{localStorage.removeItem('monCarnetPendingImport_v48')}catch(_){} return true;}
+    }
+  }catch(_){}
+  return false;
+}
+
 // V42 — reprise robuste après retour de Raccourcis iOS.
 // Sur iPhone, un raccourci peut rendre la main à un onglet déjà ouvert sans
 // réexécuter tout le script. On retente donc l'import à chaque retour visible.
@@ -1710,8 +1772,9 @@ function consumeHealthReturn(){
 }
 
 function resumeCarnetAfterShortcut(force=false){
-  // Important : importer d'abord ce qui vient d'arriver dans l'URL,
-  // puis relire le stockage. L'ordre inverse pouvait restaurer une copie ancienne.
+  // V48 : résultat x-callback en premier, puis reçu Santé classique, puis stockage.
+  // La copie V48 reste ainsi la page maîtresse après le retour de Raccourcis.
+  consumeShortcutCallbackResult();
   consumeHealthReturn();
   syncFromStorageAndRender(force);
 }
@@ -2115,7 +2178,7 @@ function openAppleHealthBridge(){
   // Ainsi Apple Santé revient dans le même index/origine et écrit dans le même localStorage.
   const callback=safariBaseUrl();
   healthImportStatus('Ouverture de « Carnet - Apple Santé »… retour vers cette version du carnet.');
-  runShortcut('Carnet - Apple Santé',callback);
+  runShortcut('Carnet - Apple Santé',callback,true,{source:'Apple Santé',type:'Donnée Santé',unit:''});
 }
 function startSleepHuaweiImport(){
   const st=document.getElementById('sleepImportStatus');
@@ -2124,7 +2187,7 @@ function startSleepHuaweiImport(){
     st.textContent='Ouverture de « HUAWEI Sommeil vers CARNET »… la nuit reçue sera enregistrée automatiquement.';
     st.style.display='block';
   }
-  runShortcut('HUAWEI Sommeil vers CARNET',callback);
+  runShortcut('HUAWEI Sommeil vers CARNET',callback,true,{source:'HUAWEI Health',type:'Sommeil',unit:'h'});
 }
 
 function startSleepAppleImport(){
@@ -2137,7 +2200,7 @@ function startSleepAppleImport(){
   // Utilise le même pont Apple Santé que la rubrique Connexions santé.
   // Le retour avec healthSource=Apple Santé & healthType=Sommeil est déjà
   // pris en charge par importHealthFromUrl() et enregistré dans data.sleep.
-  runShortcut('Carnet - Apple Santé',callback);
+  runShortcut('Carnet - Apple Santé',callback,true,{source:'Apple Santé',type:'Sommeil',unit:'h'});
 }
 function presetHealth(source,type,unit,btn){
   openHealthImport(source,btn);
@@ -3249,13 +3312,14 @@ document.getElementById('hiType')?.addEventListener('input',updateHealthAppointm
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
 /* V47: restaurer uniquement si le stockage principal est vide, puis traiter le retour d’import. */
 restoreRedundantBackup().finally(()=>{
+  consumeShortcutCallbackResult();
   consumeHealthReturn();
   render();
   try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){}
   idbSaveSnapshot(data);
 });
 // V42 : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
-try{localStorage.setItem('monCarnetDerniereAdresse',window.location.href.split(/[?#]/)[0]);}catch(_){}
+try{const a=currentCarnetBaseUrl();localStorage.setItem('monCarnetDerniereAdresse',a);localStorage.setItem('monCarnetDerniereAdresse_v48',a);}catch(_){}
 window.addEventListener('pagehide',()=>{try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){} idbSaveSnapshot(data);});
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
