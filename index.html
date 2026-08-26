@@ -309,7 +309,7 @@ footer .action{font-size:13px;padding:9px 8px}
 <header>
 <h1>Mon carnet de bord</h1>
 <div class="subtitle">Santé • recettes • activité • suivi quotidien</div>
-<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V48</div>
+<div style="margin-top:7px;display:inline-block;padding:4px 9px;border:1px solid #5aa9ff;border-radius:999px;color:#8fc5ff;font-size:12px;font-weight:800">NOUVEAU SUIVI DÈS LE 25 AOÛT • HISTORIQUE CONSERVÉ • V49</div>
 </header>
 <main>
 <div style="margin:0 16px 18px;padding:14px 16px;border:1px solid #5aa9ff;border-radius:18px;background:#1d222b;color:#f3f6fb;font-weight:700;line-height:1.45"><div style="color:#8fc5ff;font-size:16px;margin-bottom:5px">Nouveau suivi • depuis le 25 août 2026</div><div style="font-size:13px;color:#c8ced9">Les données antérieures restent conservées comme historique. Les nouvelles mesures de glycémie, tension et sommeil alimentent le suivi à partir d’aujourd’hui.</div></div>
@@ -735,8 +735,8 @@ footer .action{font-size:13px;padding:9px 8px}
 </button>
 <div class="section-body">
 <div class="card" style="margin-bottom:10px">
-<div class="item-title">Connexions santé — V48</div>
-<div class="small" style="margin-top:6px">La V48 verrouille le retour sur cette copie du carnet : avant d’ouvrir Raccourcis, elle mémorise cette adresse et sauvegarde les données. Le retour automatique ne dépend plus d’une ancienne adresse V44/V45 enregistrée dans le raccourci.</div>
+<div class="item-title">Connexions santé — V49</div>
+<div class="small" style="margin-top:6px">La V49 protège la copie active : aucune ancienne sauvegarde intégrée ou IndexedDB n’est restaurée automatiquement par-dessus vos données actuelles. Pour HUAWEI, le raccourci doit copier le total puis se terminer sans ouvrir une nouvelle page web.</div>
 </div>
 <div class="small" style="margin-bottom:10px">HUAWEI : touchez « Importer depuis HUAWEI ». Pour les autres sources, « Ajouter une donnée ici » conserve le formulaire manuel.</div>
 <div class="integration-grid">
@@ -895,8 +895,9 @@ function mergeRecoveryData(target){
   });
   return changed;
 }
+// V49 — la copie active du navigateur est la source de vérité.
+// L'ancienne sauvegarde intégrée ne doit plus être fusionnée à chaque ouverture.
 let data=loadData();
-try{mergeRecoveryData(data);}catch(_){data=cloneData(recoveryData);}
 try{reconcileImportedHealth(data);}catch(_){}
 try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){}
 // V34r : adapte la fiche existante « poulet TM7 aux légumes » au poulet fermier congelé.
@@ -1234,8 +1235,8 @@ function prepareShortcutReturn(intent={}){
     localStorage.setItem(KEY,JSON.stringify(data));
     idbSaveSnapshot(data);
     const payload={...intent,returnUrl:currentCarnetBaseUrl(),at:Date.now()};
-    localStorage.setItem('monCarnetPendingImport_v48',JSON.stringify(payload));
-    localStorage.setItem('monCarnetDerniereAdresse_v48',payload.returnUrl);
+    localStorage.setItem('monCarnetPendingImport_v49',JSON.stringify(payload));
+    localStorage.setItem('monCarnetDerniereAdresse_v49',payload.returnUrl);
   }catch(_){}
 }
 function runShortcut(name,inputText='',returnToCarnet=false,intent={}){
@@ -1261,7 +1262,7 @@ function startHuaweiImport(){
   // Le raccourci pourra rouvrir cette adresse avec les paramètres healthSource,
   // healthType, healthValue, healthUnit, healthDate et healthNote.
   const callback=safariBaseUrl();
-  healthImportStatus('Ouverture de « HUAWEI vers CARNET »…');
+  healthImportStatus('Ouverture de « HUAWEI vers CARNET »… Le raccourci doit copier le total puis se terminer, sans ouvrir une page web.');
   runShortcut('HUAWEI vers CARNET',callback,true,{source:'HUAWEI Health',type:'Pas',unit:'pas'});
 }
 
@@ -1485,7 +1486,7 @@ function canonicalHealthType(type){
 function safariBaseUrl(){
   // V48 : toujours partir de l'adresse réelle de la copie actuellement ouverte.
   const base=currentCarnetBaseUrl();
-  try{localStorage.setItem('monCarnetDerniereAdresse_v48',base);}catch(_){}
+  try{localStorage.setItem('monCarnetDerniereAdresse_v49',base);}catch(_){}
   if(/^https:\/\//i.test(base)) return base.replace(/^https:\/\//i,'x-safari-https://');
   if(/^http:\/\//i.test(base)) return base.replace(/^http:\/\//i,'x-safari-http://');
   return base;
@@ -1736,14 +1737,14 @@ function consumeShortcutCallbackResult(){
 
     // Secours : résultat numérique simple + intention mémorisée avant le départ.
     let pending={};
-    try{pending=JSON.parse(localStorage.getItem('monCarnetPendingImport_v48')||'{}')}catch(_){}
+    try{pending=JSON.parse(localStorage.getItem('monCarnetPendingImport_v49')||'{}')}catch(_){}
     const clean=extractHuaweiNumber(result);
     if(clean && pending && pending.type){
       let ok=false;
-      if(canonicalHealthType(pending.type)==='Sommeil') ok=upsertSleepFromImport(pending.source,clean,pending.unit||'',localDateString(),'Import via Raccourcis — retour V48');
-      else if(/huawei/i.test(pending.source||'') && canonicalHealthType(pending.type)==='Pas') ok=saveHuaweiImport(clean,'Import via Raccourcis — retour V48');
-      else ok=saveDirectHealthImport(pending.source||'Apple Santé',pending.type,clean,pending.unit||'',localDateString(),'Import via Raccourcis — retour V48');
-      if(ok){try{localStorage.removeItem('monCarnetPendingImport_v48')}catch(_){} return true;}
+      if(canonicalHealthType(pending.type)==='Sommeil') ok=upsertSleepFromImport(pending.source,clean,pending.unit||'',localDateString(),'Import via Raccourcis — retour V49');
+      else if(/huawei/i.test(pending.source||'') && canonicalHealthType(pending.type)==='Pas') ok=saveHuaweiImport(clean,'Import via Raccourcis — retour V49');
+      else ok=saveDirectHealthImport(pending.source||'Apple Santé',pending.type,clean,pending.unit||'',localDateString(),'Import via Raccourcis — retour V49');
+      if(ok){try{localStorage.removeItem('monCarnetPendingImport_v49')}catch(_){} return true;}
     }
   }catch(_){}
   return false;
@@ -3310,16 +3311,15 @@ foodTypeChanged();
 applySectionTones();
 document.getElementById('hiType')?.addEventListener('input',updateHealthAppointmentUI);
 document.getElementById('hiSource')?.addEventListener('change',updateHealthAppointmentUI);
-/* V47: restaurer uniquement si le stockage principal est vide, puis traiter le retour d’import. */
-restoreRedundantBackup().finally(()=>{
-  consumeShortcutCallbackResult();
-  consumeHealthReturn();
-  render();
-  try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){}
-  idbSaveSnapshot(data);
-});
+/* V49 : ne jamais restaurer automatiquement une ancienne copie IndexedDB au démarrage.
+   La donnée active reste celle de ce carnet. */
+consumeShortcutCallbackResult();
+consumeHealthReturn();
+render();
+try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){}
+idbSaveSnapshot(data);
 // V42 : mémorise l’adresse de cette copie pour vérifier que les imports reviennent au même carnet.
-try{const a=currentCarnetBaseUrl();localStorage.setItem('monCarnetDerniereAdresse',a);localStorage.setItem('monCarnetDerniereAdresse_v48',a);}catch(_){}
+try{const a=currentCarnetBaseUrl();localStorage.setItem('monCarnetDerniereAdresse',a);localStorage.setItem('monCarnetDerniereAdresse_v49',a);}catch(_){}
 window.addEventListener('pagehide',()=>{try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){} idbSaveSnapshot(data);});
 window.addEventListener('resize',()=>{drawGlucoseChart();drawExerciseChart();drawSleepChart();drawStepsCharts();drawBPChart();});
 </script>
