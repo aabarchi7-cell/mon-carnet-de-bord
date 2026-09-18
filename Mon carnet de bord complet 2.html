@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon carnet de bord complet</title>
+<style>
+body{font-family:-apple-system,Arial,sans-serif;background:#17191d;color:#f2f3f5;margin:0;padding:12px}
+h1{font-size:22px;margin:0} .subtitle{color:#b7bdc8;font-size:13px;margin-bottom:12px}
+.card{background:#23262c;border:1px solid #414753;border-radius:14px;padding:12px;margin:10px 0}
+.section-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:800;font-size:17px;padding:4px 0}
+.section-body{display:none;margin-top:10px} .section.open .section-body{display:block}
+button{border:1px solid #414753;background:#2b2f36;color:#fff;border-radius:10px;padding:9px 12px;font-weight:700}
+button.primary{background:#5aa9ff;color:#07111d;border:none} button.danger{background:transparent;color:#ff9b9b;border-color:#7c3a3a}
+input,select,textarea{width:100%;padding:10px;background:#111317;color:#fff;border:1px solid #414753;border-radius:10px;margin:4px 0}
+.item{background:#1d2025;border:1px solid #383e49;border-radius:12px;padding:10px;margin:6px 0}
+.empty{color:#b7bdc8;font-size:13px} .meta{font-size:12px;color:#b7bdc8}
+img.preview{max-width:100%;border-radius:10px;display:none;margin-top:8px}
+canvas{width:100%;height:200px;background:#1a1d22;border-radius:10px}
+#error{display:none;background:#7c3a3a;color:#fff;padding:10px;border-radius:10px;white-space:pre-wrap}
+.exercise-card{background:#1b1f24;border:1px solid #414753;border-radius:12px;padding:10px;margin:8px 0}
+.exercise-name{font-weight:800} .exercise-desc{font-size:13px;color:#b7bdc8;margin-top:4px}
+.progressbar{height:8px;background:#101216;border:1px solid #343a43;border-radius:999px;overflow:hidden;margin-top:6px} .progress{height:100%;background:#5aa9ff}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+<div id="error"></div>
+<script>window.onerror=function(m,u,l){var e=document.getElementById('error'); e.style.display='block'; e.textContent='Erreur: '+m+' ligne '+l;};</script>
+<h1>Mon carnet de bord</h1>
+<div class="subtitle">Version finale - sport remis, clavicule retiree - photo compressee</div>
+
+<div class="card section open" id="sec-today">
+<div class="section-head" onclick="toggleSec('sec-today')">☀️ Aujourd'hui <span>▼</span></div>
+<div class="section-body">
+<div id="todaySummary" class="meta"></div>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<button class="primary" onclick="toggleForm('glucoseForm')">+ Glycemie</button>
+<button onclick="toggleForm('foodForm')">+ Repas</button>
+<button onclick="toggleForm('exForm')">+ Sport</button>
+<button onclick="toggleForm('medForm')">+ Medicament</button>
+</div>
+</div>
+</div>
+
+<div class="card section open" id="sec-glucose">
+<div class="section-head" onclick="toggleSec('sec-glucose')">🩸 Glycemie <span>▼</span></div>
+<div class="section-body">
+<button onclick="toggleForm('glucoseForm')">+ Ajouter</button>
+<form id="glucoseForm" style="display:none" onsubmit="addGlucose(event)">
+<input id="gValue" type="number" placeholder="Valeur mg/dL" required>
+<select id="gMoment"><option>A jeun</option><option>Avant repas</option><option selected>2 h apres repas</option><option>Autre</option></select>
+<input id="gDate" type="date" required><input id="gTime" type="time">
+<select id="gMeal"><option value="">Type repas</option><option>Petit-dejeuner</option><option>Dejeuner</option><option>Diner</option><option>Collation</option></select>
+<input id="gMealTag" placeholder="Etiquette repas">
+<textarea id="gNote" placeholder="Remarque"></textarea>
+<label>📷 Photo lecteur</label>
+<input type="file" accept="image/*" id="gPhotoInput" onchange="previewGlucose(this)">
+<img id="gPreview" class="preview">
+<div style="display:flex;gap:6px;margin:6px 0"><button type="button" onclick="readPhoto()">🔎 Relire auto</button><button type="button" onclick="manualPhoto()">✍️ Saisir</button><button type="button" onclick="clearPhoto()">❌ Sans photo</button></div>
+<div id="gOcrStatus" class="meta"></div>
+<button class="primary" type="submit">Enregistrer</button>
+</form>
+<div id="glucoseList"></div>
+<canvas id="glucoseChart" width="760" height="220"></canvas>
+</div>
+</div>
+
+<div class="card section" id="sec-food">
+<div class="section-head" onclick="toggleSec('sec-food')">🍽️ Alimentation <span>▼</span></div>
+<div class="section-body">
+<button onclick="toggleForm('foodForm')">+ Ajouter repas/recette</button>
+<form id="foodForm" style="display:none" onsubmit="addFood(event)">
+<select id="foodType"><option>Repas</option><option selected>Recette TM7</option><option>Recette</option></select>
+<input id="foodTitle" placeholder="Titre" required>
+<input id="foodDate" type="date">
+<textarea id="foodIngredients" placeholder="Ingredients"></textarea>
+<textarea id="foodSteps" placeholder="Etapes"></textarea>
+<input id="foodCookidoo" placeholder="Lien Cookidoo">
+<button class="primary" type="submit">Enregistrer</button>
+</form>
+<div id="foodList"></div>
+</div>
+</div>
+
+<div class="card section" id="sec-sport">
+<div class="section-head" onclick="toggleSec('sec-sport')">🏃 Sport / Exercices <span>▼</span></div>
+<div class="section-body">
+<button onclick="toggleForm('exForm')">+ Ajouter exercice</button>
+<form id="exForm" style="display:none" onsubmit="addEx(event)">
+<input id="exName" placeholder="Exercice ex: Marche, velo, renfo" required>
+<input id="exDuration" placeholder="Duree ex: 30 min">
+<input id="exDate" type="date">
+<textarea id="exNote" placeholder="Note, ressenti"></textarea>
+<button class="primary" type="submit">Enregistrer</button>
+</form>
+<div id="exList"></div>
+<div class="meta" style="margin-top:10px">Progression</div>
+<div class="progressbar"><div id="exProgress" class="progress" style="width:0%"></div></div>
+</div>
+</div>
+
+<div class="card section" id="sec-bp"><div class="section-head" onclick="toggleSec('sec-bp')">❤️ Tension <span>▼</span></div><div class="section-body"><button onclick="toggleForm('bpForm')">+ Ajouter</button><form id="bpForm" style="display:none" onsubmit="addBP(event)"><input id="bpSys" type="number" placeholder="Systolique" required><input id="bpDia" type="number" placeholder="Diastolique" required><input id="bpPulse" type="number" placeholder="Pouls"><input id="bpDate" type="date" required><input id="bpTime" type="time"><textarea id="bpNote" placeholder="Note"></textarea><button class="primary" type="submit">Enregistrer</button></form><div id="bpList"></div></div></div>
+
+<div class="card section" id="sec-meds"><div class="section-head" onclick="toggleSec('sec-meds')">💊 Medicaments <span>▼</span></div><div class="section-body"><button onclick="toggleForm('medForm')">+ Ajouter</button><form id="medForm" style="display:none" onsubmit="addMed(event)"><input id="medName" placeholder="Nom" required><input id="medDose" placeholder="Dose"><input id="medDate" type="date"><input id="medTime" type="time"><textarea id="medNote" placeholder="Note"></textarea><button class="primary" type="submit">Enregistrer</button></form><div id="medList"></div></div></div>
+
+<div class="card section" id="sec-analyses"><div class="section-head" onclick="toggleSec('sec-analyses')">🧪 Analyses <span>▼</span></div><div class="section-body"><button onclick="toggleForm('analysisForm')">+ Ajouter</button><form id="analysisForm" style="display:none" onsubmit="addAnalysis(event)"><input id="analysisType" placeholder="Type ex HbA1c" required><input id="analysisValue" placeholder="Valeur"><input id="analysisDate" type="date"><textarea id="analysisNote" placeholder="Note"></textarea><button class="primary" type="submit">Enregistrer</button></form><div id="analysisList"></div></div></div>
+
+<div class="card section" id="sec-sleep"><div class="section-head" onclick="toggleSec('sec-sleep')">😴 Sommeil <span>▼</span></div><div class="section-body"><button onclick="toggleForm('sleepForm')">+ Ajouter</button><form id="sleepForm" style="display:none" onsubmit="addSleep(event)"><input id="sDate" type="date"><input id="sHours" placeholder="Heures"><select id="sQuality"><option>Bonne</option><option>Moyenne</option><option>Mauvaise</option></select><textarea id="sNote" placeholder="Note"></textarea><button class="primary" type="submit">Enregistrer</button></form><div id="sleepList"></div></div></div>
+
+<div class="card section" id="sec-notes"><div class="section-head" onclick="toggleSec('sec-notes')">📝 Notes <span>▼</span></div><div class="section-body"><button onclick="toggleForm('noteForm')">+ Ajouter</button><form id="noteForm" style="display:none" onsubmit="addNote(event)"><input id="noteTitle" placeholder="Titre"><input id="noteDate" type="date"><textarea id="noteText" placeholder="Texte"></textarea><button class="primary" type="submit">Enregistrer</button></form><div id="noteList"></div></div></div>
+
+<script>
+const KEY='carnet_final_sport_sans_clav_v9';
+const BUILTIN=[{"title": "Soupe protéinée légère TM", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 min", "portions": "2 à 3 personnes", "ingredients": "200 g de blanc de poulet fermier cuit ou cru en petits morceaux\n1 courgette\n1 petite carotte\n1 petit oignon\n1 petite tomate\n100 g de chou-fleur\n50 g de lentilles corail\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\npoivre\ncoriandre ou persil\n700 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le chou-fleur : 5 sec / vitesse 4.\n4. Ajouter les lentilles corail, le curcuma, le poivre et 700 g d’eau.\n5. Si le poulet est cru, l’ajouter maintenant.\n6. Cuire 30 à 35 min / 100 °C / sens inverse / vitesse mijotage.\n7. Si le poulet est déjà cuit, l’ajouter seulement pour les 5 dernières minutes.\n8. Prélever une petite partie des légumes et du bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l’épaissir légèrement.\n9. Ajouter coriandre ou persil et mélanger doucement.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Poulet façon tajine léger TM7", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "Cuire 35 à 40 min / 100 °C / sens inverse / vitesse mijotage, puis vérifiez la tendreté. Si les morceaux sont encore fermes, ajoutez 5 à 10 min.", "portions": "2 à 3 personnes", "ingredients": "300 à 350 g de blanc de poulet en morceaux\n1 petit oignon\n1 petite courgette\n1 carotte\n1 tomate\n½ poivron\n1 petite gousse d’ail\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de gingembre\n½ c. à café de paprika doux\nun peu de cumin\npoivre\ncoriandre ou persil\n250 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon et l’ail dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, le curcuma, le gingembre, le paprika, le cumin et le poivre : 5 min / 100 °C / vitesse 1.\n4. Ajouter le poulet fermier, la carotte, la courgette, le poivron et 250 g d’eau.\n5. Cuire 35 à 40 min / 100 °C / sens inverse / vitesse mijotage.\n6. Vérifier la tendreté du poulet ; si nécessaire, prolonger de 5 à 10 min.\n7. Ajouter coriandre ou persil en fin de cuisson et mélanger doucement.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Couscous d’orge TM7 très léger", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "50 min", "portions": "3 personnes", "ingredients": "120 g de couscous d’orge sec\n250 g de blanc de poulet ou de dinde\n1 courgette\n1 carotte\n1 petite aubergine\n1 tomate\n½ poivron\n1 petit oignon\n100 g de navet, facultatif\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de gingembre\n½ c. à café de paprika doux\npoivre\ncoriandre ou persil\n600 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon et la tomate dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter le curcuma, le gingembre, le paprika, le poivre et 600 g d’eau.\n4. Ajouter la carotte, le navet, l’aubergine, le poivron et les morceaux de poulet.\n5. Cuire : 25 min / 100 °C / sens inverse / vitesse mijotage.\n6. Ajouter la courgette et poursuivre : 10 min / 100 °C / sens inverse / vitesse mijotage.\n7. Pendant ce temps, humidifier légèrement les 120 g de couscous d’orge avec un peu d’eau, l’égrainer puis le mettre dans le Varoma.\n8. Poser le Varoma pour les 15 dernières minutes de cuisson afin de cuire l’orge à la vapeur.\n9. Égrainer l’orge après cuisson. Servir une petite portion avec beaucoup de légumes, le poulet et un peu de bouillon.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Boulettes de viande maigre en sauce légère", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 min", "portions": "2 à 3 personnes", "ingredients": "300 g de viande hachée maigre\n1 petit oignon\n1 petite gousse d’ail\n1 tomate\n½ courgette\n½ poivron\n1 c. à café d’huile d’olive\n½ c. à café de cumin\n½ c. à café de paprika doux\n½ c. à café de curcuma\npoivre\ncoriandre ou persil\n250 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon, l’ail, la coriandre ou le persil dans le bol : 5 sec / vitesse 5.\n2. Prélever la moitié de ce mélange et l’ajouter à la viande hachée avec le cumin, le paprika, le curcuma et le poivre.\n3. Former de petites boulettes avec les mains légèrement humides.\n4. Ajouter l’huile d’olive au reste d’oignon dans le bol : 3 min / 120 °C / vitesse 1.\n5. Ajouter la tomate, la courgette, le poivron et 250 g d’eau : 10 min / 100 °C / vitesse 1.\n6. Mixer la sauce : 20 sec / vitesse 7.\n7. Déposer les boulettes dans le Varoma.\n8. Cuire : 15 à 18 min / Varoma / vitesse 1.\n9. Servir les boulettes nappées de sauce légère.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Tajine de légumes TM7", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "40 min", "portions": "2 à 3 personnes", "ingredients": "1 courgette\n1 petite aubergine\n1 carotte\n1 tomate\n½ poivron\n1 petit oignon\n1 petite gousse d’ail\n100 g de pois chiches cuits, facultatif\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\n½ c. à café de cumin\npoivre\nun peu de sel, facultatif\n250 g d’eau\ncoriandre ou persil", "steps": "1. Mettre l’oignon et l’ail dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, le paprika, le curcuma, le cumin et le poivre : 5 min / 100 °C / vitesse 1.\n4. Ajouter la carotte, la courgette, l’aubergine, le poivron et 250 g d’eau.\n5. Cuire : 20 min / 100 °C / sens inverse / vitesse mijotage.\n6. Ajouter les pois chiches cuits si vous en mettez.\n7. Poursuivre : 5 min / 100 °C / sens inverse / vitesse mijotage.\n8. Ajouter coriandre ou persil en fin de cuisson et mélanger doucement.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Poisson TM7 en sauce légère", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 min", "portions": "2 personnes", "ingredients": "300 à 350 g de poisson blanc (merlan, cabillaud, colin ou lotte)\n1 petite courgette\n1 petite carotte\n1 tomate\n½ poivron\n1 petit oignon\n1 petite gousse d’ail\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\nun peu de cumin, facultatif\npoivre\njus de ½ citron\n300 g d’eau", "steps": "1. Mettre l’oignon et l’ail dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le poivron : 5 sec / vitesse 4.\n4. Ajouter 300 g d’eau, le curcuma, le paprika, le cumin et le poivre.\n5. Cuire la sauce : 12 min / 100 °C / vitesse 1.\n6. Mixer la sauce : 20 sec / vitesse 7 pour la rendre légère et homogène.\n7. Mettre le poisson dans le Varoma avec le jus de citron.\n8. Cuire : 15 à 18 min / Varoma / vitesse 1.\n9. Servir le poisson nappé de la sauce légère.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Poulet TM7 aux légumes", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "40 min", "portions": "2 personnes", "ingredients": "300 à 350 g de blanc de poulet en morceaux\n1 courgette\n1 carotte\n1 petit oignon\n1 tomate\n½ poivron\n100 g de champignons, facultatif\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\npoivre\nun peu de sel, facultatif\n500 g d’eau pour le bol", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte, le poivron et les champignons : 5 sec / vitesse 4.\n4. Ajouter 500 g d’eau dans le bol.\n5. Mettre les morceaux de poulet dans le Varoma, avec curcuma, paprika et poivre.\n6. Installer le Varoma et cuire 25 à 30 min / Varoma / vitesse 1.\n7. Vérifier que le poulet est bien cuit à cœur ; si nécessaire, prolonger de quelques minutes.\n8. Servir avec les légumes.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Merlan TM7 aux légumes", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "30 min", "portions": "2 personnes", "ingredients": "300 à 350 g de merlan congelé\n1 courgette\n1 petite aubergine\n1 carotte\n1 tomate\n½ poivron\n1 petit oignon\norigan\npoivre\n1 c. à café d’huile d’olive, facultatif\n500 g d’eau pour le bol", "steps": "Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive si vous l’utilisez : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, l’aubergine, la carotte et le poivron : 5 sec / vitesse 4.\n4. Ajouter 500 g d’eau dans le bol.\n5. Mettre le merlan congelé dans le Varoma, avec l’origan et un peu de poivre.\n6. Installer le Varoma et cuire 18 à 22 min / Varoma / vitesse 1.\n7. Vérifier la cuisson du merlan. Si nécessaire, prolonger de 2 à 3 min.\n8. Servir avec les légumes.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Lotte TM7 aux légumes", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 mn", "portions": "2 personnes", "ingredients": "320 g de lotte congelée\n1 courgette\n1 carotte\n1 petit oignon\n1 tomate\n½ poivron\n1 c. à café d’huile d’olive\norigan ou herbes de votre choix\npoivre\nun peu de sel, facultatif\n500 g d’eau pour le bol", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le poivron : 5 sec / vitesse 4.\n4. Ajouter 500 g d’eau dans le bol.\n5. Mettre la lotte congelée dans le Varoma, avec l’origan et un peu de poivre.\n6. Installer le Varoma et cuire 22 à 25 min / Varoma / vitesse 1.\n7. Vérifier la cuisson de la lotte. Si nécessaire, prolonger de 3 à 5 min.\n8. Servir la lotte avec les légumes.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "harira très modérée en glucid", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "40 min", "portions": "4 bols environ", "ingredients": "* 250 g de tomates\n* 100 g de courgette\n* 80 g de chou-fleur\n* 1 petit oignon\n* 1 branche de céleri avec feuilles\n* coriandre et persil\n* 80 à 100 g de viande maigre en petits morceaux, facultatif\n* 30 g de lentilles sèches\n* 20 g de pois chiches cuits, facultatif\n* 1 c. à café d’huile d’olive\n* 1 c. à café de curcuma\n* ½ c. à café de gingembre\n* poivre\n* un peu de cannelle, facultatif\n* sel modéré\n* environ 700 g d’eau\n* pas de farine, pas de vermicelles, pas de riz", "steps": "1. Mettre l’oignon, le céleri, le persil et la coriandre dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter les tomates, la courgette et le chou-fleur : 8 sec / vitesse 5.\n4. Ajouter les lentilles, les pois chiches, la viande si utilisée, les épices et 700 g d’eau.\n5. Cuire : 30 min / 100 °C / sens inverse / vitesse mijotage.\n6. À la fin, prélever environ 1 louche de légumes et de bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l’épaissir naturellement.\n7. Mélanger 20 sec / sens inverse / vitesse 2.\n8. Goûter et ajuster légèrement le sel et les épices.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Pain amandes & lin low carb", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "1h", "portions": "1 pain", "ingredients": "200 g d’amandes entières à moudre\n80 g de graines de lin à moudre\n20 g de psyllium\n10 g de levure chimique\n4 œufs\n120 g de yaourt nature ou skyr\n60 à 80 g d’eau seulement, à ajouter progressivement\n1 c. à soupe d’huile d’olive\n½ c. à café de sel", "steps": "1. Mettre les amandes dans le bol : 10 sec / vitesse 10. Réserver.\n2. Mettre les graines de lin : 10 sec / vitesse 10.\n3. Ajouter les amandes moulues, le psyllium, la levure chimique et le sel : 10 sec / vitesse 4.\n4. Ajouter les œufs, le yaourt et l’huile d’olive : 20 sec / vitesse 4.\n5. Ajouter 60 g d’eau puis mélanger 20 sec / vitesse 4.\n6. Laisser reposer la pâte 5 à 10 min pour que le psyllium absorbe l’humidité.\n7. Si elle est trop sèche, ajouter l’eau restante petit à petit. La pâte doit rester souple mais assez ferme pour être façonnée.\n8. Former de petits pains aplatis avec les mains légèrement humides.\n9. Les déposer sur une plaque avec papier cuisson.\n10. Cuire au four préchauffé à 180 °C pendant environ 25 à 30 min, jusqu’à ce qu’ils soient bien pris.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Pain au millet IG bas", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "1h40 environ", "portions": "1 pain", "ingredients": "200 g farine d’orge complète\n100 g farine d’avoine\n100 g farine de sarrasin\n100 g farine de millet\n10 g psyllium\n410 g d’eau tiède\n12 g levure fraîche\n9 g sel\n½ c. à café de sucre", "steps": "1. Mettre l’eau tiède et la levure dans le bol : 2 min / 37 °C / vitesse 2.\n2. Ajouter les farines, le psyllium, le sel et le sucre.\n3. Pétrir : 4 min / mode Pétrin.\n4. Laisser lever la pâte environ 45 min dans le bol ou dans un saladier couvert.\n5. Façonner le pain et laisser reposer encore 20 à 30 min.\n6. Cuire au four préchauffé à 200 °C pendant environ 35 à 40 min.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Soupe de légumes TM7", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35mn", "portions": "4", "ingredients": "1 courgette\n2 carottes\n1 poireau\n1 oignon\n10 g d’huile d’olive\n750 g d’eau\npoivre\ncurcuma\nbouillon réduit en sel, facultatif", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la courgette, les carottes, le poireau, l’eau, le poivre et le curcuma.\n4. Cuire : 25 min / 100 °C / vitesse 1.\n5. Mixer progressivement : 1 min, en montant jusqu’à vitesse 9–10.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Lentilles à la marocaine", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "", "portions": "", "ingredients": "", "steps": "", "cookidooUrl": "https://cookidoo.international/recipes/recipe/fr/r622678", "text": "", "photo": ""}];
+function load(){try{const r=localStorage.getItem(KEY); if(r) return JSON.parse(r);}catch(e){} return {foods:JSON.parse(JSON.stringify(BUILTIN)), glucose:[], bp:[], meds:[], analyses:[], sleep:[], notes:[], exercises:[]};}
+function save(){localStorage.setItem(KEY, JSON.stringify(data));}
+let data=load();
+let pendingPhoto='';
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toggleForm(id){const f=document.getElementById(id); f.style.display=f.style.display==='none'||f.style.display==''?'block':'none';}
+function toggleSec(id){const el=document.getElementById(id); el.classList.toggle('open'); if(id==='sec-glucose' && el.classList.contains('open')) setTimeout(drawChart,100);}
+
+let isOcrRunning=false;
+function previewGlucose(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      let w=img.width, h=img.height; const maxSide=800;
+      if(w>maxSide || h>maxSide){ if(w>h){ h=Math.round(h*maxSide/w); w=maxSide; } else { w=Math.round(w*maxSide/h); h=maxSide; } }
+      canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+      pendingPhoto=canvas.toDataURL('image/jpeg',0.6);
+      const preview=document.getElementById('gPreview'); preview.src=pendingPhoto; preview.style.display='block';
+      document.getElementById('gOcrStatus').textContent='Photo '+Math.round(pendingPhoto.length/1024)+' Ko - lecture auto en cours...';
+      // Lancer OCR auto
+      runOcr(canvas);
+    }; img.src=e.target.result;
+  }; reader.readAsDataURL(file);
+}
+
+async function runOcr(canvas){
+  if(isOcrRunning) return;
+  isOcrRunning=true;
+  const status=document.getElementById('gOcrStatus');
+  try{
+    status.textContent='🔍 Lecture du taux...';
+    // Pre-traitement: augmenter contraste et recadrer centre
+    const ctx=canvas.getContext('2d');
+    const w=canvas.width, h=canvas.height;
+    // On prend la zone centrale 60% (ou le lecteur est)
+    const cropCanvas=document.createElement('canvas');
+    const cw=Math.floor(w*0.8), ch=Math.floor(h*0.6);
+    const cx=Math.floor((w-cw)/2), cy=Math.floor((h-ch)/2);
+    cropCanvas.width=cw; cropCanvas.height=ch;
+    const cctx=cropCanvas.getContext('2d');
+    cctx.drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+    // Ameliorer contraste
+    const imgData=cctx.getImageData(0,0,cw,ch);
+    for(let i=0;i<imgData.data.length;i+=4){
+      const avg=(imgData.data[i]+imgData.data[i+1]+imgData.data[i+2])/3;
+      const val=avg>180?255:(avg<100?0:avg>140?255:0);
+      imgData.data[i]=imgData.data[i+1]=imgData.data[i+2]=val;
+    }
+    cctx.putImageData(imgData,0,0);
+
+    if(typeof Tesseract==='undefined'){ throw new Error('Tesseract non charge'); }
+    const result=await Tesseract.recognize(cropCanvas, 'eng', {
+      tessedit_char_whitelist:'0123456789',
+      tessedit_pageseg_mode: '7'
+    });
+    const text=result.data.text||'';
+    console.log('OCR brut:', text);
+    // Extraire 2-3 chiffres plausibles pour glycemie (20-600)
+    const numbers=text.match(/\d{2,3}/g);
+    let best=null;
+    if(numbers){
+      for(let n of numbers){
+        const v=parseInt(n,10);
+        if(v>=20 && v<=600){ best=v; break; }
+      }
+      if(!best && numbers.length) best=parseInt(numbers[0],10);
+    }
+    if(best){
+      document.getElementById('gValue').value=String(best);
+      status.textContent='✅ Taux detecte: '+best+' mg/dL - verifiez et enregistrez';
+      status.style.color='#8dd8ff';
+    }else{
+      status.textContent='⚠️ Lecture auto: '+text.trim()+' - corrigez si besoin puis Enregistrer';
+      status.style.color='#ffd479';
+    }
+  }catch(err){
+    console.log('OCR fail', err);
+    status.textContent='Lecture auto indisponible - saisissez manuellement: '+err.message;
+    status.style.color='#ff9b9b';
+  }finally{
+    isOcrRunning=false;
+  }
+}
+
+function manualPhoto(){ const v=prompt('Entrez valeur manuelle:'); if(v) document.getElementById('gValue').value=v.replace(/[^0-9]/g,''); }
+function clearPhoto(){ pendingPhoto=''; const p=document.getElementById('gPreview'); p.removeAttribute('src'); p.style.display='none'; const inp=document.getElementById('gPhotoInput'); if(inp) inp.value=''; document.getElementById('gOcrStatus').textContent='Photo retiree'; document.getElementById('gOcrStatus').style.color='#b7bdc8'; }
+function readPhoto(){ if(!pendingPhoto){alert('Choisissez photo');return;} const canvas=document.createElement('canvas'); const img=document.getElementById('gPreview'); canvas.width=img.naturalWidth; canvas.height=img.naturalHeight; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0); runOcr(canvas); }
+
+function addFood(e){e.preventDefault(); const entry={title:foodTitle.value.trim(), type:foodType.value, date:foodDate.value, ingredients:foodIngredients.value, steps:foodSteps.value, link:foodCookidoo.value}; if(!entry.title)return; data.foods.unshift(entry); try{save();}catch(err){data.glucose.forEach(g=>g.photo=''); save();} e.target.reset(); e.target.style.display='none'; render();}
+function addGlucose(e){
+  e.preventDefault(); const gVal=document.getElementById('gValue'); if(!gVal.value)return;
+  const entry={value:Number(gVal.value), moment:gMoment.value, date:gDate.value, time:gTime.value, meal:gMeal.value, mealTag:gMealTag.value, note:gNote.value, photo:pendingPhoto||''};
+  data.glucose.unshift(entry);
+  try{save();}catch(err){ if(entry.photo){ entry.photo=''; pendingPhoto=''; data.glucose[0].photo=''; try{save();}catch(e2){data.glucose.forEach(g=>g.photo=''); save();} }else{data.glucose.shift(); return;} }
+  pendingPhoto=''; e.target.reset(); document.getElementById('gPreview').style.display='none'; document.getElementById('gPhotoInput').value=''; e.target.style.display='none'; render(); drawChart(); document.getElementById('gOcrStatus').textContent='Glycemie '+entry.value+' enregistree';
+}
+function addEx(e){e.preventDefault(); const entry={name:exName.value, duration:exDuration.value, date:exDate.value, note:exNote.value}; data.exercises.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addBP(e){e.preventDefault(); data.bp.unshift({sys:bpSys.value, dia:bpDia.value, pulse:bpPulse.value, date:bpDate.value, time:bpTime.value, note:bpNote.value}); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addMed(e){e.preventDefault(); data.meds.unshift({name:medName.value, dose:medDose.value, date:medDate.value, time:medTime.value, note:medNote.value}); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addAnalysis(e){e.preventDefault(); data.analyses.unshift({type:analysisType.value, value:analysisValue.value, date:analysisDate.value, note:analysisNote.value}); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addSleep(e){e.preventDefault(); data.sleep.unshift({date:sDate.value, hours:sHours.value, quality:sQuality.value, note:sNote.value}); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addNote(e){e.preventDefault(); data.notes.unshift({title:noteTitle.value, date:noteDate.value, text:noteText.value}); save(); e.target.reset(); e.target.style.display='none'; render();}
+
+function del(type,i){ if(Array.isArray(data[type])){ data[type].splice(i,1); try{save();}catch(e){} render(); drawChart(); } }
+window.del=del;
+
+function render(){
+  foodList.innerHTML = data.foods.length? data.foods.map((x,i)=>`<div class="item"><b>${esc(x.title)}</b> <span class="meta">${esc(x.date)} ${esc(x.type)}</span><button class="danger" style="float:right" onclick="window.del('foods',${i})">Suppr</button><div style="clear:both"></div><div>${esc(x.ingredients)}</div></div>`).join('') : '<div class="empty">Aucune recette</div>';
+  glucoseList.innerHTML = data.glucose.length? data.glucose.map((x,i)=>`<div class="item"><b>${esc(x.value)} mg/dL</b> <span class="meta">${esc(x.date)} ${esc(x.time)} ${esc(x.moment)}</span><button class="danger" style="float:right" onclick="window.del('glucose',${i})">Suppr</button><div style="clear:both"></div><div>${esc(x.note)}</div>${x.photo?`<img src="${x.photo}" style="max-width:100%;border-radius:8px;margin-top:6px">`:''}</div>`).join('') : '<div class="empty">Aucune mesure</div>';
+  exList.innerHTML = data.exercises.length? data.exercises.map((x,i)=>`<div class="exercise-card"><div class="exercise-name">${esc(x.name)} - ${esc(x.duration)} <span class="meta">${esc(x.date)}</span><button class="danger" style="float:right" onclick="window.del('exercises',${i})">Suppr</button></div><div class="exercise-desc">${esc(x.note)}</div></div>`).join('') : '<div class="empty">Aucun exercice</div>';
+  const prog=document.getElementById('exProgress'); if(prog){ const pct=Math.min(100, data.exercises.length*10); prog.style.width=pct+'%'; }
+  bpList.innerHTML = data.bp.length? data.bp.map((x,i)=>`<div class="item"><b>${esc(x.sys)}/${esc(x.dia)}</b> <button class="danger" style="float:right" onclick="window.del('bp',${i})">Suppr</button></div>`).join('') : '<div class="empty">Aucune</div>';
+  medList.innerHTML = data.meds.length? data.meds.map((x,i)=>`<div class="item"><b>${esc(x.name)}</b> <button class="danger" style="float:right" onclick="window.del('meds',${i})">Suppr</button></div>`).join('') : '<div class="empty">Aucun</div>';
+  analysisList.innerHTML = data.analyses.length? data.analyses.map((x,i)=>`<div class="item"><b>${esc(x.type)}: ${esc(x.value)}</b> <button class="danger" style="float:right" onclick="window.del('analyses',${i})">Suppr</button></div>`).join('') : '<div class="empty">Aucune</div>';
+  sleepList.innerHTML = data.sleep.length? data.sleep.map((x,i)=>`<div class="item"><b>${esc(x.hours)}h ${esc(x.quality)}</b> <button class="danger" style="float:right" onclick="window.del('sleep',${i})">Suppr</button></div>`).join('') : '<div class="empty">Aucun</div>';
+  noteList.innerHTML = data.notes.length? data.notes.map((x,i)=>`<div class="item"><b>${esc(x.title)}</b> <button class="danger" style="float:right" onclick="window.del('notes',${i})">Suppr</button><div>${esc(x.text)}</div></div>`).join('') : '<div class="empty">Aucune</div>';
+  const s=document.getElementById('todaySummary'); if(s) s.textContent=`Aujourd'hui: ${data.glucose.length} glycemies, ${data.foods.length} repas, ${data.exercises.length} sport`;
+}
+function drawChart(){
+  const c=document.getElementById('glucoseChart'); if(!c) return;
+  const rect=c.getBoundingClientRect(); const dpr=window.devicePixelRatio||1; const cssW=rect.width||700; const cssH=220;
+  c.width=Math.floor(cssW*dpr); c.height=Math.floor(cssH*dpr); c.style.height=cssH+'px';
+  const ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,cssW,cssH);
+  const pts=data.glucose.slice().reverse().slice(-20); if(!pts.length){ ctx.fillStyle='#b7bdc8'; ctx.fillText('Aucune donnee',12,24); return; }
+  const vals=pts.map(p=>Number(p.value)); let min=Math.min(...vals,70), max=Math.max(...vals,180); min=Math.floor((min-10)/10)*10; max=Math.ceil((max+10)/10)*10; if(max-min<60) max=min+60;
+  const padL=42,padR=12,padT=14,padB=28; const W=cssW-padL-padR, H=cssH-padT-padB;
+  const x=i=>padL+(pts.length===1?W/2:i*W/(pts.length-1)); const y=v=>padT+(max-v)*H/(max-min);
+  ctx.strokeStyle='#3c424c'; ctx.lineWidth=1; ctx.fillStyle='#aeb5c0'; ctx.font='11px Arial';
+  for(let i=0;i<=4;i++){ const val=Math.round(min+i*(max-min)/4); const yy=y(val); ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(cssW-padR,yy); ctx.stroke(); ctx.fillText(String(val),4,yy+4); }
+  ctx.strokeStyle='#5aa9ff'; ctx.lineWidth=2.5; ctx.beginPath(); pts.forEach((p,i)=>{ const xx=x(i), yy=y(Number(p.value)); if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }); ctx.stroke();
+  pts.forEach((p,i)=>{ const v=Number(p.value); ctx.fillStyle=v<70?'#f2b84b':(v>180?'#ff6b6b':'#5aa9ff'); ctx.beginPath(); ctx.arc(x(i),y(v),5,0,Math.PI*2); ctx.fill(); });
+}
+(function(){
+  const now=new Date(); document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value) el.valueAsDate=now;});
+  const gt=document.getElementById('gTime'); if(gt) gt.value=now.toTimeString().slice(0,5);
+  render(); setTimeout(drawChart,150);
+})();
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
