@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr"><head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Index</title>
+<style>
+*{box-sizing:border-box}body{font-family:-apple-system,system-ui,sans-serif;margin:0;background:#f6f7f9;color:#222}
+header{background:#fff;padding:16px 20px;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10}
+h1{margin:0;font-size:20px}main{max-width:780px;margin:0 auto;padding:10px}
+section{background:#fff;border-radius:12px;margin:10px 0;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.sec-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.sec-head h2{margin:0;font-size:16px}
+.btn{border:0;border-radius:8px;padding:8px 12px;background:#111;color:#fff;cursor:pointer;font-size:14px}
+.btn-sec{background:#eef2ff;color:#111}.btn-del{background:#fee2e2;color:#991b1b}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;margin:5px 0;font-size:15px}
+textarea{min-height:70px}.card{border:1px solid #eee;border-radius:10px;padding:10px;margin:8px 0;background:#fafafa}
+.badge{font-size:11px;background:#e0f2fe;padding:2px 6px;border-radius:6px}
+pre{white-space:pre-wrap;font-family:inherit;margin:4px 0;font-size:14px}
+canvas{width:100%;height:200px;border:1px solid #eee;border-radius:8px}
+.muted{color:#6b7280;font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style></head>
+<body>
+<header><h1>Tableau de bord</h1><div class="muted">Version complète légère - recettes avec méthode</div></header>
+<main>
+<section><div class="sec-head" onclick="toggle('today')"><h2>☀️ Aujourd'hui</h2><span>▼</span></div><div id="body-today"><div id="today-summary" class="muted"></div></div></section>
+
+<section><div class="sec-head" onclick="toggle('gly')"><h2>🩸 Glycémie</h2><span>▼</span></div><div id="body-gly">
+<canvas id="gChart" width="700" height="200"></canvas>
+<div style="margin:8px 0"><button class="btn btn-sec" onclick="openForm('glyForm')">+ Ajouter glycémie</button></div>
+<div id="glyForm" style="display:none;border:1px dashed #ccc;padding:10px;border-radius:10px">
+<input id="gVal" type="number" placeholder="Valeur mg/dL"><select id="gMoment"><option>À jeun</option><option>Avant repas</option><option>2h après repas</option><option>Coucher</option></select>
+<input id="gDate" type="date"><input id="gHeure" type="time"><input id="gNote" placeholder="Note"><div style="display:flex;gap:6px"><button class="btn" onclick="addGlucose()">Enregistrer</button><button class="btn btn-sec" onclick="closeForm('glyForm')">Annuler</button></div></div>
+<div id="list-gly"></div></div></section>
+
+<section><div class="sec-head" onclick="toggle('food')"><h2>🍽️ Alimentation & recettes</h2><span>▼</span></div><div id="body-food">
+<div><button class="btn btn-sec" onclick="openForm('foodForm')">+ Ajouter repas / recette</button></div>
+<div id="foodForm" style="display:none;border:1px dashed #ccc;padding:10px;border-radius:10px;margin-top:8px">
+<input id="fTitre" placeholder="Titre"><select id="fType"><option value="repas">Repas</option><option value="recette" selected>Recette TM7</option></select>
+<textarea id="fIng" placeholder="Ingrédients (un par ligne)"></textarea>
+<textarea id="fEtapes" placeholder="Méthode de préparation / Étapes - ICI LA MÉTHODE"></textarea>
+<div style="display:flex;gap:6px"><button class="btn" onclick="addFood()">Enregistrer</button><button class="btn btn-sec" onclick="closeForm('foodForm')">Annuler</button></div></div>
+<div id="list-food"></div></div></section>
+
+<section><div class="sec-head" onclick="toggle('tension')"><h2>❤️ Tension</h2><span>▼</span></div><div id="body-tension" style="display:none"><input id="tVal" placeholder="Ex: 120/80"><button class="btn" onclick="addSimple('tension','tVal','list-tension')">Enregistrer</button><div id="list-tension"></div></div></section>
+<section><div class="sec-head" onclick="toggle('meds')"><h2>💊 Médicaments</h2><span>▼</span></div><div id="body-meds" style="display:none"><input id="mVal" placeholder="Médicament"><button class="btn" onclick="addSimple('meds','mVal','list-meds')">Enregistrer</button><div id="list-meds"></div></div></section>
+<section><div class="sec-head" onclick="toggle('analyses')"><h2>🧪 Analyses</h2><span>▼</span></div><div id="body-analyses" style="display:none"><input id="aVal" placeholder="Analyse"><button class="btn" onclick="addSimple('analyses','aVal','list-analyses')">Enregistrer</button><div id="list-analyses"></div></div></section>
+<section><div class="sec-head" onclick="toggle('sommeil')"><h2>😴 Sommeil</h2><span>▼</span></div><div id="body-sommeil" style="display:none"><input id="sVal" placeholder="Heures"><button class="btn" onclick="addSimple('sommeil','sVal','list-sommeil')">Enregistrer</button><div id="list-sommeil"></div></div></section>
+<section><div class="sec-head" onclick="toggle('notes')"><h2>📝 Notes rapides</h2><span>▼</span></div><div id="body-notes" style="display:none"><input id="nVal" placeholder="Note"><button class="btn" onclick="addSimple('notes','nVal','list-notes')">Enregistrer</button><div id="list-notes"></div></div></section>
+</main>
+<script>
+let data=JSON.parse(localStorage.getItem('carnet_vFinal')||'null')||{
+glucose:[],foods:[
+{titre:"Soupe protéinée légère TM",type:"recette",ingredients:"200g blanc de poulet\n1 courgette\n1 oignon\n400ml eau",etapes:"1. Couper poulet et légumes\n2. TM7: 10min / 100° / vit1\n3. Mixer 30sec vit6\n4. Sel poivre léger"},
+{titre:"Poulet façon tajine léger TM7",type:"recette",ingredients:"400g poulet\n200g tomates\n1 oignon\n épices tajine",etapes:"1. Oignon 5sec vit5\n2. Ajouter poulet + tomates\n3. 20min / 100° / sens inverse / mijotage\n4. Servir avec légumes vapeur"},
+{titre:"Couscous d'orge TM7 très léger",type:"recette",ingredients:"200g orge\n400ml eau\n légumes",etapes:"1. Rincer orge\n2. Varoma 25min\n3. Légumes vapeur en même temps\n4. Mélanger"},
+{titre:"Boulettes de viande maigre",type:"recette",ingredients:"300g viande hachée 5%\n1 oeuf\n persil",etapes:"1. Mélanger viande + oeuf + persil\n2. Former boulettes\n3. Four 180° 18min"},
+{titre:"Tajine de légumes TM7",type:"recette",ingredients:"2 courgettes\n2 carottes\n1 poivron\n épices",etapes:"1. Couper légumes\n2. Varoma 20min\n3. Assaisonner"},
+{titre:"Salade protéinée",type:"recette",ingredients:"100g quinoa\n100g poulet grillé\n crudités",etapes:"1. Cuire quinoa 15min\n2. Griller poulet\n3. Mélanger"},
+{titre:"Omelette légère",type:"recette",ingredients:"2 oeufs\n50ml lait écrémé\n herbes",etapes:"1. Battre oeufs + lait\n2. Poêle antiadhésive 4min"},
+{titre:"Soupe de lentilles TM",type:"recette",ingredients:"150g lentilles\n1 carotte\n1 oignon\n500ml eau",etapes:"1. 20min / 100° / vit1\n2. Mixer 20sec vit6"},
+{titre:"Poisson vapeur TM7",type:"recette",ingredients:"Filet poisson blanc 200g\n citron",etapes:"1. Varoma 15min\n2. Jus citron"},
+{titre:"Yaourt bowl",type:"recette",ingredients:"150g yaourt 0%\n50g fruits rouges",etapes:"1. Mélanger yaourt + fruits\n2. Servir frais"},
+{titre:"Velouté courgette",type:"recette",ingredients:"3 courgettes\n1 oignon\n400ml eau",etapes:"1. 15min 100° vit1\n2. Mixer vit8"},
+{titre:"Poulet grillé simple",type:"recette",ingredients:"200g poulet\n épices",etapes:"1. Griller 10min chaque côté"},
+{titre:"Légumes sautés TM",type:"recette",ingredients:"300g légumes mélangés",etapes:"1. 12min Varoma\n2. 5sec vit3 sens inverse"},
+{titre:"Compote légère",type:"recette",ingredients:"3 pommes",etapes:"1. 12min 100° vit1\n2. Mixer 10sec vit5"}
+],tension:[],meds:[],analyses:[],sommeil:[],notes:[]};
+function save(){localStorage.setItem('carnet_vFinal',JSON.stringify(data));render();}
+function toggle(k){let b=document.getElementById('body-'+k); if(b) b.style.display=b.style.display==='none'?'block':'none'; if(k==='gly') setTimeout(drawChart,100);}
+function openForm(id){document.getElementById(id).style.display='block';}
+function closeForm(id){document.getElementById(id).style.display='none';}
+function addFood(){
+ let titre=document.getElementById('fTitre').value.trim(); if(!titre){alert('Titre');return;}
+ let ing=document.getElementById('fIng').value.trim(); let et=document.getElementById('fEtapes').value.trim();
+ data.foods.unshift({titre,type:document.getElementById('fType').value,ingredients:ing,etapes:et,date:new Date().toISOString()});
+ document.getElementById('fTitre').value='';document.getElementById('fIng').value='';document.getElementById('fEtapes').value='';
+ closeForm('foodForm'); save();
+}
+function addGlucose(){
+ let v=parseInt(document.getElementById('gVal').value); if(!v){alert('Valeur');return;}
+ data.glucose.unshift({val:v,moment:document.getElementById('gMoment').value,date:document.getElementById('gDate').value||new Date().toISOString().slice(0,10),heure:document.getElementById('gHeure').value,note:document.getElementById('gNote').value,ts:Date.now()});
+ closeForm('glyForm'); save();
+}
+function addSimple(k,inputId,listId){ let el=document.getElementById(inputId); let v=el.value.trim(); if(!v) return; data[k].unshift({val:v,ts:Date.now()}); el.value=''; save();}
+window.del=function(k,i){data[k].splice(i,1);save();}
+window.editFood=function(i){
+ let f=data.foods[i];
+ document.getElementById('fTitre').value=f.titre;
+ document.getElementById('fIng').value=f.ingredients||'';
+ document.getElementById('fEtapes').value=f.etapes||'';
+ openForm('foodForm');
+ data.foods.splice(i,1); save();
+}
+function render(){
+ let lg=document.getElementById('list-gly'); if(lg){lg.innerHTML=''; data.glucose.forEach((g,i)=>{ let d=document.createElement('div'); d.className='card'; d.innerHTML=`<b>${g.val} mg/dL</b> ${g.moment||''} <span class=muted>${g.date||''} ${g.heure||''}</span> <button class='btn btn-del' onclick="del('glucose',${i})">Suppr</button>`; lg.appendChild(d);});}
+ let lf=document.getElementById('list-food'); lf.innerHTML=''; data.foods.forEach((f,i)=>{
+  let d=document.createElement('div'); d.className='card';
+  let ing=f.ingredients?`<div><b>Ingrédients:</b><pre>${f.ingredients}</pre></div>`:'';
+  let et=f.etapes?`<div style='margin-top:6px'><b>🧑‍🍳 Méthode de préparation:</b><pre style='background:#fff;padding:8px;border-radius:8px;border:1px solid #e5e7eb'>${f.etapes}</pre></div>`:`<div class=muted>⚠️ Pas de méthode - clique Modifier</div>`;
+  d.innerHTML=`<div style='display:flex;justify-content:space-between'><b>${f.titre}</b><span class=badge>${f.type}</span></div>${ing}${et}<div style='margin-top:8px'><button class='btn btn-del' onclick="del('foods',${i})">Suppr</button> <button class='btn btn-sec' onclick='editFood(${i})'>Modifier / Ajouter méthode</button></div>`;
+  lf.appendChild(d);
+ });
+ ['tension','meds','analyses','sommeil','notes'].forEach(k=>{
+  let el=document.getElementById('list-'+k); if(!el) return; el.innerHTML=''; data[k].forEach((x,i)=>{ let d=document.createElement('div'); d.className='card'; d.innerHTML=`${x.val} <button class='btn btn-del' onclick="del('${k}',${i})">Suppr</button>`; el.appendChild(d);});
+ });
+ let today=document.getElementById('today-summary'); if(today) today.textContent=`${data.glucose.length} glycémies, ${data.foods.length} recettes`;
+ drawChart();
+}
+function drawChart(){
+ let c=document.getElementById('gChart'); if(!c) return; let ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);
+ if(data.glucose.length===0){ctx.fillStyle='#999';ctx.fillText('Aucune donnée',20,100);return;}
+ let vals=[...data.glucose].reverse().slice(-20); let min=60,max=220;
+ ctx.strokeStyle='#eee'; ctx.beginPath(); vals.forEach((_,i)=>{}); 
+ ctx.beginPath(); ctx.strokeStyle='#2563eb'; ctx.lineWidth=2;
+ vals.forEach((g,idx)=>{ let x=(idx/(vals.length-1||1))*c.width; let y=c.height - ((g.val-min)/(max-min))*c.height; if(idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke();
+ vals.forEach((g,idx)=>{ let x=(idx/(vals.length-1||1))*c.width; let y=c.height - ((g.val-min)/(max-min))*c.height; ctx.fillStyle=g.val>180?'#ef4444':g.val<70?'#f59e0b':'#2563eb'; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();});
+}
+document.getElementById('gDate').valueAsDate=new Date();
+render();
+</script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
