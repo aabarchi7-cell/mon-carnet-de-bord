@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191d">
+<title>Mon carnet de bord</title>
+<style>
+:root{
+  --bg:#17191d;
+  --panel:#23262c;
+  --panel2:#2b2f36;
+  --text:#f2f3f5;
+  --muted:#b7bdc8;
+  --line:#414753;
+  --accent:#5aa9ff;
+  --accent2:#f2b84b;
+  --danger:#ff6b6b;
+  --violet:#b08cff;
+  --cyan:#5ed6d6;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.45;
+}
+header{
+  position:sticky; top:0; z-index:20;
+  background:rgba(23,25,29,.96);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 16px 12px;
+}
+h1{font-size:23px;margin:0 0 4px;font-weight:800}
+.subtitle{font-size:14px;color:var(--muted)}
+main{max-width:820px;margin:auto;padding:14px 14px 220px}
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:0 4px 18px rgba(0,0,0,.12);
+}
+.metric-title{font-size:13px;color:var(--muted)}
+.metric-value{font-size:25px;font-weight:800;margin-top:4px}
+.metric-note{font-size:12px;color:var(--muted);margin-top:2px}
+.section{
+  margin:10px 0;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--panel);
+}
+.section button.section-head{
+  touch-action:manipulation;
+  width:100%;
+  border:0;
+  background:var(--panel);
+  color:var(--text);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px;
+  font-size:18px;
+  font-weight:800;
+  text-align:left;
+}
+.section-head .left{display:flex;gap:10px;align-items:center}
+.icon{
+  width:34px;height:34px;border-radius:10px;
+  display:grid;place-items:center;
+  background:var(--panel2);
+  font-size:19px
+}
+.chev{transition:.2s; color:var(--muted)}
+.section.open .chev{transform:rotate(90deg)}
+.section-body{display:none;padding:0 14px 14px}
+.section.open .section-body{display:block}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+button, input, select, textarea{font:inherit}
+.action{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:12px;
+  padding:10px 13px;
+  font-weight:700;
+}
+.action.primary{background:var(--accent);color:#07111d;border-color:transparent}
+.action.warn{background:var(--accent2);color:#1d1400;border-color:transparent}
+.action.danger{background:transparent;color:#ff9b9b;border-color:#7c3a3a}
+form.entry{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin:8px 0 14px;
+}
+form.entry .full{grid-column:1/-1}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{
+  width:100%;
+  padding:11px 12px;
+  background:#111317;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:11px;
+}
+textarea{min-height:72px;resize:vertical}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{
+  background:#1d2025;
+  border:1px solid #383e49;
+  border-radius:13px;
+  padding:11px 12px;
+}
+.item-top{display:flex;justify-content:space-between;gap:8px}
+.item-title{font-weight:800}
+.item-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.item-text{margin-top:7px;white-space:pre-wrap}
+.badge{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#313742;
+  color:#dce2ea;
+  font-size:12px;
+}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+footer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(23,25,29,.97);
+  border-top:1px solid var(--line);
+  padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+  display:flex;gap:8px;justify-content:center;
+}
+footer button{max-width:260px;flex:1}
+.small{font-size:12px;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+@media(min-width:700px){
+  .dashboard{grid-template-columns:repeat(4,1fr)}
+}
+
+.chart-wrap{
+  margin-top:12px;
+  background:#1a1d22;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+}
+.chart-title{font-weight:800;margin-bottom:8px}
+.chart-legend{font-size:12px;color:var(--muted);margin-top:8px}
+canvas{width:100%;height:220px;display:block}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 12px}
+.quick{
+  background:#1c2026;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center
+}
+.quick b{display:block;font-size:18px}
+.quick span{font-size:11px;color:var(--muted)}
+.status-ok{color:#8dd8ff}
+.status-watch{color:#ffd479}
+.status-high{color:#ff9b9b}
+
+
+footer .action{font-size:13px;padding:9px 8px}
+@media(max-width:420px){footer .action{font-size:12px}}
+
+
+.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.compare-card{background:#1d2025;border:1px solid var(--line);border-radius:13px;padding:11px}
+.compare-card b{font-size:18px;display:block}
+.compare-card span{font-size:11px;color:var(--muted)}
+.trend-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.trend-table th,.trend-table td{padding:8px 6px;border-bottom:1px solid #363c46;text-align:left}
+.trend-table th{color:var(--muted);font-weight:700}
+.signal{display:inline-block;border-radius:999px;padding:3px 7px;font-size:11px;background:#303641}
+.signal.good{color:#9bdcff}.signal.mid{color:#ffd479}.signal.high{color:#ff9b9b}
+
+
+.exercise-card{background:#1b1f24;border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}
+.exercise-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.exercise-name{font-weight:800;font-size:16px}
+.exercise-desc{font-size:13px;color:var(--muted);margin-top:5px}
+.exercise-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.progressbar{height:9px;background:#101216;border:1px solid #343a43;border-radius:999px;overflow:hidden;margin-top:7px}
+.progressfill{height:100%;background:var(--accent);width:0}
+.checkline{display:flex;align-items:center;gap:8px;margin:7px 0}
+.checkline input{width:20px;height:20px}
+.exercise-status{font-size:11px;padding:3px 7px;border-radius:999px;background:#303641;color:#d8dde5}
+.exercise-status.validated{color:#9bdcff}
+.exercise-status.pause{color:#ffd479}
+.exercise-status.stop{color:#ff9b9b}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.range-row{display:grid;grid-template-columns:1fr 54px;gap:8px;align-items:center}
+.range-row input[type=range]{padding:0}
+
+
+.photo-preview{display:none;width:120px;height:120px;object-fit:cover;border-radius:12px;margin-top:8px;border:1px solid var(--line)}
+.photo-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.saved-thumb{width:110px;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--line);margin-top:8px}
+.integration-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.integration-card{background:#1d2025;border:1px solid #383e49;border-radius:13px;padding:12px}
+.integration-card b{display:block;margin-bottom:4px}
+.integration-card .small{line-height:1.45}
+@media(min-width:600px){.integration-grid{grid-template-columns:1fr 1fr}}
+
+.integration-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.integration-actions .action{flex:1;min-width:145px}
+.integration-status{margin-top:8px;padding:8px 10px;border-radius:10px;background:#171a1f;border:1px solid #343a43}
+
+
+.saved-photo-block{margin-top:10px}
+.saved-photo-block .saved-thumb{display:block;max-width:180px;max-height:180px;width:auto;height:auto;object-fit:cover;border-radius:12px;border:1px solid #3a414b}
+
+
+/* V33 couleurs renforcées — chaque rubrique possède une identité visuelle nette.
+   La couleur reste accompagnée d'une icône et d'un titre pour un repérage non dépendant de la couleur seule. */
+.section{
+  --sectAccent:#6aa8ff;--sectBg:#20324a;--sectBg2:#172433;--sectBorder:#5279a8;
+  border:2px solid var(--sectBorder);
+  background:linear-gradient(180deg,var(--sectBg2),#20242a 96px);
+  box-shadow:0 5px 16px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.025)
+}
+.section .section-head{
+  background:linear-gradient(105deg,var(--sectBg) 0%,var(--sectBg2) 72%,#1c2026 100%);
+  border-left:9px solid var(--sectAccent);
+  min-height:66px;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.07)
+}
+.section .section-head .left{gap:12px}
+.section .section-head .icon{
+  width:38px;height:38px;display:inline-grid;place-items:center;border-radius:11px;
+  background:var(--sectAccent);color:#0d1117;border:2px solid rgba(255,255,255,.28);
+  box-shadow:0 2px 7px rgba(0,0,0,.24);font-size:20px
+}
+.section .section-body{border-top:1px solid rgba(255,255,255,.06);padding-top:12px}
+.section.tone-today{--sectAccent:#79A7FF;--sectBg:#263E68;--sectBg2:#1C2B47;--sectBorder:#648DD0}
+.section.tone-glucose{--sectAccent:#FF7CA7;--sectBg:#5A2638;--sectBg2:#3A1D29;--sectBorder:#A64E70}
+.section.tone-rehab{--sectAccent:#A6ADB8;--sectBg:#343941;--sectBg2:#282C32;--sectBorder:#626A75}
+.section.tone-sport{--sectAccent:#4CA7FF;--sectBg:#174B76;--sectBg2:#17344F;--sectBorder:#3F7DB0}
+.section.tone-pressure{--sectAccent:#53D3E7;--sectBg:#155362;--sectBg2:#183943;--sectBorder:#3D8593}
+.section.tone-meds{--sectAccent:#C08BFF;--sectBg:#51306A;--sectBg2:#352244;--sectBorder:#79569A}
+.section.tone-analyses{--sectAccent:#F08B63;--sectBg:#613528;--sectBg2:#40251E;--sectBorder:#995941}
+.section.tone-food{--sectAccent:#FFC25A;--sectBg:#674B19;--sectBg2:#463416;--sectBorder:#9B7834}
+.section.tone-sleep{--sectAccent:#8E94FF;--sectBg:#343A79;--sectBg2:#252953;--sectBorder:#5E65AA}
+.section.tone-notes{--sectAccent:#63B8FF;--sectBg:#205074;--sectBg2:#1A374F;--sectBorder:#4D7FA5}
+.section.tone-calendar{--sectAccent:#FFD166;--sectBg:#65501E;--sectBg2:#443718;--sectBorder:#967B3A}
+.section.tone-objectives{--sectAccent:#E184FF;--sectBg:#653271;--sectBg2:#43234B;--sectBorder:#9653A1}
+.section.tone-connections{--sectAccent:#57CFE3;--sectBg:#18535E;--sectBg2:#183A41;--sectBorder:#41838D}
+.section.tone-backup{--sectAccent:#B0BAC8;--sectBg:#3A424D;--sectBg2:#2B3139;--sectBorder:#687480}
+.section.open .section-head{filter:brightness(1.10)}
+.section.secondary{opacity:.76;margin-top:20px;border-style:dashed;transform:scale(.985);transform-origin:center top}
+.section.secondary .section-head{font-size:.94em;min-height:58px}
+.section.secondary .section-head:after{content:'secondaire';font-size:10px;letter-spacing:.45px;text-transform:uppercase;color:#d3d7dd;background:#171a1f;border:1px solid #606773;border-radius:999px;padding:3px 7px;margin-left:auto;margin-right:8px}
+.recipe-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.recipe-actions .action{min-height:38px}
+.recipe-badge{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:999px;background:#171b20;border:1px solid #46505e;color:#d7dbe2;font-size:11px}
+.feature-note{background:#1a1e24;border:1px solid #3b4653;border-radius:12px;padding:10px;margin:8px 0;color:#cfd5dd;font-size:12px;line-height:1.45}
+
+
+/* V33 — titres de rubriques colorés individuellement */
+.section .section-head .left{color:var(--sectAccent)}
+.section .section-head .left .icon{color:#0d1117}
+.section .section-head .chev{color:var(--sectAccent)}
+
+
+/* V34h — ciblage manuel ultra-simple de l’écran avant OCR */
+.ocr-target-modal{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:16px}
+.ocr-target-card{width:min(94vw,720px);background:#171a20;border:1px solid #48515e;border-radius:16px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.ocr-target-title{font-weight:800;margin:2px 0 8px;font-size:17px}.ocr-target-help{font-size:13px;opacity:.82;margin-bottom:10px}
+.ocr-target-wrap{position:relative;display:flex;justify-content:center;align-items:center;max-height:68vh;overflow:hidden;border-radius:12px;background:#0c0e12}
+.ocr-target-img{display:block;max-width:100%;max-height:68vh;object-fit:contain;touch-action:manipulation}
+.ocr-target-dot{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.55);pointer-events:none;display:none}
+.ocr-target-dot:before,.ocr-target-dot:after{content:'';position:absolute;background:#fff;left:50%;top:50%;transform:translate(-50%,-50%)}
+.ocr-target-dot:before{width:20px;height:2px}.ocr-target-dot:after{width:2px;height:20px}
+.ocr-target-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}
+
+/* V65 — la rubrique Rééducation / récupération est supprimée. Sécurité pour d’anciens fragments DOM. */
+section.tone-rehab, .tone-rehab { display:none !important; }
+</style>
+</head>
+<body>
+<div id="error-box" style="display:none;background:#7c3a3a;color:#fff;padding:12px;border-radius:12px;margin:10px;font-size:14px;white-space:pre-wrap;position:fixed;top:0;left:0;right:0;z-index:9999"></div>
+<script>window.onerror=function(m,u,l){var b=document.getElementById('error-box'); if(b){b.style.display='block'; b.textContent='Erreur: '+m+' ligne '+l;}};</script>
+<header><h1>Mon carnet de bord</h1><div class="subtitle">Version complete legere - toutes fonctions + 14 recettes</div></header>
+<main>
+
+<div class="dashboard" style="display:none!important">
+<div class="card">
+<div class="metric-title">Dernière glycémie</div>
+<div class="metric-value" id="lastGlucose">—</div>
+<div class="metric-note" id="lastGlucoseNote">Aucune donnée</div>
+</div>
+<div class="card">
+<div class="metric-title">Mesures aujourd’hui</div>
+<div class="metric-value" id="todayCount">0</div>
+<div class="metric-note">glycémie</div>
+</div>
+<div class="card" style="display:none!important">
+<div class="metric-title">Dernière note clavicule</div>
+<div class="metric-value" id="lastClavicle" style="font-size:17px">—</div>
+<div class="metric-note" id="lastClavicleNote">Aucune donnée</div>
+</div>
+<div class="card">
+<div class="metric-title">Sommeil</div>
+<div class="metric-value" id="lastSleep">—</div>
+<div class="metric-note" id="lastSleepNote">Aucune donnée</div>
+</div>
+<div class="card">
+<div class="metric-title">Dernière tension</div>
+<div class="metric-value" id="lastBP">—</div>
+<div class="metric-note" id="lastBPNote">Aucune donnée</div>
+</div>
+</div>
+<section class="section open tone-today" id="todaySection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">☀️</span><span class="section-title-text" style="color:#FFD166!important;-webkit-text-fill-color:#FFD166!important;border-bottom:3px solid #FFD166;padding-bottom:2px;letter-spacing:.15px">Aujourd’hui</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title" id="todayDateTitle">Aujourd’hui</div>
+<div class="small" id="todaySummary">Résumé de la journée</div>
+</div>
+<div class="dashboard" style="margin-bottom:10px">
+<div class="card">
+<div class="metric-title">Glycémie</div>
+<div class="metric-value" id="todayGlucose">—</div>
+<div class="metric-note" id="todayGlucoseNote">Aucune mesure</div>
+</div>
+<div class="card">
+<div class="metric-title">Repas</div>
+<div class="metric-value" id="todayMeals">0</div>
+<div class="metric-note">notes alimentaires</div>
+</div>
+<div class="card">
+<div class="metric-title">Médicaments</div>
+<div class="metric-value" id="todayMeds">0</div>
+<div class="metric-note">entrées du jour</div>
+</div>
+<div class="card">
+<div class="metric-title">Clavicule</div>
+<div class="metric-value" id="todayClavicle" style="font-size:17px">—</div>
+<div class="metric-note" id="todayClavicleNote">Aucune note</div>
+</div>
+</div>
+<div class="toolbar">
+<button class="action primary" onclick="quickAddGlucose()">+ Glycémie</button>
+<button class="action" onclick="quickAddFood()">+ Repas</button>
+<button class="action" onclick="quickAddMed()">+ Médicament</button>
+<button class="action warn" onclick="quickAddNote()">+ Note rapide</button>
+</div>
+<div class="chart-wrap">
+<div class="chart-title">Chronologie du jour</div>
+<div class="list" id="todayTimeline"></div>
+</div>
+</div>
+</section>
+<section class="section open tone-glucose">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🩸</span><span class="section-title-text" style="color:#FF6B8A!important;-webkit-text-fill-color:#FF6B8A!important;border-bottom:3px solid #FF6B8A;padding-bottom:2px;letter-spacing:.15px">Glycémie &amp; repas</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar">
+<button class="action primary" onclick="toggleForm('glucoseForm')">+ Nouvelle mesure</button>
+<button class="action" onclick="scrollGlucoseChart()">Voir le graphique</button>
+</div>
+<div class="quick-grid">
+<div class="quick"><b id="gAvg">—</b><span>Moyenne 7 jours</span></div>
+<div class="quick"><b id="gMin">—</b><span>Plus basse</span></div>
+<div class="quick"><b id="gMax">—</b><span>Plus haute</span></div>
+</div>
+<form class="entry" id="glucoseForm" onsubmit="addGlucose(event)" style="display:none">
+<div><label>Valeur (mg/dL)</label><input id="gValue" max="600" min="20" required="" type="number"/></div>
+<div><label>Moment</label>
+<select id="gMoment">
+<option>À jeun</option><option>Avant repas</option><option>1 h après repas</option>
+<option selected="">2 h après repas</option><option>3 h après repas</option><option>Autre</option>
+</select>
+</div>
+<div><label>Date</label><input id="gDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="gTime" required="" type="time"/></div>
+<div><label>Type de repas</label>
+<select id="gMeal">
+<option value="">—</option>
+<option>Petit-déjeuner</option>
+<option>Déjeuner</option>
+<option>Dîner</option>
+<option>Collation</option>
+</select>
+</div>
+<div><label>Étiquette repas</label><input id="gMealTag" placeholder="Ex. couscous, pain maison…"/></div>
+<div class="full"><label>📷 Photo du lecteur de glycémie (facultatif)</label><input accept="image/*" id="gPhoto" onchange="previewGlucosePhoto(this,'gPreview')" type="file"/><img alt="Aperçu glycémie" class="photo-preview" id="gPreview"/><div class="toolbar" style="margin-top:8px"><button class="action primary" type="button" onclick="readGlucosePhoto()">🔎 Lire automatiquement</button><button class="action" type="button" onclick="targetOcrDisplay('glucose')">🎯 Cibler seulement si nécessaire</button><button class="action" type="button" onclick="manualGlucoseFromPhoto()">✍️ Saisir depuis la photo</button></div><div class="small" id="gOcrStatus">V60-AUTO : choisissez une photo puis touchez « Lire automatiquement ». Le carnet cherche d’abord le grand nombre au centre de l’écran. Si la lecture échoue, vous pouvez utiliser le ciblage manuel.</div></div>
+<div class="full"><label>Repas / remarque</label><textarea id="gNote" placeholder="Ex. petit-déjeuner habituel, couscous, marche 15 min…"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button><button class="action" type="button" onclick="cancelGlucoseEntry()" style="margin-left:8px">Annuler</button></div>
+</form>
+<div class="chart-wrap">
+<div class="chart-title">Analyse par moment de la journée</div>
+<div class="compare-grid">
+<div class="compare-card"><b id="avgFasting">—</b><span>À jeun</span></div>
+<div class="compare-card"><b id="avgPremeal">—</b><span>Avant repas</span></div>
+<div class="compare-card"><b id="avg2h">—</b><span>2 h après repas</span></div>
+<div class="compare-card"><b id="avg3h">—</b><span>3 h après repas</span></div>
+</div>
+<div id="mealComparison"></div>
+</div>
+<div class="toolbar" style="margin-top:10px">
+<button class="action" id="toggleGlucoseMeasures" type="button" onclick="toggleGlucoseMeasurements()">👁️ Cacher les mesures</button>
+</div>
+<div id="glucoseMeasurementsPanel">
+<div class="list" id="glucoseList"></div>
+</div>
+<div class="chart-wrap" id="glucoseChartBox">
+<div class="chart-title">Évolution de la glycémie</div>
+<canvas height="220" id="glucoseChart" width="760"></canvas>
+<div class="chart-legend">Les points sont tracés dans l’ordre des mesures enregistrées. Le graphique sert au suivi de tendance, pas au diagnostic.</div>
+</div>
+</div>
+</section>
+
+<section class="section tone-sport" id="exerciseSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🏃</span><span class="section-title-text" style="color:#7DFF9B!important;-webkit-text-fill-color:#7DFF9B!important;border-bottom:3px solid #7DFF9B;padding-bottom:2px;letter-spacing:.15px">Sport &amp; activité physique</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+  <div class="item-title">🚶 1. Pas &amp; distance parcourue</div>
+  <div class="small" style="margin-top:6px">Les pas viennent des données enregistrées/importées. La distance directe est utilisée si elle existe ; sinon une estimation est calculée à partir des pas.</div>
+  <div class="compare-grid" style="margin-top:10px">
+    <div class="compare-card"><b id="activityStepsToday">—</b><span>Pas du jour</span></div>
+    <div class="compare-card"><b id="activityDistanceToday">—</b><span>Distance du jour</span></div>
+    <div class="compare-card"><b id="activityStepsLatest">—</b><span>Derniers pas</span></div>
+    <div class="compare-card"><b id="activityDistanceLatest">—</b><span>Dernière distance</span></div>
+  </div>
+</div>
+<div class="chart-wrap" id="stepsChartBox">
+  <div class="chart-title">Évolution des pas</div>
+  <canvas height="220" id="stepsChart" width="760"></canvas>
+  <div class="chart-legend">Nombre de pas par jour d’après les données enregistrées dans Connexions santé.</div>
+</div>
+<div class="chart-wrap" id="distanceChartBox">
+  <div class="chart-title">Évolution de la distance</div>
+  <canvas height="220" id="distanceChart" width="760"></canvas>
+  <div class="chart-legend">Distance en m ou km. Si aucune distance directe n’est disponible, une estimation est calculée à partir des pas.</div>
+</div>
+<div class="card" style="margin-bottom:10px">
+  <div class="item-title">🏊 2. Natation</div>
+  <div class="small" style="margin-top:6px">Enregistrer la durée et, si vous le souhaitez, la distance nagée.</div>
+  <button class="action primary" type="button" onclick="document.getElementById('exName').value='Natation';toggleForm('exerciseLogForm');document.getElementById('exerciseLogForm').scrollIntoView({behavior:'smooth',block:'center'})">+ Enregistrer une séance</button>
+</div>
+<div class="card" style="margin-bottom:10px">
+  <div class="item-title">⛳ 3. Golf</div>
+  <div class="small" style="margin-top:6px">Enregistrer la durée de la partie et, si vous le souhaitez, le nombre de trous ou la distance parcourue.</div>
+  <button class="action primary" type="button" onclick="document.getElementById('exName').value='Golf';toggleForm('exerciseLogForm');document.getElementById('exerciseLogForm').scrollIntoView({behavior:'smooth',block:'center'})">+ Enregistrer une partie</button>
+</div>
+<div class="card" style="margin-bottom:10px">
+  <div class="item-title">🧘 4. Yoga</div>
+  <div class="small" style="margin-top:6px">Enregistrer la durée de la séance de yoga.</div>
+  <button class="action primary" type="button" onclick="document.getElementById('exName').value='Yoga';toggleForm('exerciseLogForm');document.getElementById('exerciseLogForm').scrollIntoView({behavior:'smooth',block:'center'})">+ Enregistrer une séance</button>
+</div>
+<div class="toolbar">
+<button class="action primary" id="openExerciseLog" type="button">+ Enregistrer une activité</button>
+</div>
+<form class="entry" id="exerciseLogForm" onsubmit="addExerciseLog(event)" style="display:none">
+<div><label>Date</label><input id="exDate" required="" type="date"/></div>
+<div><label>Activité</label><select id="exName" required=""><option>Natation</option><option>Golf</option><option>Yoga</option></select></div>
+<div><label>Durée / distance / trous</label><input id="exDose" placeholder="Ex. 45 min • 1,2 km • 18 trous"/></div>
+<div class="full"><label>Remarque</label><textarea id="exNote" placeholder="Facultatif"></textarea></div>
+<!-- Champs techniques conservés pour la compatibilité avec les anciennes données et le code du carnet, mais non affichés. -->
+<div style="display:none"><select id="exRange"><option selected>Confortable</option></select><input id="exPainBefore" value="0"/><output id="exPainBeforeVal">0</output><input id="exPainAfter" value="0"/><output id="exPainAfterVal">0</output><input id="exEase" value="5"/><output id="exEaseVal">5</output><select id="exHelp"><option>Oui</option></select></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="chart-wrap">
+<div class="chart-title">Historique des activités</div>
+<div class="list" id="exerciseLogList"></div>
+</div>
+</div>
+</section>
+<section class="section tone-pressure" id="bpSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">❤️</span><span class="section-title-text" style="color:#55D6FF!important;-webkit-text-fill-color:#55D6FF!important;border-bottom:3px solid #55D6FF;padding-bottom:2px;letter-spacing:.15px">Tension artérielle</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar">
+<button class="action primary" onclick="toggleForm('bpForm')">+ Nouvelle mesure</button>
+<button class="action" onclick="openBPDirect()" type="button">❤️ Mettre à jour la tension</button>
+</div>
+<div class="small" id="bpAutoStatus" style="margin:6px 0 12px">V65-DIRECT : saisie et photo directement dans le carnet, sans Raccourcis.</div>
+<form class="entry" id="bpForm" onsubmit="addBP(event)" style="display:none">
+<div><label>Systolique</label><input id="bpSys" max="260" min="50" placeholder="Ex. 125" required="" type="number"/></div>
+<div><label>Diastolique</label><input id="bpDia" max="160" min="30" placeholder="Ex. 78" required="" type="number"/></div>
+<div><label>Pouls / min</label><input id="bpPulse" max="220" min="30" placeholder="Ex. 68" type="number"/></div>
+<div><label>Date</label><input id="bpDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="bpTime" required="" type="time"/></div>
+<div><label>Contexte</label><select id="bpContext"><option>Au repos</option><option>Matin</option><option>Soir</option><option>Après activité</option><option>Autre</option></select></div>
+<div class="full"><label>📷 Photo du tensiomètre (facultatif)</label><input accept="image/*" id="bpPhoto" onchange="previewPhoto(this,'bpPreview')" type="file"/><img alt="Aperçu" class="photo-preview" id="bpPreview"/><div class="toolbar" style="margin-top:8px"><button class="action" type="button" onclick="targetOcrDisplay('bp')">🎯 Cibler l’écran</button><button class="action" type="button" onclick="readBPPhoto()">🔎 Lire les chiffres</button></div><div class="small" id="bpOcrStatus">V34k : ciblez le centre de l’écran. SYS, DIA et pouls sont lus séparément, puis toujours proposés pour confirmation.</div></div>
+<div class="full"><label>Remarque</label><textarea id="bpNote"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="small" style="margin:6px 0 12px">La photo reste attachée à la mesure. La lecture automatique est une aide : vérifiez toujours les chiffres proposés avant d’enregistrer.</div>
+<div class="list" id="bpList"></div>
+<div class="chart-wrap" id="bpChartBox">
+<div class="chart-title">Évolution de la tension</div>
+<canvas height="220" id="bpChart" width="760"></canvas>
+<div class="chart-legend">Systolique et diastolique au fil des mesures. Les données importées de type « Tension artérielle » sont incluses lorsqu’elles contiennent une valeur de type 128/78.</div>
+</div>
+</div>
+</section>
+<section class="section tone-meds">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">💊</span><span class="section-title-text" style="color:#D98CFF!important;-webkit-text-fill-color:#D98CFF!important;border-bottom:3px solid #D98CFF;padding-bottom:2px;letter-spacing:.15px">Médicaments &amp; compléments</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('medForm')">+ Ajouter</button></div>
+<form class="entry" id="medForm" onsubmit="addMedication(event)" style="display:none">
+<div><label>Nom</label><input id="medTitle" required=""/></div>
+<div><label>Dose</label><input id="medDose" placeholder="Ex. 1 comprimé"/></div>
+<div><label>Date</label><input id="medDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="medTime" type="time"/></div>
+<div><label>Statut</label><select id="medTaken"><option>Prévu</option><option>Pris</option><option>Non pris</option></select></div>
+<div class="full"><label>Remarque</label><textarea id="medText"></textarea></div><div class="full"><label>Photo (facultatif)</label><input accept="image/*" capture="environment" id="medPhoto" onchange="genericPhoto(this,'medPreview','med')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="medPreview"/><button class="action danger" onclick="clearPendingPhoto('med','medPhoto','medPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="medList"></div>
+</div>
+</section>
+<section class="section tone-analyses">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🧪</span><span class="section-title-text" style="color:#FF9F5A!important;-webkit-text-fill-color:#FF9F5A!important;border-bottom:3px solid #FF9F5A;padding-bottom:2px;letter-spacing:.15px">Analyses &amp; examens</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('analysisForm')">+ Ajouter</button></div>
+<form class="entry" id="analysisForm" onsubmit="addAnalysis(event)" style="display:none">
+<div><label>Examen</label><input id="analysisTitle" required=""/></div>
+<div><label>Date</label><input id="analysisDate" required="" type="date"/></div>
+<div class="full"><label>Résultat / remarque</label><textarea id="analysisText"></textarea></div><div class="full"><label>Photo / document image (facultatif)</label><input accept="image/*" capture="environment" id="analysisPhoto" onchange="genericPhoto(this,'analysisPreview','analysis')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="analysisPreview"/><button class="action danger" onclick="clearPendingPhoto('analysis','analysisPhoto','analysisPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="analysisList"></div>
+</div>
+</section>
+<section class="section tone-food">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🍽️</span><span class="section-title-text" style="color:#FFE066!important;-webkit-text-fill-color:#FFE066!important;border-bottom:3px solid #FFE066;padding-bottom:2px;letter-spacing:.15px">Alimentation &amp; recettes</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('foodForm')">+ Ajouter</button></div>
+<form class="entry" id="foodForm" onsubmit="addFood(event)" style="display:none">
+<div><label>Type</label><select id="foodType" onchange="foodTypeChanged()"><option>Repas</option><option>Recette TM7</option><option>Recette</option><option>Réaction alimentaire</option></select></div>
+<div><label>Titre</label><input id="foodTitle" required=""/></div>
+<div><label>Date</label><input id="foodDate" required="" type="date"/></div>
+<div><label>Moment</label><select id="foodMoment"><option value="">—</option><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+<div class="recipe-only" style="display:none"><label>Durée</label><input id="foodDuration" placeholder="Ex. 35 min"/></div>
+<div class="recipe-only" style="display:none"><label>Portions</label><input id="foodPortions" placeholder="Ex. 2 personnes"/></div>
+<div class="recipe-only" style="display:none"><label>Calories estimées / portion</label><input id="foodCalories" inputmode="decimal" placeholder="Ex. 225 kcal"/><div class="small">Valeur indicative : vous pouvez la corriger à tout moment avec « Modifier ».</div></div>
+<div class="full recipe-only" style="display:none"><label>Ingrédients</label><textarea id="foodIngredients" placeholder="Liste des ingrédients et quantités"></textarea></div>
+<div class="full recipe-only" style="display:none"><label>Étapes TM7 / préparation</label><textarea id="foodSteps" placeholder="Étapes, température, vitesse, durée…"></textarea></div>
+<div class="full recipe-only" style="display:none"><label>Lien Cookidoo (facultatif)</label><input id="foodCookidooUrl" placeholder="Collez ici le lien de la recette Cookidoo" type="url"/></div>
+<div class="full recipe-only" style="display:none"><button class="action" onclick="openCookidooFromField()" type="button">↗️ Ouvrir la recette Cookidoo</button></div>
+<div class="full recipe-only feature-note" style="display:none">Après enregistrement : <b>Modifier</b>, <b>Programmer 📅</b>, <b>Liste de courses 🛒</b> et <b>Partager</b> sont disponibles directement sur la fiche.</div>
+<div class="full"><label>Repas / réaction / remarque</label><textarea id="foodText"></textarea></div><div class="full"><label>Photo du repas / recette (facultatif)</label><input accept="image/*" capture="environment" id="foodPhoto" onchange="genericPhoto(this,'foodPreview','food')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="foodPreview"/><button class="action danger" onclick="clearPendingPhoto('food','foodPhoto','foodPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" id="foodSubmitBtn" type="submit">Enregistrer</button><button class="action" id="foodCancelEditBtn" onclick="cancelFoodEdit()" style="display:none;margin-left:8px" type="button">Annuler la modification</button></div>
+</form>
+<div class="list" id="foodList"></div>
+</div>
+</section>
+<section class="section tone-sleep">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🌙</span><span class="section-title-text" style="color:#A8A4FF!important;-webkit-text-fill-color:#A8A4FF!important;border-bottom:3px solid #A8A4FF;padding-bottom:2px;letter-spacing:.15px">Sommeil</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar">
+<button class="action primary" onclick="toggleForm('sleepForm')">+ Ajouter une nuit</button>
+<button class="action primary" onclick="openSleepDirect('HUAWEI Health')" type="button">⌚ Mettre à jour HUAWEI</button>
+<button class="action" onclick="openSleepDirect('Apple Santé')" type="button">🍎 Mettre à jour Apple Santé</button>
+</div>
+<div class="small" id="sleepImportStatus" style="margin:0 0 10px"></div>
+<div class="card" id="sleepLatestImportCard" style="margin:0 0 12px;padding:11px 13px">
+  <div class="small">Dernière nuit reconnue</div>
+  <div class="item-title" id="sleepLatestImportValue">—</div>
+  <div class="item-meta" id="sleepLatestImportMeta">Aucune nouvelle nuit importée.</div>
+</div>
+<form class="entry" id="sleepForm" onsubmit="addSleep(event)" style="display:none">
+<div><label>Date</label><input id="sDate" required="" type="date"/></div>
+<div><label>Durée (heures)</label><input id="sHours" max="24" min="0" required="" step="0.1" type="number"/></div>
+<div><label>Qualité</label><select id="sQuality"><option>Mauvaise</option><option>Moyenne</option><option selected="">Bonne</option><option>Très bonne</option></select></div>
+<div><label>Réveils</label><input id="sWake" max="20" min="0" type="number"/></div>
+<div class="full"><label>Remarque</label><textarea id="sNote"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="list" id="sleepList"></div>
+<div class="chart-wrap" id="sleepChartBox">
+<div class="chart-title">Évolution du sommeil</div>
+<canvas height="220" id="sleepChart" width="760"></canvas>
+<div class="chart-legend">Durée de sommeil enregistrée par nuit. Les données importées depuis HUAWEI ou Apple Santé sont incluses lorsqu’elles sont enregistrées dans Sommeil.</div>
+</div>
+</div>
+</section>
+<section class="section tone-notes">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">📝</span><span class="section-title-text" style="color:#63E6BE!important;-webkit-text-fill-color:#63E6BE!important;border-bottom:3px solid #63E6BE;padding-bottom:2px;letter-spacing:.15px">Notes &amp; rendez-vous</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="toolbar"><button class="action primary" onclick="toggleForm('noteForm')">+ Ajouter</button></div>
+<form class="entry" id="noteForm" onsubmit="addNote(event)" style="display:none">
+<div><label>Type</label><select id="noteType"><option>Note</option><option>Rendez-vous</option></select></div>
+<div><label>Titre</label><input id="noteTitle" required=""/></div>
+<div><label>Date</label><input id="noteDate" required="" type="date"/></div>
+<div><label>Heure</label><input id="noteTime" type="time"/></div>
+<div class="full"><label>Note</label><textarea id="noteText"></textarea></div>
+<div class="full"><label>📷 Photo (facultatif)</label><input accept="image/*" capture="environment" id="notePhoto" onchange="genericPhoto(this,'notePreview','note')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="notePreview"/><button class="action danger" onclick="clearPendingPhoto('note','notePhoto','notePreview')" type="button">Retirer la photo</button></div></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer</button></div>
+</form>
+<div class="small" style="margin:6px 0 12px">Pour un rendez-vous, « Ajouter au calendrier » lance directement le raccourci iPhone « Ajouter au calendrier » avec le titre, la date, l’heure et la note du rendez-vous.</div>
+<div class="list" id="noteList"></div>
+</div>
+</section>
+<section class="section tone-calendar" id="calendarShareSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">📅</span><span class="section-title-text" style="color:#F4E06D!important;-webkit-text-fill-color:#F4E06D!important;border-bottom:3px solid #F4E06D;padding-bottom:2px;letter-spacing:.15px">Calendrier / Partager</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Calendrier &amp; partage</div>
+<div class="small" style="margin-top:6px">
+          Ces boutons sont actifs. Vous pouvez ouvrir directement « Notes &amp; rendez-vous », préparer un nouveau rendez-vous,
+          ou exporter la sauvegarde du carnet.
+        </div>
+</div>
+<div class="toolbar">
+<button class="action primary" onclick="openNotesAppointments()" type="button">📝 Notes &amp; rendez-vous</button>
+<button class="action warn" onclick="newAppointment()" type="button">📅 Nouveau rendez-vous</button>
+<button class="action" onclick="exportData()" type="button">↗️ Partager / sauvegarder</button>
+</div>
+</div>
+</section>
+<section class="section tone-objectives">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🎯</span><span class="section-title-text" style="color:#FF8CE7!important;-webkit-text-fill-color:#FF8CE7!important;border-bottom:3px solid #FF8CE7;padding-bottom:2px;letter-spacing:.15px">Objectifs &amp; repères</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Glycémie</div>
+<div class="small" style="margin-top:6px">Utilisez surtout vos propres objectifs fixés avec votre médecin. Le carnet sert à les noter et à suivre les tendances.</div>
+<div class="item-text" id="objGlucoseText" style="margin-top:8px"></div>
+<div class="toolbar"><button class="action" onclick="openObjectiveForm('glucose')" type="button">Ajouter / modifier mon repère</button></div>
+</div>
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Clavicule</div>
+<div class="small" style="margin-top:6px">Notez ici les repères personnels donnés par le kinésithérapeute / orthopédiste.</div>
+<div class="item-text" id="objClavicleText" style="margin-top:8px"></div>
+<div class="toolbar"><button class="action" onclick="openObjectiveForm('clavicle')" type="button">Ajouter / modifier mon repère</button></div>
+</div>
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Sommeil</div>
+<div class="small" style="margin-top:6px">Notez ici vos propres repères de durée, qualité ou régularité.</div>
+<div class="item-text" id="objSleepText" style="margin-top:8px"></div>
+<div class="toolbar"><button class="action" onclick="openObjectiveForm('sleep')" type="button">Ajouter / modifier mon repère</button></div>
+</div>
+<form class="entry" id="objectiveForm" onsubmit="saveObjective(event)" style="display:none">
+<input id="objCategory" type="hidden"/>
+<div class="full"><label>Mon objectif / repère</label><textarea id="objValue" placeholder="Écrivez ici votre objectif ou la consigne reçue"></textarea></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer le repère</button></div>
+</form>
+</div>
+</section>
+<section class="section tone-connections" id="healthConnectionsSection">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">🔗</span><span class="section-title-text" style="color:#4DE1D2!important;-webkit-text-fill-color:#4DE1D2!important;border-bottom:3px solid #4DE1D2;padding-bottom:2px;letter-spacing:.15px">Connexions santé</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<div class="card" style="margin-bottom:10px">
+<div class="item-title">Connexions santé — V65-DIRECT</div>
+<div class="small" style="margin-top:6px">Réception automatique : le carnet enregistre immédiatement les données reçues par un Raccourci/une URL de retour. En revanche, une page Safari ne peut pas lire toute seule les données d’Apple Santé ou HUAWEI Health sans qu’un Raccourci ou une automatisation iPhone les lui transmette.</div>
+</div>
+<div class="small" style="margin-bottom:10px">Touchez une source pour saisir sa nouvelle valeur directement dans le carnet. Aucune ouverture de Raccourcis.</div>
+<div class="integration-grid">
+<div class="integration-card">
+<b>Apple Santé</b>
+<div class="small">Mise à jour directe dans le carnet. Apple Santé ne peut pas être lu automatiquement par une page Safari.</div>
+<div class="integration-actions">
+<button class="action primary" onclick="openHealthImport('Apple Santé',this)" type="button">Mettre à jour Apple Santé</button>
+</div>
+</div>
+<div class="integration-card">
+<b>HUAWEI Health</b>
+<div class="small">Réception automatique au retour : le Raccourci transmet la valeur au carnet, qui l'enregistre sans nouvelle saisie.</div>
+<div class="integration-actions">
+<button class="action primary" onclick="openHealthImport('HUAWEI Health',this)" type="button">Mettre à jour HUAWEI</button>
+</div>
+</div>
+<div class="integration-card">
+<b>HUM Health</b>
+<div class="small">Choisissez un type pour saisir la nouvelle valeur directement dans le carnet.</div>
+<div class="integration-actions">
+<button class="action" onclick="presetHealth('HUM Health','Tension artérielle','mmHg',this)" type="button">Tension</button>
+<button class="action" onclick="presetHealth('HUM Health','Fréquence cardiaque','bpm',this)" type="button">Fréquence cardiaque</button>
+<button class="action" onclick="presetHealth('HUM Health','Sommeil','h',this)" type="button">Sommeil</button>
+<button class="action" onclick="openHealthImport('HUM Health',this)" type="button">Autre donnée</button>
+</div>
+</div>
+<div class="integration-card">
+<b>Quirónsalud</b>
+<div class="small">Choisissez le document ou résultat à noter. Pour une consultation, la V28 permet aussi de préparer un rendez-vous pour le calendrier.</div>
+<div class="integration-actions">
+<button class="action" onclick="presetHealth('Quirónsalud','Analyse sanguine','',this)" type="button">Analyse sanguine</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Radio / scanner / IRM','',this)" type="button">Radio / scanner / IRM</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Compte rendu','',this)" type="button">Compte rendu</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Ordonnance','',this)" type="button">Ordonnance</button>
+<button class="action" onclick="presetHealth('Quirónsalud','Rendez-vous / consultation','',this)" type="button">Consultation</button>
+</div>
+</div>
+</div>
+<div class="integration-status" id="shortcutHelp" style="display:none;margin-bottom:10px"></div>
+<form class="entry" id="healthImportForm" onsubmit="addHealthImport(event)" style="display:none">
+<div><label>Source</label>
+<select id="hiSource">
+<option>Apple Santé</option>
+<option>HUAWEI Health</option>
+<option>HUM Health</option>
+<option>Quirónsalud</option>
+</select>
+</div>
+<div><label>Type de donnée</label><input id="hiType" placeholder="Ex. pas, sommeil, fréquence cardiaque…" required=""/></div>
+<div><label>Valeur</label><input id="hiValue" placeholder="Ex. 2801"/></div>
+<div><label>Unité</label><input id="hiUnit" placeholder="Ex. pas, h, bpm"/></div>
+<div><label>Date</label><input id="hiDate" required="" type="date"/></div>
+<div id="hiTimeWrap" style="display:none"><label>Heure du rendez-vous</label><input id="hiTime" type="time"/></div>
+<div class="full"><label>Remarque</label><textarea id="hiNote"></textarea></div>
+<div class="full"><label>Photo / capture (facultatif)</label><input accept="image/*" capture="environment" id="hiPhoto" onchange="genericPhoto(this,'hiPhotoPreview','health')" type="file"/><div class="photo-tools"><img alt="Aperçu" class="photo-preview" id="hiPhotoPreview"/><button class="action danger" onclick="clearPendingPhoto('health','hiPhoto','hiPhotoPreview')" type="button">Retirer la photo</button></div></div>
+<div class="full" id="hiCalendarWrap" style="display:none"><button class="action warn" onclick="healthAppointmentToCalendar()" type="button">📅 Ajouter au calendrier</button></div>
+<div class="full"><button class="action primary" type="submit">Enregistrer la donnée</button></div>
+</form>
+<div class="chart-wrap">
+<div class="chart-title">Données santé ajoutées / importées</div>
+<div class="list" id="healthImportList"></div>
+<div class="small" style="margin-top:10px">Les courbes Pas &amp; Distance sont maintenant affichées dans <b>Sport &amp; activité physique</b>.</div>
+</div>
+</div>
+</section>
+<section class="section tone-backup" id="backupSection" style="margin-bottom:120px">
+<button class="section-head" type="button">
+<span class="left"><span class="icon">⚙️</span><span class="section-title-text" style="color:#E0E4EA!important;-webkit-text-fill-color:#E0E4EA!important;border-bottom:3px solid #E0E4EA;padding-bottom:2px;letter-spacing:.15px">Sauvegarde</span></span><span class="chev">›</span>
+</button>
+<div class="section-body">
+<p class="small">Les données personnelles restent enregistrées séparément dans ce navigateur sur cet appareil. Le carnet peut recevoir une nouvelle version du site sans effacer vos saisies.</p>
+<div class="item" style="margin-bottom:12px">
+  <div class="item-title">🔄 Mise à jour automatique</div>
+  <div class="small" id="appUpdateStatus">Mise à jour directe : vérification…</div>
+  <div class="toolbar" style="margin-top:8px">
+    <button class="action" type="button" onclick="checkForAppUpdate(true)">Vérifier maintenant</button>
+  </div>
+</div>
+<div class="item" style="margin-bottom:12px">
+  <div class="item-title">🕶️ Confidentialité</div>
+  <div class="small" id="privacyModeStatus">Personnel protégé par PIN • Anonyme séparé de vos données personnelles.</div>
+  <div class="toolbar" style="margin-top:8px">
+    <button class="action" type="button" onclick="changePersonalPin()">Changer le code Personnel</button>
+    <button class="action" type="button" onclick="lockCarnet()">Verrouiller</button>
+    <button class="action" type="button" onclick="exportAnonymousData()">Export anonyme</button>
+  </div>
+</div>
+<div class="toolbar">
+<button class="action" onclick="exportData()">Exporter mes données</button>
+<label class="action" style="cursor:pointer">Importer
+          <input accept=".json,application/json" id="importFile" onchange="importData(event)" style="display:none" type="file"/>
+</label>
+<button class="action danger" onclick="clearAll()">Effacer toutes les données</button>
+</div>
+</div>
+</section>
+
+</main>
+<script>
+
+const KEY='monCarnet_COMPLET_90Ko_v6';
+const BUILTIN=[{"title": "Soupe protéinée légère TM", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 min", "portions": "2 à 3 personnes", "ingredients": "200 g de blanc de poulet fermier cuit ou cru en petits morceaux\n1 courgette\n1 petite carotte\n1 petit oignon\n1 petite tomate\n100 g de chou-fleur\n50 g de lentilles corail\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\npoivre\ncoriandre ou persil\n700 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le chou-fleur : 5 sec / vitesse 4.\n4. Ajouter les lentilles corail, le curcuma, le poivre et 700 g d’eau.\n5. Si le poulet est cru, l’ajouter maintenant.\n6. Cuire 30 à 35 min / 100 °C / sens inverse / vitesse mijotage.\n7. Si le poulet est déjà cuit, l’ajouter seulement pour les 5 dernières minutes.\n8. Prélever une petite partie des légumes et du bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l’épaissir légèrement.\n9. Ajouter coriandre ou persil et mélanger doucement.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Poulet façon tajine léger TM7", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "Cuire 35 à 40 min / 100 °C / sens inverse / vitesse mijotage, puis vérifiez la tendreté. Si les morceaux sont encore fermes, ajoutez 5 à 10 min.", "portions": "2 à 3 personnes", "ingredients": "300 à 350 g de blanc de poulet en morceaux\n1 petit oignon\n1 petite courgette\n1 carotte\n1 tomate\n½ poivron\n1 petite gousse d’ail\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de gingembre\n½ c. à café de paprika doux\nun peu de cumin\npoivre\ncoriandre ou persil\n250 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon et l’ail dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, le curcuma, le gingembre, le paprika, le cumin et le poivre : 5 min / 100 °C / vitesse 1.\n4. Ajouter le poulet fermier, la carotte, la courgette, le poivron et 250 g d’eau.\n5. Cuire 35 à 40 min / 100 °C / sens inverse / vitesse mijotage.\n6. Vérifier la tendreté du poulet ; si nécessaire, prolonger de 5 à 10 min.\n7. Ajouter coriandre ou persil en fin de cuisson et mélanger doucement.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Couscous d’orge TM7 très léger", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "50 min", "portions": "3 personnes", "ingredients": "120 g de couscous d’orge sec\n250 g de blanc de poulet ou de dinde\n1 courgette\n1 carotte\n1 petite aubergine\n1 tomate\n½ poivron\n1 petit oignon\n100 g de navet, facultatif\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de gingembre\n½ c. à café de paprika doux\npoivre\ncoriandre ou persil\n600 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon et la tomate dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter le curcuma, le gingembre, le paprika, le poivre et 600 g d’eau.\n4. Ajouter la carotte, le navet, l’aubergine, le poivron et les morceaux de poulet.\n5. Cuire : 25 min / 100 °C / sens inverse / vitesse mijotage.\n6. Ajouter la courgette et poursuivre : 10 min / 100 °C / sens inverse / vitesse mijotage.\n7. Pendant ce temps, humidifier légèrement les 120 g de couscous d’orge avec un peu d’eau, l’égrainer puis le mettre dans le Varoma.\n8. Poser le Varoma pour les 15 dernières minutes de cuisson afin de cuire l’orge à la vapeur.\n9. Égrainer l’orge après cuisson. Servir une petite portion avec beaucoup de légumes, le poulet et un peu de bouillon.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Boulettes de viande maigre en sauce légère", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 min", "portions": "2 à 3 personnes", "ingredients": "300 g de viande hachée maigre\n1 petit oignon\n1 petite gousse d’ail\n1 tomate\n½ courgette\n½ poivron\n1 c. à café d’huile d’olive\n½ c. à café de cumin\n½ c. à café de paprika doux\n½ c. à café de curcuma\npoivre\ncoriandre ou persil\n250 g d’eau\nun peu de sel, facultatif", "steps": "1. Mettre l’oignon, l’ail, la coriandre ou le persil dans le bol : 5 sec / vitesse 5.\n2. Prélever la moitié de ce mélange et l’ajouter à la viande hachée avec le cumin, le paprika, le curcuma et le poivre.\n3. Former de petites boulettes avec les mains légèrement humides.\n4. Ajouter l’huile d’olive au reste d’oignon dans le bol : 3 min / 120 °C / vitesse 1.\n5. Ajouter la tomate, la courgette, le poivron et 250 g d’eau : 10 min / 100 °C / vitesse 1.\n6. Mixer la sauce : 20 sec / vitesse 7.\n7. Déposer les boulettes dans le Varoma.\n8. Cuire : 15 à 18 min / Varoma / vitesse 1.\n9. Servir les boulettes nappées de sauce légère.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Tajine de légumes TM7", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "40 min", "portions": "2 à 3 personnes", "ingredients": "1 courgette\n1 petite aubergine\n1 carotte\n1 tomate\n½ poivron\n1 petit oignon\n1 petite gousse d’ail\n100 g de pois chiches cuits, facultatif\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\n½ c. à café de cumin\npoivre\nun peu de sel, facultatif\n250 g d’eau\ncoriandre ou persil", "steps": "1. Mettre l’oignon et l’ail dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, le paprika, le curcuma, le cumin et le poivre : 5 min / 100 °C / vitesse 1.\n4. Ajouter la carotte, la courgette, l’aubergine, le poivron et 250 g d’eau.\n5. Cuire : 20 min / 100 °C / sens inverse / vitesse mijotage.\n6. Ajouter les pois chiches cuits si vous en mettez.\n7. Poursuivre : 5 min / 100 °C / sens inverse / vitesse mijotage.\n8. Ajouter coriandre ou persil en fin de cuisson et mélanger doucement.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Poisson TM7 en sauce légère", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 min", "portions": "2 personnes", "ingredients": "300 à 350 g de poisson blanc (merlan, cabillaud, colin ou lotte)\n1 petite courgette\n1 petite carotte\n1 tomate\n½ poivron\n1 petit oignon\n1 petite gousse d’ail\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\nun peu de cumin, facultatif\npoivre\njus de ½ citron\n300 g d’eau", "steps": "1. Mettre l’oignon et l’ail dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le poivron : 5 sec / vitesse 4.\n4. Ajouter 300 g d’eau, le curcuma, le paprika, le cumin et le poivre.\n5. Cuire la sauce : 12 min / 100 °C / vitesse 1.\n6. Mixer la sauce : 20 sec / vitesse 7 pour la rendre légère et homogène.\n7. Mettre le poisson dans le Varoma avec le jus de citron.\n8. Cuire : 15 à 18 min / Varoma / vitesse 1.\n9. Servir le poisson nappé de la sauce légère.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Poulet TM7 aux légumes", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "40 min", "portions": "2 personnes", "ingredients": "300 à 350 g de blanc de poulet en morceaux\n1 courgette\n1 carotte\n1 petit oignon\n1 tomate\n½ poivron\n100 g de champignons, facultatif\n1 c. à café d’huile d’olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\npoivre\nun peu de sel, facultatif\n500 g d’eau pour le bol", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte, le poivron et les champignons : 5 sec / vitesse 4.\n4. Ajouter 500 g d’eau dans le bol.\n5. Mettre les morceaux de poulet dans le Varoma, avec curcuma, paprika et poivre.\n6. Installer le Varoma et cuire 25 à 30 min / Varoma / vitesse 1.\n7. Vérifier que le poulet est bien cuit à cœur ; si nécessaire, prolonger de quelques minutes.\n8. Servir avec les légumes.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Merlan TM7 aux légumes", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "30 min", "portions": "2 personnes", "ingredients": "300 à 350 g de merlan congelé\n1 courgette\n1 petite aubergine\n1 carotte\n1 tomate\n½ poivron\n1 petit oignon\norigan\npoivre\n1 c. à café d’huile d’olive, facultatif\n500 g d’eau pour le bol", "steps": "Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive si vous l’utilisez : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, l’aubergine, la carotte et le poivron : 5 sec / vitesse 4.\n4. Ajouter 500 g d’eau dans le bol.\n5. Mettre le merlan congelé dans le Varoma, avec l’origan et un peu de poivre.\n6. Installer le Varoma et cuire 18 à 22 min / Varoma / vitesse 1.\n7. Vérifier la cuisson du merlan. Si nécessaire, prolonger de 2 à 3 min.\n8. Servir avec les légumes.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Lotte TM7 aux légumes", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35 mn", "portions": "2 personnes", "ingredients": "320 g de lotte congelée\n1 courgette\n1 carotte\n1 petit oignon\n1 tomate\n½ poivron\n1 c. à café d’huile d’olive\norigan ou herbes de votre choix\npoivre\nun peu de sel, facultatif\n500 g d’eau pour le bol", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le poivron : 5 sec / vitesse 4.\n4. Ajouter 500 g d’eau dans le bol.\n5. Mettre la lotte congelée dans le Varoma, avec l’origan et un peu de poivre.\n6. Installer le Varoma et cuire 22 à 25 min / Varoma / vitesse 1.\n7. Vérifier la cuisson de la lotte. Si nécessaire, prolonger de 3 à 5 min.\n8. Servir la lotte avec les légumes.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "harira très modérée en glucid", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "40 min", "portions": "4 bols environ", "ingredients": "* 250 g de tomates\n* 100 g de courgette\n* 80 g de chou-fleur\n* 1 petit oignon\n* 1 branche de céleri avec feuilles\n* coriandre et persil\n* 80 à 100 g de viande maigre en petits morceaux, facultatif\n* 30 g de lentilles sèches\n* 20 g de pois chiches cuits, facultatif\n* 1 c. à café d’huile d’olive\n* 1 c. à café de curcuma\n* ½ c. à café de gingembre\n* poivre\n* un peu de cannelle, facultatif\n* sel modéré\n* environ 700 g d’eau\n* pas de farine, pas de vermicelles, pas de riz", "steps": "1. Mettre l’oignon, le céleri, le persil et la coriandre dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter les tomates, la courgette et le chou-fleur : 8 sec / vitesse 5.\n4. Ajouter les lentilles, les pois chiches, la viande si utilisée, les épices et 700 g d’eau.\n5. Cuire : 30 min / 100 °C / sens inverse / vitesse mijotage.\n6. À la fin, prélever environ 1 louche de légumes et de bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l’épaissir naturellement.\n7. Mélanger 20 sec / sens inverse / vitesse 2.\n8. Goûter et ajuster légèrement le sel et les épices.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Pain amandes & lin low carb", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "1h", "portions": "1 pain", "ingredients": "200 g d’amandes entières à moudre\n80 g de graines de lin à moudre\n20 g de psyllium\n10 g de levure chimique\n4 œufs\n120 g de yaourt nature ou skyr\n60 à 80 g d’eau seulement, à ajouter progressivement\n1 c. à soupe d’huile d’olive\n½ c. à café de sel", "steps": "1. Mettre les amandes dans le bol : 10 sec / vitesse 10. Réserver.\n2. Mettre les graines de lin : 10 sec / vitesse 10.\n3. Ajouter les amandes moulues, le psyllium, la levure chimique et le sel : 10 sec / vitesse 4.\n4. Ajouter les œufs, le yaourt et l’huile d’olive : 20 sec / vitesse 4.\n5. Ajouter 60 g d’eau puis mélanger 20 sec / vitesse 4.\n6. Laisser reposer la pâte 5 à 10 min pour que le psyllium absorbe l’humidité.\n7. Si elle est trop sèche, ajouter l’eau restante petit à petit. La pâte doit rester souple mais assez ferme pour être façonnée.\n8. Former de petits pains aplatis avec les mains légèrement humides.\n9. Les déposer sur une plaque avec papier cuisson.\n10. Cuire au four préchauffé à 180 °C pendant environ 25 à 30 min, jusqu’à ce qu’ils soient bien pris.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Pain au millet IG bas", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "1h40 environ", "portions": "1 pain", "ingredients": "200 g farine d’orge complète\n100 g farine d’avoine\n100 g farine de sarrasin\n100 g farine de millet\n10 g psyllium\n410 g d’eau tiède\n12 g levure fraîche\n9 g sel\n½ c. à café de sucre", "steps": "1. Mettre l’eau tiède et la levure dans le bol : 2 min / 37 °C / vitesse 2.\n2. Ajouter les farines, le psyllium, le sel et le sucre.\n3. Pétrir : 4 min / mode Pétrin.\n4. Laisser lever la pâte environ 45 min dans le bol ou dans un saladier couvert.\n5. Façonner le pain et laisser reposer encore 20 à 30 min.\n6. Cuire au four préchauffé à 200 °C pendant environ 35 à 40 min.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Soupe de légumes TM7", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "35mn", "portions": "4", "ingredients": "1 courgette\n2 carottes\n1 poireau\n1 oignon\n10 g d’huile d’olive\n750 g d’eau\npoivre\ncurcuma\nbouillon réduit en sel, facultatif", "steps": "1. Mettre l’oignon dans le bol : 5 sec / vitesse 5.\n2. Ajouter l’huile d’olive : 3 min / 120 °C / vitesse 1.\n3. Ajouter la courgette, les carottes, le poireau, l’eau, le poivre et le curcuma.\n4. Cuire : 25 min / 100 °C / vitesse 1.\n5. Mixer progressivement : 1 min, en montant jusqu’à vitesse 9–10.", "cookidooUrl": "", "text": "", "photo": ""}, {"title": "Lentilles à la marocaine", "date": "2026-08-18", "type": "Recette TM7", "moment": "", "duration": "", "portions": "", "ingredients": "", "steps": "", "cookidooUrl": "https://cookidoo.international/recipes/recipe/fr/r622678", "text": "", "photo": ""}];
+
+function load(){try{const r=localStorage.getItem(KEY); if(r) return JSON.parse(r);}catch(e){} return {foods:JSON.parse(JSON.stringify(BUILTIN)), glucose:[], bp:[], meds:[], analyses:[], sleep:[], notes:[], clavicle:[], exercises:[]};}
+function save(){localStorage.setItem(KEY, JSON.stringify(data));}
+let data=load();
+let pendingGlucosePhoto='';
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toggleForm(id){const f=document.getElementById(id); f.style.display=f.style.display==='none'?'grid':'none';}
+function toggleSection(btn){const sec=btn.closest('.section'); sec.classList.toggle('open');}
+document.addEventListener('click', e=>{const h=e.target.closest('.section-head'); if(h) toggleSection(h);});
+
+function setTodayDefaults(){
+  const ds=new Date().toISOString().slice(0,10); const ts=new Date().toTimeString().slice(0,5);
+  ['gDate','bpDate','foodDate','medDate','analysisDate','sDate','noteDate','cDate','exDate'].forEach(id=>{const el=document.getElementById(id); if(el&&!el.value) el.value=ds;});
+  const gt=document.getElementById('gTime'); if(gt&&!gt.value) gt.value=ts;
+  const bt=document.getElementById('bpTime'); if(bt&&!bt.value) bt.value=ts;
+}
+
+function previewGlucosePhoto(input){
+  const file=input.files&&input.files[0]; if(!file){pendingGlucosePhoto='';return;}
+  const r=new FileReader(); r.onload=e=>{pendingGlucosePhoto=e.target.result; const img=document.getElementById('gPreview'); if(img){img.src=pendingGlucosePhoto; img.style.display='block';}}; r.readAsDataURL(file);
+}
+function readGlucosePhoto(){
+  if(!pendingGlucosePhoto){alert('Choisissez photo');return;}
+  const v=prompt('Valeur lue sur le lecteur:'); if(v) document.getElementById('gValue').value=v.replace(/[^0-9]/g,'');
+}
+function manualGlucoseFromPhoto(){
+  const v=prompt('Entrez valeur:'); if(v) document.getElementById('gValue').value=v.replace(/[^0-9]/g,'');
+}
+function targetOcrDisplay(){alert('Prenez photo centree sur le grand nombre');}
+
+function addFood(e){e.preventDefault(); const entry={title:foodTitle.value.trim(), type:foodType.value, date:foodDate.value, ingredients:foodIngredients.value, steps:foodSteps.value}; if(!entry.title) return; data.foods.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addGlucose(e){e.preventDefault(); const entry={value:Number(gValue.value), moment:gMoment.value, date:gDate.value, time:gTime.value, meal:gMeal.value, mealTag:gMealTag.value, note:gNote.value, photo:pendingGlucosePhoto||''}; if(!entry.value){alert('Valeur requise');return;} data.glucose.unshift(entry); pendingGlucosePhoto=''; save(); e.target.reset(); const gp=document.getElementById('gPreview'); if(gp){gp.removeAttribute('src'); gp.style.display='none';} e.target.style.display='none'; render();}
+function addBP(e){e.preventDefault(); const entry={sys:bpSys.value, dia:bpDia.value, pulse:bpPulse?bpPulse.value:'', date:bpDate.value, time:bpTime?bpTime.value:'', note:bpNote?bpNote.value:''}; data.bp.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addMed(e){e.preventDefault(); const entry={name:medName.value, dose:medDose.value, date:medDate.value, time:medTime?medTime.value:'', note:medNote?medNote.value:''}; data.meds.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addAnalysis(e){e.preventDefault(); const entry={type:analysisType.value, value:analysisValue.value, date:analysisDate.value, note:analysisNote?analysisNote.value:''}; data.analyses.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addSleep(e){e.preventDefault(); const entry={date:sDate.value, hours:sHours.value, quality:sQuality.value, note:sNote.value}; data.sleep.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addNote(e){e.preventDefault(); const entry={title:noteTitle.value, date:noteDate.value, time:noteTime?noteTime.value:'', text:noteText.value}; data.notes.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+function addClavicle(e){e.preventDefault(); const entry={date:cDate.value, pain:cPain.value, note:cNote.value}; data.clavicle.unshift(entry); save(); e.target.reset(); e.target.style.display='none'; render();}
+
+function del(type,i){if(!confirm('Supprimer ?'))return; data[type].splice(i,1); save(); render();}
+
+function render(){
+  const map={foods:'foodList', glucose:'glucoseList', bp:'bpList', meds:'medList', analyses:'analysisList', sleep:'sleepList', notes:'noteList', clavicle:'clavicleList'};
+  // foods
+  if(document.getElementById(map.foods)) document.getElementById(map.foods).innerHTML = data.foods.length? data.foods.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(x.date)} • ${esc(x.type)}</div></div><button class="action danger" onclick="del('foods',${i})">Suppr</button></div></div>`).join('') : '<div class="empty">Aucune recette</div>';
+  if(document.getElementById(map.glucose)) document.getElementById(map.glucose).innerHTML = data.glucose.length? data.glucose.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.value)} mg/dL</div><div class="item-meta">${esc(x.date)} ${esc(x.time)} ${esc(x.moment)} ${x.meal?'• '+esc(x.meal):''}</div></div><button class="action danger" onclick="del('glucose',${i})">Suppr</button></div>${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}${x.photo?`<img src="${x.photo}" style="max-width:100%;border-radius:8px;margin-top:6px">`:''}</div>`).join('') : '<div class="empty">Aucune mesure</div>';
+  if(document.getElementById(map.bp)) document.getElementById(map.bp).innerHTML = data.bp.length? data.bp.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.sys)}/${esc(x.dia)} ${x.pulse?'- '+esc(x.pulse):''}</div><div class="item-meta">${esc(x.date)} ${esc(x.time||'')}</div></div><button class="action danger" onclick="del('bp',${i})">Suppr</button></div>${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}</div>`).join('') : '<div class="empty">Aucune mesure</div>';
+  if(document.getElementById(map.meds)) document.getElementById(map.meds).innerHTML = data.meds.length? data.meds.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.name)} ${esc(x.dose)}</div><div class="item-meta">${esc(x.date)} ${esc(x.time||'')}</div></div><button class="action danger" onclick="del('meds',${i})">Suppr</button></div>${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}</div>`).join('') : '<div class="empty">Aucun medicament</div>';
+  if(document.getElementById(map.analyses)) document.getElementById(map.analyses).innerHTML = data.analyses.length? data.analyses.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.type)}: ${esc(x.value)}</div><div class="item-meta">${esc(x.date)}</div></div><button class="action danger" onclick="del('analyses',${i})">Suppr</button></div>${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}</div>`).join('') : '<div class="empty">Aucune analyse</div>';
+  if(document.getElementById(map.sleep)) document.getElementById(map.sleep).innerHTML = data.sleep.length? data.sleep.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.hours)}h - ${esc(x.quality)}</div><div class="item-meta">${esc(x.date)}</div></div><button class="action danger" onclick="del('sleep',${i})">Suppr</button></div>${x.note?`<div class="item-text">${esc(x.note)}</div>`:''}</div>`).join('') : '<div class="empty">Aucun sommeil</div>';
+  if(document.getElementById(map.notes)) document.getElementById(map.notes).innerHTML = data.notes.length? data.notes.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">${esc(x.title)}</div><div class="item-meta">${esc(x.date)} ${esc(x.time||'')}</div></div><button class="action danger" onclick="del('notes',${i})">Suppr</button></div><div class="item-text">${esc(x.text)}</div></div>`).join('') : '<div class="empty">Aucune note</div>';
+  if(document.getElementById(map.clavicle)) document.getElementById(map.clavicle).innerHTML = data.clavicle.length? data.clavicle.map((x,i)=>`<div class="item"><div class="item-top"><div><div class="item-title">Douleur: ${esc(x.pain)}/10</div><div class="item-meta">${esc(x.date)}</div></div><button class="action danger" onclick="del('clavicle',${i})">Suppr</button></div><div class="item-text">${esc(x.note)}</div></div>`).join('') : '<div class="empty">Aucune note</div>';
+
+  const fc=document.getElementById('foodCount'); if(fc) fc.textContent=data.foods.length;
+}
+
+(function(){ setTodayDefaults(); render(); })();
+
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
