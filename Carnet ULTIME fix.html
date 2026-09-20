@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carnet ULTIME fix</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--acc:#6c5ce7;--ok:#00b894;--bad:#d63031;--text:#2d3436}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+header{padding:12px 16px;background:var(--card);position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+h1{font-size:17px;margin:0}
+.btn{border:0;border-radius:10px;padding:8px 12px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-ghost{background:#eee;color:#333}
+.btn-danger{background:var(--bad)}
+.card{background:var(--card);margin:10px;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;font-size:14px;box-sizing:border-box}
+label{font-size:12px;font-weight:600;margin:6px 0 2px;display:block}
+.item{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;background:#fff}
+.item-head{display:flex;justify-content:space-between;gap:8px;align-items:center;cursor:pointer;padding:4px}
+.item-body{display:none;margin-top:10px;padding:12px;border-top:2px solid #6c5ce7;background:#f9fafb;border-radius:8px;font-size:13px;line-height:1.6}
+.item.open .item-body{display:block}
+img.thumb{width:90px;height:70px;object-fit:cover;border-radius:8px;border:2px solid #0ea5e9;cursor:pointer}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:#dfe6e9}
+canvas{width:100%!important;height:150px!important;background:#fff;border-radius:10px}
+details summary{cursor:pointer;font-weight:700;padding:8px 0;font-size:15px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:10px 14px;border-radius:20px;display:none;z-index:99;max-width:90%;text-align:center}
+.form-box{border:2px dashed #ccc;padding:10px;border-radius:12px;margin-top:8px}
+.preview-box{margin-top:8px;padding:10px;background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;display:none}
+.preview-box.has-photo{display:block}
+#imgModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:100;justify-content:center;align-items:center;flex-direction:column;padding:20px;box-sizing:border-box}
+#imgModal img{max-width:95%;max-height:75%;border-radius:12px}
+.tip{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px;margin-top:8px;font-size:11px}
+</style>
+</head>
+<body>
+<header><h1>📒 Carnet complet</h1><div class="row"><button class="btn btn-sm" style="background:#ef4444" onclick="forceRecipes()">⚠️ FORCER recettes détaillées</button><button class="btn btn-sm btn-ghost" onclick="exportData()">Exporter</button></div></header>
+<div id="toast"></div>
+<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg"><div style="margin-top:12px"><button class="btn btn-sm" onclick="document.getElementById('imgModal').style.display='none'">Fermer</button></div></div>
+<main style="max-width:720px;margin:auto;padding-bottom:90px">
+
+<div class="card" style="border:2px solid #ef4444">
+<details open>
+<summary>⚠️ Si recettes = que titres → clique ici</summary>
+<div style="font-size:13px;margin-top:8px">
+Ton ancien stockage bloque les nouvelles recettes détaillées. Clique sur le bouton rouge en haut <b>FORCER recettes détaillées</b> → ça écrase les 14 titres vides par les 14 recettes complètes avec ingrédients + étapes + astuces diabète. Tes glycémies/tensions restent.
+<br><br>
+<button class="btn" style="background:#ef4444" onclick="forceRecipes()">🔄 Forcer maintenant les 14 recettes complètes</button>
+<div id="forceMsg" style="margin-top:8px;font-size:12px;color:#059669"></div>
+</div>
+</details>
+</div>
+
+<div class="card"><details id="det-gly"><summary>🩸 Glycémie <span id="g-count" class="badge">0</span> <span id="alert-ind" class="badge" style="display:none;background:#00b894;color:#fff">⏰ alerte</span></summary>
+<div id="alert-pending"></div><div id="alert-setup" style="display:none;background:#fff7e6;border:1px solid #ffe58f;border-radius:10px;padding:8px;margin:8px 0;font-size:12px">⏰ Rappel 2h ?<div class="row" style="margin-top:6px"><button class="btn btn-sm" style="background:#00b894" onclick="activateAlert(120)">Oui 2h</button><button class="btn btn-sm btn-ghost" onclick="document.getElementById('alert-setup').style.display='none'">Non</button></div></div>
+<canvas id="gChart"></canvas>
+<div class="form-box"><label>Valeur *</label><input id="gVal" type="number" inputmode="numeric"><div class="row"><div style="flex:1"><label>Moment</label><select id="gMoment"><option value="à jeun">À jeun</option><option value="avant repas">Avant repas</option><option value="après repas">2h après repas</option><option value="coucher">Coucher</option></select></div><div style="flex:1"><label>Date</label><input id="gDate" type="date"></div><div style="flex:1"><label>Heure</label><input id="gTime" type="time"></div></div><label>Photo lecteur</label><input id="gPhoto" type="file" accept="image/*"><div id="gPreview" class="preview-box"></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveGly(false)">Enregistrer</button></div></div><div id="gList"></div></details></div>
+
+<div class="card"><details open id="det-food"><summary>🍽️ Recettes DÉTAILLÉES (tap pour ouvrir) <span id="f-count" class="badge">0</span></summary>
+<div id="fList"></div>
+</details></div>
+
+<div class="card"><details open id="det-tens"><summary>❤️ Tension - photo galerie CORRIGÉE <span id="t-count" class="badge">0</span></summary>
+<div class="form-box" style="border-color:#0ea5e9;border-style:solid;background:#f0f9ff">
+
+<div class="row"><div style="flex:1"><label>SYS/DIA Pouls *</label><input id="tVal" placeholder="120/80 72"></div><div style="flex:1"><label>Date</label><input id="tDate" type="date"></div><div style="flex:1"><label>Heure</label><input id="tTime" type="time"></div></div>
+
+<label>📸 Photo tensiomètre - CORRIGÉ : choisis galerie</label>
+<input id="tPhoto" type="file" accept="image/*">
+<div style="font-size:10px;color:#0369a1;margin:4px 0">Sur iPhone tu auras : Photothèque / Prendre photo / Choisir un fichier. Choisis Photothèque pour récupérer.</div>
+
+<div id="tPreview" class="preview-box"><div id="tPreviewInner">Aucune photo sélectionnée</div></div>
+
+<div class="row" style="margin-top:8px">
+<button class="btn btn-sm btn-ghost" onclick="clearPhoto('t')">❌ Effacer photo</button>
+<button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('t')">🖼️ Voir photo sélectionnée</button>
+</div>
+
+<label>Note</label><input id="tNote">
+
+<div class="row" style="margin-top:8px"><button class="btn" style="background:#0ea5e9" onclick="saveTension()">💾 Enregistrer tension + photo</button></div>
+
+<div id="tStatus" style="font-size:11px;margin-top:6px;color:#059669"></div>
+</div>
+<div id="tList"></div>
+</details></div>
+
+<div class="card"><details id="det-meds"><summary>💊 Médicaments <span id="m-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:1"><label>Nom</label><input id="mVal"></div><div style="flex:1"><label>Date</label><input id="mDate" type="date"></div></div><label>Photo</label><input id="mPhoto" type="file" accept="image/*"><div id="mPreview" class="preview-box"></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveMeds()">Enregistrer</button></div></div><div id="mList"></div></details></div>
+<div class="card"><details id="det-analyses"><summary>🧪 Analyses <span id="a-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:1"><label>Type</label><input id="aVal"></div><div style="flex:1"><label>Résultat</label><input id="aResult"></div><div style="flex:1"><label>Date</label><input id="aDate" type="date"></div></div><label>Photo</label><input id="aPhoto" type="file" accept="image/*"><div id="aPreview" class="preview-box"></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveAnalyses()">Enregistrer</button></div></div><div id="aList"></div></details></div>
+<div class="card"><details id="det-sommeil"><summary>😴 Sommeil <span id="sl-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:1"><label>Date</label><input id="slDate" type="date"></div><div style="flex:1"><label>Total</label><input id="slTotal"></div></div><div class="row"><div style="flex:1"><label>S1 début</label><input id="slS1D" type="time"></div><div style="flex:1"><label>fin</label><input id="slS1F" type="time"></div><div style="flex:1"><label>durée</label><input id="slS1Dur"></div></div><div class="row"><div style="flex:1"><label>Éveil</label><input id="slEveil"></div><div style="flex:1"><label>Para</label><input id="slPara"></div><div style="flex:1"><label>Lent</label><input id="slLent"></div><div style="flex:1"><label>Prof</label><input id="slProf"></div></div><div class="row"><div style="flex:1"><label>S2 début</label><input id="slS2D" type="time"></div><div style="flex:1"><label>fin</label><input id="slS2F" type="time"></div><div style="flex:1"><label>durée</label><input id="slS2Dur"></div></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveSommeil()">Enregistrer nuit</button></div></div><div id="slList"></div></details></div>
+
+</main>
+<script>
+const KEY='carnet_v12_final';
+const DEFAULT_RECIPES=[
+{
+title:"Harira - Soupe Ramadan complète (6 pers)",
+type:"recette",
+ing:"• Tomates mûres 500g (ou 400g concassées)\n• Pois chiches 200g trempés 12h puis cuits\n• Lentilles vertes 100g\n• Oignon 1 gros 150g\n• Céleri 1 branche + coriandre 1 bouquet + persil 1 bouquet\n• Viande boeuf 200g dés (facultatif)\n• Concentré tomate 2 cs\n• Farine 1 cs + eau 100ml pour lier (tedouira)\n• Épices: curcuma 1cc, gingembre 1cc, cannelle 1/2cc, poivre, sel\n• Huile olive 2cs + eau 1,5L",
+steps:"1. Mixer tomates finement.\n2. Marmite: huile + viande + oignon haché 5min.\n3. Ajouter tomates + concentré + pois chiches + lentilles + 1,5L eau + toutes épices.\n4. Cuire 40min sous pression.\n5. Dans bol, mélanger farine + 100ml eau froide sans grumeaux, verser en filet dans soupe en remuant pour épaissir légèrement.\n6. Ajouter herbes hachées, cuire 10min.\n7. Servir avec quartier citron et 2 dattes.\n\nConservation: 3 jours frigo, congèle bien.",
+meta:"60min | 6 pers | IG moyen", 
+tip:"💡 Diabète: 1 petite louche 200ml = ~20g glucides. Version allégée: 1cc farine seulement, plus de lentilles. Très bien pour rompre jeûne."
+},
+{
+title:"Tajine poulet citron confit olives (4 pers) - plat familial",
+type:"recette",
+ing:"• Poulet 1kg (cuisses ou entier coupé)\n• Oignons 2 moyens 300g émincés fin\n• Ail 3 gousses écrasées\n• Citrons confits 2 coupés en 4 quartiers\n• Olives vertes 100g dessalées à l'eau\n• Coriandre fraîche 2cs hachée + persil 2cs\n• Épices: gingembre 1cc, curcuma 1cc, poivre 1/2cc, sel, safran 1 pincée\n• Huile olive 3cs + eau 200ml",
+steps:"1. Dans tajine ou cocotte lourde, chauffer huile, faire suer oignons + ail 5min sans colorer.\n2. Ajouter poulet, saupoudrer toutes épices + herbes, bien enrober, faire dorer 5min.\n3. Verser eau 200ml au fond, couvrir, feu très doux 30min (le poulet rend son jus).\n4. Ajouter citrons confits + olives autour du poulet, couvrir à nouveau 30min jusqu'à poulet fondant et sauce onctueuse sirupeuse.\n5. Goûter, rectifier sel (citrons déjà salés).\n6. Servir dans tajine avec olives dessus.\n\nAccompagnement: 3cs semoule complète ou 1/4 pain complet, pas les deux.",
+meta:"1h15 | 4 pers | IG bas", 
+tip:"💡 Diabète: Poulet + olives = protéines + bonnes graisses qui ralentissent le pic. Pas besoin de beaucoup de féculent avec."
+},
+{
+title:"Couscous 7 légumes vendredi (6 pers) - traditionnel",
+type:"recette",
+ing:"• Semoule moyenne 500g\n• Légumes: carottes 3, courgettes 2, navets 2, chou 1/4, courge 300g, tomates 2, pois chiches cuits 200g\n• Oignon 1 + concentré tomate 1cs\n• Épices couscous: ras el hanout 1cs, curcuma 1cc, poivre, sel\n• Huile olive 4cs + beurre 30g\n• Eau 2L pour bouillon",
+steps:"1. Bouillon: faire revenir oignon + tomates concassées + concentré + épices + huile 5min. Ajouter carottes, navets, chou coupés + eau 2L, cuire 20min. Ajouter courgettes, courge, pois chiches, cuire 15min de plus. Légumes doivent rester entiers.\n2. Semoule: dans grande bassine, arroser 2cs huile + pincée sel, ajouter 200ml eau, égrener avec mains. Mettre dans haut du couscoussier au-dessus du bouillon, vapeur 15min.\n3. Retirer, verser dans bassine, arroser 100ml eau salée, égrener pour casser grumeaux, re-mettre en vapeur 15min. Recommencer 3e fois (total 3 vapeurs).\n4. Dernière fois: ajouter 30g beurre, égrener.\n5. Service: dôme de semoule, légumes autour, louche de bouillon.\n\nAstuce légère: 4-5 cs semoule seulement + double légumes.",
+meta:"1h30 | 6 pers | IG moyen", 
+tip:"💡 Diabète: 4-5 cs semoule max = 30g glucides. Privilégier légumes. Éviter 2e service."
+},
+{
+title:"Chorba frik blé vert (4 pers) - IG bas",
+type:"recette",
+ing:"• Viande agneau ou boeuf 300g en petits dés\n• Frik (blé vert concassé) 100g lavé\n• Pois chiches 100g trempés 12h\n• Tomates 400g concassées\n• Oignon 1 haché fin\n• Coriandre 1cs + menthe séchée 1cc\n• Épices: carvi 1cc, paprika 1cc, cannelle pincée, sel, poivre\n• Huile 2cs + eau 1,5L",
+steps:"1. Marmite: huile + viande + oignon 5min doré.\n2. Ajouter tomates + pois chiches + frik + épices + eau 1,5L.\n3. Porter ébullition, écumer, cuire 45min sous pression. Frik gonfle et épaissit naturellement.\n4. Finir avec coriandre + menthe.\n5. Texture doit être soupe épaisse pas liquide.\n\nFrik = fibres +++ IG plus bas que vermicelles, rassasiant.",
+meta:"1h | 4 pers | IG bas", 
+tip:"💡 Frik bien meilleur que vermicelles pour glycémie (fibres). 1 bol = 25g glucides lents."
+},
+{
+title:"Salade marocaine + Taktouka + Zaalouk (IG très bas)",
+type:"recette",
+ing:"Taktouka: poivrons verts 2 grillés + tomates 3 + ail 2 gousses + cumin 1cc + paprika 1cc + huile olive 2cs\nZaalouk: aubergine 1 grosse + tomates 3 + ail 2 + cumin 1cc + paprika + coriandre hachée + huile\nSalade crue: tomates 4 + concombre 2 + oignon 1 + poivron 1 + persil + huile olive 3cs + citron 1 + sel + cumin",
+steps:"1. Griller poivrons et aubergine au four 200°C 20min ou flamme, peler peau noire, épépiner, couper en dés.\n2. Dans poêle: ail haché + tomates concassées + épices + huile 10min compote, ajouter poivrons pour Taktouka OU aubergine pour Zaalouk, compoter 15min écrasant à la fourchette.\n3. Salade crue: couper tous légumes petits dés, mélanger vinaigrette: huile + citron + cumin + sel.\n4. Servir 3 salades ensemble tièdes ou froides.\n\nÀ volonté, très peu glucides.",
+meta:"30min | IG très bas | À volonté", 
+tip:"💡 Entrée idéale diabète: fibres + peu glucides, à volonté avant plat."
+},
+{
+title:"Briouates amandes miel - version légère four (20 pièces)",
+type:"recette",
+ing:"• Feuilles brick 10 coupées en 2 bandes (20 bandes)\n• Amandes 250g grillées 10min four puis mixées\n• Sucre 50g seulement (au lieu de 100g)\n• Cannelle 1cc + eau fleur d'oranger 1cs + beurre 30g fondu\n• Miel 150g + graines sésame 1cs\n• Huile pour friture OU four",
+steps:"1. Farce: mixer amandes grillées + sucre 50g + cannelle + beurre fondu + fleur d'oranger = pâte qui se tient.\n2. Couper feuilles brick en bandes 8cm large. Déposer 1cc farce en bas, plier en triangle en rabattant (technique samossa), coller bout avec jaune d'oeuf ou eau+farine.\n3. VERSION LÉGÈRE FOUR (conseillée): poser sur papier cuisson, badigeonner peu huile, four 180°C 12-15min dorées. VERSION FRITURE: frire 2min chaque côté.\n4. Tremper rapidement 10sec dans miel chaud, égoutter, parsemer sésame.\n5. 1 briouate = ~15g glucides.\n\nConservation: boîte métal 1 semaine, congèle crues.",
+meta:"45min | 20 pcs | IG haut - limiter", 
+tip:"💡 Diabète: 1 seule après repas équilibré, pas 3-4. Four bien mieux que friture."
+},
+{
+title:"Loubia haricots blancs sauce tomate (4 pers) - IG bas",
+type:"recette",
+ing:"• Haricots blancs 400g secs trempés 12h dans eau froide\n• Tomates 400g concassées + concentré 1cs\n• Oignon 1 haché + ail 3 gousses écrasées\n• Cumin 1cc + paprika 1cc + piment doux + sel + poivre + laurier 1 feuille\n• Huile olive 2cs + persil haché 2cs\n• Eau 1L",
+steps:"1. Cuire haricots trempés à l'eau non salée 30min (ou 15min cocotte minute) jusqu'à tendres mais pas écrasés. Égoutter, garder eau cuisson.\n2. Sauce: dans marmite, huile + oignon + ail 5min, ajouter tomates + concentré + épices + laurier, cuire 10min.\n3. Ajouter haricots égouttés + 2 louches eau cuisson haricots, mijoter 20min que sauce épaississe et enrobe.\n4. Retirer laurier, parsemer persil.\n5. Servir avec 1/4 pain complet ou seul.\n\nExcellent protéine végétale + fibres, IG bas, rassasiant.",
+meta:"50min + trempage | IG bas | Protéines végétales", 
+tip:"💡 Très bon pour diabète: IG bas, rassasiant, 1 assiette = 30g glucides lents. Pas besoin viande avec."
+},
+{
+title:"Rfissa poulet lentilles fenugrec (4 pers) - aide glycémie",
+type:"recette",
+ing:"• Msemen ou trid (feuilles fines) 500g déchiré en petits morceaux\n• Poulet 1kg coupé\n• Lentilles 200g + fenugrec (helba) 1cs trempé 1h puis rincé\n• Oignons 500g émincés fin\n• Ras el hanout 1cs + curcuma 1cc + gingembre 1cc + sel + poivre + safran 1 pincée\n• Huile 3cs + smen (beurre rance) 1cc",
+steps:"1. Dans grande marmite: huile + poulet + oignons + lentilles + fenugrec égoutté + toutes épices + eau 1L, porter ébullition, cuire 1h feu moyen. Poulet doit se détacher, oignons fondus, sauce abondante.\n2. Pendant ce temps, déchirer msemen en petits morceaux 2cm dans grand plat (gsaa).\n3. Arroser msemen généreusement de sauce + oignons + lentilles, bien mélanger pour imbiber.\n4. Déposer poulet au centre.\n5. Servir chaud.\n\nFenugrec aide glycémie mais goût amer si trop, bien rincer.",
+meta:"1h20 | IG moyen | Fenugrec", 
+tip:"💡 Fenugrec aide à baisser glycémie. Msemen complet mieux que blanc."
+},
+{
+title:"Tajine kefta oeufs rapide 25min (4 pers) - IG bas",
+type:"recette",
+ing:"• Kefta boeuf haché 500g\n• Tomates 500g concassées\n• Oignon 1 haché fin + ail 2 gousses\n• Coriandre fraîche 1 bouquet + persil\n• Oeufs 4 frais\n• Épices: cumin 1cc, paprika 1cc, sel 1cc, poivre, piment fort si aime\n• Huile olive 2cs",
+steps:"1. Sauce: dans tajine ou poêle profonde, huile + oignon + ail 3min, ajouter tomates + la moitié coriandre + épices, cuire 15min compote épaisse.\n2. Kefta: mélanger viande hachée + oignon haché fin + reste coriandre + cumin + sel, former boulettes 20g (noix).\n3. Déposer boulettes délicatement dans sauce frémissante, ne pas remuer 5min, puis cuire 10min.\n4. Faire 4 petits puits dans sauce avec cuillère, casser 1 oeuf dans chaque puits, couvrir, cuire 5min pour oeufs mollets (blanc pris jaune coulant) ou 8min bien cuits.\n5. Parsemer coriandre fraîche, servir dans tajine.\n\nServir avec 1/4 pain complet pour saucer.",
+meta:"25min | 4 pers | IG bas | Protéines", 
+tip:"💡 Plat idéal diabète: protéines + peu glucides. 1 oeuf + 3 boulettes + sauce = impact glycémie très faible."
+},
+{
+title:"Seffa vermicelles sucrés amandes (6 pers) - fête",
+type:"recette",
+ing:"• Vermicelles fins spéciaux seffa (chaaria) 500g\n• Beurre doux 100g + sel 1cc\n• Sucre glace 60g seulement (au lieu de 100g) + cannelle moulue 1cs\n• Amandes grillées concassées 100g + raisins secs 50g dorés (facultatif)\n• Huile neutre 2cs + eau",
+steps:"1. Dans bassine, mélanger vermicelles + huile 2cs + sel, bien égrener.\n2. Mettre dans haut couscoussier, vapeur 20min.\n3. Retirer dans bassine, arroser 200ml eau, égrener pour séparer, re-mettre vapeur 20min. Recommencer 3e fois (total 3 vapeurs).\n4. Dernière fois: ajouter beurre 100g en morceaux, bien mélanger pour enrober, vapeur 5min finale.\n5. Dressage: former dôme dans plat, saupoudrer sucre glace léger + cannelle en croisillons, amandes + raisins secs dessus.\n6. Servir tiède.\n\nVersion diabète: peu sucre, beaucoup cannelle (aide glycémie), petite portion.",
+meta:"1h | 6 pers | IG haut - petite portion", 
+tip:"💡 Dessert fête: 3 cs max = 20g glucides. Cannelle aide à réguler."
+},
+{
+title:"Pastilla poulet amandes (6 pers) - grande occasion",
+type:"recette",
+ing:"• Poulet entier 1kg + oignons 500g émincés + persil + coriandre hachés\n• Feuilles pastilla (ou brick grandes) 10\n• Oeufs 4 battus\n• Amandes 200g grillées + sucre 50g + cannelle 2cc mixés grossier\n• Beurre fondu 100g + huile 2cs\n• Épices: gingembre 1cc, curcuma 1cc, cannelle 1cc, sel, poivre, safran 1 dose",
+steps:"1. Poulet: dans marmite, huile + poulet + oignons + persil + coriandre + épices + eau 500ml, cuire 45min. Retirer poulet, effilocher chair, garder peau.\n2. Faire réduire oignons en compote épaisse sans liquide, ajouter oeufs battus en remuant comme brouillade, cuire 5min.\n3. Amandes: griller 10min four 160°C, mixer grossier avec sucre 50g + cannelle 2cc.\n4. Montage dans moule rond 28cm beurré: étaler 4 feuilles beurrées qui dépassent, au centre 2 feuilles. Couche 1: oignons/oeufs, couche 2: poulet effiloché, couche 3: amandes. Rabattre feuilles qui dépassent, poser 2 feuilles beurrées dessus, rentrer bords dessous.\n5. Badigeonner beurre fondu généreux.\n6. Four 180°C 20-25min dorée et croustillante.\n7. Décor: saupoudrer sucre glace + cannelle en damier avec pochoir.\n\nLong mais festif. 1/6 pastilla = ~35g glucides.",
+meta:"1h30 | 6 pers | IG haut | Fête", 
+tip:"💡 1 part max + grande salade verte. Pas tous les jours, fête seulement."
+},
+{
+title:"Tanjia Marrakech (4 pers) - 4h four",
+type:"recette",
+ing:"• Viande boeuf jarret ou collier 1kg en gros morceaux\n• Ail 5 gousses écrasées\n• Cumin moulu 2cc + sel 1cc + poivre\n• Citron confit 1 coupé en quartiers\n• Smen (beurre rance) 1cs + huile olive 2cs + safran 1 dose + eau 100ml",
+steps:"1. Dans jarre Tanjia en terre cuite (ou cocotte lourde): mettre viande + ail écrasé + cumin + sel + poivre + citron confit + smen + huile + safran + eau 100ml, bien mélanger avec mains.\n2. Fermer jarre: papier cuisson plié en 4 + ficelle solide, faire petit trou au centre pour vapeur.\n3. Four maison: 150°C 4h. Ou traditionnel: amener au ferrane (four du quartier) le matin, il met dans cendres, récupérer midi. Viande doit se défaire à la fourchette, confite.\n4. Servir dans jarre, manger avec pain et cumin.\n\nZéro légumes, à servir avec salade cuite + crue + pain complet.",
+meta:"10min prép + 4h cuisson | IG 0 | Protéines", 
+tip:"💡 Viande seule = 0 glucide. Parfait avec crudités et salades."
+},
+{
+title:"Msemen crêpes feuilletées (10 pièces)",
+type:"recette",
+ing:"• Farine blanche 500g + semoule fine 250g\n• Sel 1cc + levure boulangère sèche 5g + sucre 1cc\n• Eau tiède 400ml environ (ajuster)\n• Pour feuilletage: huile neutre 100ml + beurre fondu 50g + semoule fine 2cs pour saupoudrer",
+steps:"1. Dans bassine: mélanger farines + sel + levure + sucre, ajouter eau petit à petit, pétrir 10min jusqu'à pâte lisse souple non collante.\n2. Former 10 boules égales, huiler généreusement, couvrir film, reposer 15min (important pour étaler).\n3. Sur plan huilé, prendre 1 boule, étaler très fin à la main en grand carré transparent (comme feuille brick), badigeonner mélange huile/beurre fondu, saupoudrer pincée semoule fine.\n4. Plier: rabattre tiers gauche vers centre, tiers droit dessus = bande, puis tiers haut vers centre, tiers bas dessus = carré 10cm.\n5. Aplatir légèrement carré avec main huilée.\n6. Cuire poêle lourde chaude légèrement huilée 3-4min chaque côté jusqu'à doré et feuilleté.\n\nCongélable cuit: réchauffer poêle.",
+meta:"1h | 10 pcs | IG haut", 
+tip:"💡 1 msemen = 30g glucides. Version complète: 1/2 farine complète, ou 1/2 msemen + oeuf."
+},
+{
+title:"Baghrir 1000 trous inratables (15 pièces)",
+type:"recette",
+ing:"• Semoule fine 250g\n• Farine blanche 75g\n• Levure boulangère sèche 10g (1 sachet)\n• Levure chimique 1 sachet 8g\n• Sucre 1cc + sel 1 pincée\n• Eau tiède 500ml\n• Pour servir: beurre fondu + miel chaud ou huile olive + miel",
+steps:"1. Dans blender: mettre semoule + farine + levure boulangère + levure chimique + sucre + sel + eau tiède 500ml, mixer 2min vitesse max jusqu'à mousseux et homogène (pâte liquide comme crêpe épaisse).\n2. Verser dans bol, couvrir torchon, reposer 10min à température ambiante, doit faire des bulles en surface.\n3. Poêle antiadhésive 20cm, feu moyen, chaude SANS huile. Remuer pâte, verser 1 louche au centre, ne pas étaler, laisser s'étaler seule. Des trous doivent apparaître en 30sec. Cuire seulement 1 côté jusqu'à surface plus brillante, plus de pâte crue, dessous doré clair. Ne pas retourner.\n4. Poser sur torchon propre, ne pas empiler chaud sinon collent. Empiler une fois refroidis.\n5. Servir avec beurre fondu + miel mélangés tièdes.\n\nSi pas de trous: pâte trop épaisse = ajouter 50ml eau. Si déchire: trop liquide = 1cs semoule. Poêle trop chaude = pas de trous.",
+meta:"30min | 15 pcs | IG moyen-haut", 
+tip:"💡 1 baghrir = 15g glucides. 2 max + protéine (oeuf ou fromage) pour éviter pic glycémie."
+}
+];
+let stored=JSON.parse(localStorage.getItem(KEY)||'null');
+let data=stored?stored:{glucose:[],foods:JSON.parse(JSON.stringify(DEFAULT_RECIPES)),tension:[],meds:[],analyses:[],sommeil:[{date:"2026-09-20",total:"7h13",s1d:"01:22",s1f:"04:22",s1dur:"3h49",eveil:"11 min",para:"41 min",lent:"2h44",prof:"24 min",s2d:"06:00",s2f:"09:24",s2dur:"3h24",qual:"Bonne",obs:"Sensation reposée",source:"HUAWEI",ts:Date.now()}],sport:[],notes:[]};
+if(!data.tension)data.tension=[];if(!data.meds)data.meds=[];if(!data.analyses)data.analyses=[];if(!data.sommeil)data.sommeil=[];if(!data.sport)data.sport=[];if(!data.notes)data.notes=[];
+let alerts=JSON.parse(localStorage.getItem('carnet_alerts')||'[]');
+let edit={type:null,index:null};
+let photos={g:null,t:null,m:null,a:null,f:null};
+
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function saveAlerts(){localStorage.setItem('carnet_alerts',JSON.stringify(alerts));renderAlerts();}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+function todayStr(){return new Date().toISOString().slice(0,10);}function nowStr(){return new Date().toTimeString().slice(0,5);}
+['gDate','tDate','mDate','aDate','slDate'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=todayStr();});
+['gTime','tTime'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=nowStr();});
+
+function compress(file,cb){
+ const r=new FileReader();
+ r.onload=e=>{
+  const img=new Image();
+  img.onload=()=>{
+   let w=img.width,h=img.height;const max=700;
+   if(w>max||h>max){const s=Math.min(max/w,max/h);w*=s;h*=s;}
+   const c=document.createElement('canvas');c.width=w;c.height=h;
+   c.getContext('2d').drawImage(img,0,0,w,h);
+   cb(c.toDataURL('image/jpeg',0.55));
+  };
+  img.onerror=()=>cb(e.target.result);
+  img.src=e.target.result;
+ };
+ r.readAsDataURL(file);
+}
+function setupPhoto(inputId,key,previewId){
+ const input=document.getElementById(inputId);
+ if(!input)return;
+ input.addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const box=document.getElementById(previewId);
+  const quick=new FileReader();
+  quick.onload=ev=>{
+   photos[key]=ev.target.result;
+   if(box){box.classList.add('has-photo');box.innerHTML=`<img src="${ev.target.result}" style="width:110px;height:75px;object-fit:cover;border-radius:8px"> <small>Compression...</small>`;}
+  };
+  quick.readAsDataURL(f);
+  compress(f,url=>{
+   photos[key]=url;
+   if(box){box.classList.add('has-photo');box.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><img src="${url}" style="width:110px;height:75px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="showImg('${url.replace(/'/g,'')}')"><div><b style="color:#059669">✓ Photo prête ${Math.round(url.length/1024)}Ko</b><br><small>Tap pour voir grand</small><br><small style="color:#0ea5e9">Puis Enregistrer</small></div></div>`;}
+   toast('Photo '+key.toUpperCase()+' prête - maintenant Enregistrer');
+  });
+ });
+}
+setupPhoto('gPhoto','g','gPreview');
+setupPhoto('tPhoto','t','tPreview');
+setupPhoto('mPhoto','m','mPreview');
+setupPhoto('aPhoto','a','aPreview');
+
+function clearPhoto(k){photos[k]=null;const b=document.getElementById(k+'Preview');if(b){b.classList.remove('has-photo');b.innerHTML=k==='t'?'<div id="tPreviewInner">Aucune photo sélectionnée</div>':'';}const inp=document.getElementById(k+'Photo');if(inp)inp.value='';}
+function showImg(src){if(!src||src.length<100){toast('Pas de photo');return;}document.getElementById('modalImg').src=src;document.getElementById('imgModal').style.display='flex';}
+function openPhoto(k){
+ if(photos[k]&&photos[k].length>100){showImg(photos[k]);return;}
+ let last=null;
+ if(k==='t') last=[...data.tension].reverse().find(x=>x.photo);
+ if(k==='g') last=[...data.glucose].reverse().find(x=>x.photo);
+ if(k==='m') last=[...data.meds].reverse().find(x=>x.photo);
+ if(k==='a') last=[...data.analyses].reverse().find(x=>x.photo);
+ if(last&&last.photo)showImg(last.photo);else toast('Aucune photo en mémoire - choisis Photothèque d\'abord');
+}
+function forceRecipes(){
+ if(confirm('Écraser les 14 recettes actuelles (même si vides) par les 14 recettes COMPLÈTES détaillées avec ingrédients, étapes, temps et astuces diabète ? Tes glycémies/tensions restent.')){
+  data.foods=JSON.parse(JSON.stringify(DEFAULT_RECIPES));
+  save();
+  document.getElementById('forceMsg').textContent='✅ 14 recettes détaillées installées ! Va dans Recettes et tape sur Harira pour voir.';
+  toast('14 recettes détaillées installées - ouvre Recettes');
+  document.getElementById('det-food').open=true;
+ }
+}
+function onMomentChange(){}
+function saveGly(fromAuto){let v=parseInt(document.getElementById('gVal').value);if(!v){toast('Entre valeur');return false;}const o={v:v,moment:document.getElementById('gMoment').value,date:document.getElementById('gDate').value||todayStr(),time:document.getElementById('gTime').value||nowStr(),note:'',photo:photos.g,ts:Date.now()};if(edit.type==='glucose'){data.glucose[edit.index]=o;edit={type:null,index:null};}else data.glucose.push(o);document.getElementById('gVal').value='';clearPhoto('g');save();toast(`Glycémie ${v} enregistrée`);return true;}
+function saveTension(){
+ const v=document.getElementById('tVal').value.trim();if(!v){toast('Entre tension ex: 120/80');return;}
+ if(!photos.t){if(!confirm('Aucune photo sélectionnée. Tu as bien choisi Photothèque ? Enregistrer sans photo ?'))return;}
+ const o={v:v,date:document.getElementById('tDate').value||todayStr(),time:document.getElementById('tTime').value||nowStr(),note:document.getElementById('tNote').value,photo:photos.t,ts:Date.now()};
+ if(edit.type==='tension'){data.tension[edit.index]=o;edit={type:null,index:null};}else data.tension.push(o);
+ document.getElementById('tVal').value='';document.getElementById('tNote').value='';clearPhoto('t');save();
+ toast(`✅ Tension ${v} enregistrée ${o.photo?'avec photo '+Math.round(o.photo.length/1024)+'Ko':''}`);
+ document.getElementById('tStatus').textContent='Dernière enregistrée: '+v+' '+(o.photo?'avec photo':'sans photo')+' à '+new Date().toLocaleTimeString();
+}
+function saveMeds(){const v=document.getElementById('mVal').value.trim();if(!v)return;const o={v:v,date:document.getElementById('mDate').value||todayStr(),photo:photos.m,ts:Date.now()};if(edit.type==='meds'){data.meds[edit.index]=o;edit={type:null,index:null};}else data.meds.push(o);document.getElementById('mVal').value='';clearPhoto('m');save();}
+function saveAnalyses(){const v=document.getElementById('aVal').value.trim();if(!v)return;const o={v:v,result:document.getElementById('aResult').value,date:document.getElementById('aDate').value||todayStr(),photo:photos.a,ts:Date.now()};if(edit.type==='analyses'){data.analyses[edit.index]=o;edit={type:null,index:null};}else data.analyses.push(o);document.getElementById('aVal').value='';document.getElementById('aResult').value='';clearPhoto('a');save();}
+function saveSommeil(){const o={date:document.getElementById('slDate').value||todayStr(),total:document.getElementById('slTotal').value,s1d:document.getElementById('slS1D').value,s1f:document.getElementById('slS1F').value,s1dur:document.getElementById('slS1Dur').value,eveil:document.getElementById('slEveil').value,para:document.getElementById('slPara').value,lent:document.getElementById('slLent').value,prof:document.getElementById('slProf').value,s2d:document.getElementById('slS2D').value,s2f:document.getElementById('slS2F').value,s2dur:document.getElementById('slS2Dur').value,qual:'Bonne',obs:'',ts:Date.now()};if(edit.type==='sommeil'){data.sommeil[edit.index]=o;edit={type:null,index:null};}else data.sommeil.push(o);save();}
+function toggleRecipe(i){const el=document.getElementById('food-'+i);if(el)el.classList.toggle('open');}
+function editItem(cat,i){edit={type:cat,index:i};const o=data[cat][i];if(cat==='tension'){document.getElementById('tVal').value=o.v;document.getElementById('tDate').value=o.date;document.getElementById('tTime').value=o.time;document.getElementById('tNote').value=o.note||'';photos.t=o.photo;if(photos.t){const b=document.getElementById('tPreview');b.classList.add('has-photo');b.innerHTML=`<img src="${photos.t}" style="width:110px;height:75px;object-fit:cover;border-radius:8px"><div>Photo existante ${Math.round(photos.t.length/1024)}Ko</div>`;}document.getElementById('det-tens').open=true;}else if(cat==='foods'){toggleRecipe(i);}}
+function delItem(cat,i){if(!confirm('Supprimer ?'))return;data[cat].splice(i,1);edit={type:null,index:null};save();}
+function cancelEdit(){edit={type:null,index:null};}
+function activateAlert(mins){const due=Date.now()+mins*60000;const id='al_'+Date.now();alerts.push({id:id,due:due,label:`Reprendre glycémie`,mins:mins});saveAlerts();document.getElementById('alert-setup').style.display='none';toast(`⏰ Alerte ${mins}min`);setTimeout(()=>triggerAlert(id),mins*60000);}
+function triggerAlert(id){const a=alerts.find(x=>x.id===id);if(!a)return;alert('⏰ Reprends ta glycémie !');alerts=alerts.filter(x=>x.id!==id);saveAlerts();}
+function renderAlerts(){const c=document.getElementById('alert-pending');if(!c)return;if(alerts.length===0){c.innerHTML='';document.getElementById('alert-ind').style.display='none';return;}document.getElementById('alert-ind').style.display='inline-block';c.innerHTML=alerts.map(a=>{const rem=Math.max(0,Math.ceil((a.due-Date.now())/60000));return `<div style="background:#e6fffa;border:1px solid #81e6d5;border-radius:10px;padding:8px;margin:6px 0;font-size:12px;display:flex;justify-content:space-between"><span>⏰ ${a.label} dans ${rem}min</span><button class="btn btn-sm btn-ghost" onclick="cancelAlert('${a.id}')">Annuler</button></div>`}).join('');}
+function cancelAlert(id){alerts=alerts.filter(x=>x.id!==id);saveAlerts();}
+function exportData(){const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='carnet.json';a.click();}
+function render(){
+ document.getElementById('g-count').textContent=data.glucose.length;
+ document.getElementById('f-count').textContent=data.foods.length;
+ document.getElementById('t-count').textContent=data.tension.length;
+ document.getElementById('m-count').textContent=data.meds.length;
+ document.getElementById('a-count').textContent=data.analyses.length;
+ document.getElementById('sl-count').textContent=(data.sommeil||[]).length;
+ document.getElementById('gList').innerHTML=[...data.glucose].sort((a,b)=>b.ts-a.ts).map(o=>{const orig=data.glucose.findIndex(x=>x.ts===o.ts);return `<div class="item"><div style="display:flex;gap:8px;align-items:center">${o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo}')">`:''}<div><b>${o.v} mg/dL</b><br><small>${o.date}</small></div></div></div>`}).join('')||'<small>Aucune</small>';
+ document.getElementById('fList').innerHTML=data.foods.map((o,i)=>`
+  <div class="item" id="food-${i}" style="${o.ing&&o.ing.length>20?'border-left:4px solid #22c55e':''}">
+    <div class="item-head" onclick="toggleRecipe(${i})">
+      <div style="flex:1"><b>${o.title}</b> <span class="badge">${o.type}</span><br><div style="font-size:11px;color:#6b7280">${o.meta||''}</div><small style="color:#6b7280">👆 tap pour ouvrir détails complets (${o.ing?Math.round(o.ing.length/10)+' lignes':''})</small></div>
+      <span style="font-size:18px">▼</span>
+    </div>
+    <div class="item-body">
+      <div style="white-space:pre-wrap;background:#fff;padding:10px;border-radius:8px;margin:6px 0;border:1px solid #e5e7eb"><b>📋 Ingrédients détaillés:</b><br>${o.ing||'<span style="color:red">⚠️ Vide - clique FORCER recettes détaillées en haut</span>'}</div>
+      <div style="white-space:pre-wrap;background:#f0fdf4;padding:10px;border-radius:8px;margin:6px 0;border:1px solid #bbf7d0"><b>👩‍🍳 Étapes détaillées:</b><br>${o.steps||'—'}</div>
+      ${o.tip?`<div class="tip">${o.tip}</div>`:''}
+      <div class="row" style="margin-top:10px"><button class="btn btn-sm btn-ghost" onclick="editItem('foods',${i})">Ouvrir/Fermer</button><button class="btn btn-sm btn-danger" onclick="delItem('foods',${i})">Suppr</button></div>
+    </div>
+  </div>`).join('')||'<small>Aucune - clique FORCER recettes détaillées</small>';
+ document.getElementById('tList').innerHTML=data.tension.map((o,i)=>`<div class="item" style="border-left:4px solid ${o.photo?'#0ea5e9':'#f87171'}"><div style="display:flex;gap:12px;align-items:center">${o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo}')">`:`<div style="width:90px;height:70px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:11px">❌ Pas photo</div>`}<div style="flex:1"><b style="font-size:18px">${o.v}</b><br><small>${o.date} ${o.time||''}</small><br><small>${o.note||''}</small><br>${o.photo?`<small style="color:#059669">✅ Photo ${Math.round(o.photo.length/1024)}Ko récupérable</small>`:`<small style="color:#ef4444">⚠️ Sans photo</small>`}</div></div><div class="row" style="margin-top:8px"><button class="btn btn-sm btn-ghost" onclick="editItem('tension',${i})">✏️ Modif</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="showImg('${(o.photo||'').replace(/'/g,'')}')">🖼️ Voir / récupérer photo</button><button class="btn btn-sm btn-danger" onclick="delItem('tension',${i})">Suppr</button></div></div>`).join('')||'<small>Aucune tension - prends photo avec le 1er champ Photothèque</small>';
+ document.getElementById('mList').innerHTML=data.meds.map((o,i)=>`<div class="item"><div style="display:flex;gap:10px">${o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo}')">`:''}<div><b>${o.v}</b></div></div><div class="row"><button class="btn btn-sm" style="background:#0ea5e9" onclick="showImg('${(o.photo||'').replace(/'/g,'')}')">🖼️ Photo</button><button class="btn btn-sm btn-danger" onclick="delItem('meds',${i})">Suppr</button></div></div>`).join('')||'<small>Aucun</small>';
+ document.getElementById('aList').innerHTML=data.analyses.map((o,i)=>`<div class="item"><div style="display:flex;gap:10px">${o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo}')">`:''}<div><b>${o.v}</b></div></div><div class="row"><button class="btn btn-sm" style="background:#0ea5e9" onclick="showImg('${(o.photo||'').replace(/'/g,'')}')">🖼️ Photo</button><button class="btn btn-sm btn-danger" onclick="delItem('analyses',${i})">Suppr</button></div></div>`).join('')||'<small>Aucune</small>';
+ document.getElementById('slList').innerHTML=(data.sommeil||[]).map(o=>`<div class="item"><b>${o.date} - ${o.total}</b></div>`).join('')||'<small>Aucune</small>';
+ drawChart();renderAlerts();
+}
+function drawChart(){const c=document.getElementById('gChart');if(!c)return;const ctx=c.getContext('2d');const W=c.width=c.clientWidth*2;const H=c.height=320;ctx.clearRect(0,0,W,H);const vals=[...data.glucose].sort((a,b)=>a.ts-b.ts).slice(-20);if(vals.length<2){ctx.fillStyle='#999';ctx.font='18px sans-serif';ctx.fillText('Ajoute 2 glycémies',20,160);return;}const min=Math.min(...vals.map(o=>o.v),70)-10,max=Math.max(...vals.map(o=>o.v),180)+10;ctx.strokeStyle='#eee';for(let y=0;y<=4;y++){const yy=20+y*(H-40)/4;ctx.beginPath();ctx.moveTo(60,yy);ctx.lineTo(W-20,yy);ctx.stroke();}ctx.strokeStyle='#6c5ce7';ctx.lineWidth=4;ctx.beginPath();vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();}
+function handleQuery(){const p=new URLSearchParams(location.search);const gv=p.get('glycemie')||p.get('value');if(gv){const v=parseInt(gv.replace(/\D/g,''));if(v){document.getElementById('gVal').value=v;document.getElementById('det-gly').open=true;setTimeout(()=>{saveGly(true);history.replaceState({},'',location.pathname);},800);}}}
+window.addEventListener('load',()=>{render();handleQuery();});
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
