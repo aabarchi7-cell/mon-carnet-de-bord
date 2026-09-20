@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr"><head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carnet - petit bleu</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--acc:#6c5ce7;--ok:#00b894;--bad:#d63031;--text:#2d3436}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+header{padding:14px 16px;background:var(--card);position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+h1{font-size:18px;margin:0}
+.btn{border:0;border-radius:10px;padding:8px 12px;background:var(--acc);color:#fff;font-weight:600;text-decoration:none;display:inline-block}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-ghost{background:#eee;color:#333}
+.btn-danger{background:var(--bad)}
+.card{background:var(--card);margin:12px;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;font-size:15px;box-sizing:border-box}
+label{font-size:13px;font-weight:600;margin:6px 0 2px;display:block}
+.item{border:1px solid #eee;border-radius:12px;padding:10px;margin:8px 0;display:flex;justify-content:space-between;gap:8px;align-items:center}
+img.thumb{width:60px;height:45px;object-fit:cover;border-radius:6px;border:1px solid #eee}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:#dfe6e9}
+canvas{width:100%!important;height:160px!important;background:#fff;border-radius:10px}
+details summary{cursor:pointer;font-weight:700;padding:6px 0}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:10px 14px;border-radius:20px;display:none;z-index:99}
+/* PETIT BLEU */
+.shortcut-mini{display:flex;align-items:center;gap:8px;background:#ede9fe;border:1px solid #ddd6fe;border-radius:10px;padding:6px 10px;margin-bottom:8px;font-size:12px}
+.shortcut-mini b{color:#6c5ce7;font-size:12px}
+</style>
+</head>
+<body>
+<header><h1>📒 Mon carnet</h1><button class="btn btn-sm" onclick="exportData()">Exporter</button></header>
+<div id="toast"></div>
+<main style="max-width:700px;margin:auto;padding-bottom:80px">
+
+<div class="card">
+<details open id="det-gly">
+<summary>🩸 Glycémie <span id="g-count" class="badge">0</span></summary>
+
+<!-- CARRÉ BLEU RÉDUIT - UN SEUL BOUTON QUI MARCHE -->
+<div class="shortcut-mini">
+<b>📲 Photo →</b>
+<a class="btn btn-sm" style="padding:4px 10px;font-size:11px" href="shortcuts://run-shortcut?name=Test%20glyc%C3%A9mie%20photo">▶️ Test glycémie photo</a>
+<span style="font-size:10px;color:#6b7280">envoie ?glycemie= dans le carnet</span>
+</div>
+
+<canvas id="gChart"></canvas>
+
+<div id="gForm" style="margin-top:10px;border:1px dashed #a29bfe;padding:10px;border-radius:12px">
+<label>Valeur mg/dL *</label>
+<input id="gVal" type="number" inputmode="numeric" placeholder="ex: 132">
+<div class="row" style="margin-top:6px">
+<div style="flex:1"><label>Moment</label><select id="gMoment"><option value="à jeun">À jeun</option><option value="avant repas">Avant repas</option><option value="après repas">2h après repas</option><option value="coucher">Coucher</option></select></div>
+<div style="flex:1"><label>Date</label><input id="gDate" type="date"></div>
+<div style="flex:1"><label>Heure</label><input id="gTime" type="time"></div>
+</div>
+<label>Photo lecteur</label>
+<input id="gPhoto" type="file" accept="image/*" capture="environment">
+<div id="gPreview" style="margin-top:6px"></div>
+<div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearGPhoto()">❌ Sans photo</button></div>
+<label>Note</label><input id="gNote" placeholder="ex: après déj">
+<div class="row" style="margin-top:8px">
+<button class="btn" onclick="saveGly()">Enregistrer</button>
+<button class="btn btn-ghost" onclick="cancelEdit()">Annuler</button>
+</div>
+</div>
+<div id="gList"></div>
+</details>
+</div>
+
+<div class="card"><details id="det-food"><summary>🍽️ Alimentation <span id="f-count" class="badge">0</span></summary>
+<div id="fForm" style="border:1px dashed #00b894;padding:10px;border-radius:12px;margin-top:8px">
+<label>Titre *</label><input id="fTitle"><label>Type</label><select id="fType" onchange="foodTypeChanged()"><option value="repas">Repas</option><option value="recette">Recette</option></select>
+<div id="fRecetteFields"><label>Ingrédients</label><textarea id="fIng" rows="2"></textarea><label>Étapes</label><textarea id="fStep" rows="2"></textarea></div>
+<div class="row" style="margin-top:8px"><button class="btn" onclick="saveFood()">Enregistrer</button><button class="btn btn-ghost" onclick="cancelEdit()">Annuler</button></div>
+</div><div id="fList"></div></details></div>
+
+<div class="card"><details><summary>❤️ Tension</summary><div class="row"><input id="tVal" placeholder="120/80" style="flex:1"><input id="tDate" type="date" style="flex:1"><button class="btn btn-sm" onclick="saveItem('tension','tVal','tDate')">OK</button></div><div id="tList"></div></details></div>
+<div class="card"><details><summary>💊 Médicaments</summary><div class="row"><input id="mVal" placeholder="Nom" style="flex:1"><button class="btn btn-sm" onclick="saveItem('meds','mVal')">OK</button></div><div id="mList"></div></details></div>
+<div class="card"><details><summary>🏃 Sport</summary><div class="row"><input id="sVal" placeholder="Marche" style="flex:1"><button class="btn btn-sm" onclick="saveItem('sport','sVal')">OK</button></div><div id="sList"></div></details></div>
+<div class="card"><details><summary>📝 Notes</summary><div class="row"><input id="nVal" style="flex:1"><button class="btn btn-sm" onclick="saveItem('notes','nVal')">OK</button></div><div id="nList"></div></details></div>
+
+</main>
+<script>
+const KEY='carnet_v12_final';
+let data=JSON.parse(localStorage.getItem(KEY)||'null')||{glucose:[],foods:[],tension:[],meds:[],sport:[],notes:[]};
+let edit={type:null,index:null}; let gPhotoData=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2200);}
+function todayStr(){return new Date().toISOString().slice(0,10);}function nowStr(){return new Date().toTimeString().slice(0,5);}
+document.getElementById('gDate').value=todayStr();document.getElementById('gTime').value=nowStr();document.getElementById('tDate').value=todayStr();
+function compressImage(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const max=400;let w=img.width,h=img.height;if(w>max||h>max){const sc=Math.min(max/w,max/h);w*=sc;h*=sc;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',0.35));};img.src=e.target.result;};r.readAsDataURL(file);}
+document.getElementById('gPhoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;compressImage(f,url=>{gPhotoData=url;document.getElementById('gPreview').innerHTML=`<img src="${url}" style="width:90px;height:60px;object-fit:cover;border-radius:6px"> <small>${Math.round(url.length/1024)}Ko</small>`;});});
+function clearGPhoto(){gPhotoData=null;document.getElementById('gPreview').innerHTML='';document.getElementById('gPhoto').value='';}
+function saveGly(){let v=parseInt(document.getElementById('gVal').value);if(!v){toast("Entre une valeur");return;}const obj={v:v,moment:document.getElementById('gMoment').value,date:document.getElementById('gDate').value||todayStr(),time:document.getElementById('gTime').value||nowStr(),note:document.getElementById('gNote').value||'',photo:gPhotoData||null,ts:Date.now()};if(edit.type==='glucose'){data.glucose[edit.index]=obj;edit={type:null,index:null};}else{data.glucose.push(obj);}document.getElementById('gVal').value='';document.getElementById('gNote').value='';clearGPhoto();save();toast(`Glycémie ${v} enregistrée`);}
+function saveFood(){const t=document.getElementById('fTitle').value.trim();if(!t){toast("Titre requis");return;}const o={title:t,type:document.getElementById('fType').value,ing:document.getElementById('fIng').value,steps:document.getElementById('fStep').value,ts:Date.now()};if(edit.type==='foods'){data.foods[edit.index]=o;edit={type:null,index:null};}else{data.foods.push(o);}document.getElementById('fTitle').value='';save();toast("Enregistré");}
+function foodTypeChanged(){document.getElementById('fRecetteFields').style.display=document.getElementById('fType').value==='recette'?'block':'none';}
+function saveItem(cat,inputId,dateId){const val=document.getElementById(inputId).value.trim();if(!val)return;const obj={v:val,date:dateId?document.getElementById(dateId).value||todayStr():todayStr(),ts:Date.now()};if(edit.type===cat){data[cat][edit.index]=obj;edit={type:null,index:null};}else{data[cat].push(obj);}document.getElementById(inputId).value='';save();toast("Enregistré");}
+function editItem(cat,i){edit={type:cat,index:i};const o=data[cat][i];if(cat==='glucose'){document.getElementById('gVal').value=o.v;document.getElementById('gMoment').value=o.moment||'à jeun';document.getElementById('gDate').value=o.date;document.getElementById('gTime').value=o.time||'';document.getElementById('gNote').value=o.note||'';gPhotoData=o.photo||null;if(gPhotoData)document.getElementById('gPreview').innerHTML=`<img src="${gPhotoData}" style="width:90px;height:60px;object-fit:cover;border-radius:6px">`;document.getElementById('det-gly').open=true;document.getElementById('gForm').scrollIntoView({behavior:'smooth'});}else if(cat==='foods'){document.getElementById('fTitle').value=o.title||o.v;document.getElementById('fType').value=o.type||'recette';document.getElementById('fIng').value=o.ing||'';document.getElementById('fStep').value=o.steps||'';foodTypeChanged();document.getElementById('det-food').open=true;}else{const map={tension:'tVal',meds:'mVal',sport:'sVal',notes:'nVal'};if(map[cat])document.getElementById(map[cat]).value=o.v;}}
+function delItem(cat,i){if(!confirm("Supprimer ?"))return;data[cat].splice(i,1);edit={type:null,index:null};save();toast("Supprimé");}
+function cancelEdit(){edit={type:null,index:null};}
+function render(){
+ document.getElementById('g-count').textContent=data.glucose.length;document.getElementById('f-count').textContent=data.foods.length;
+ document.getElementById('gList').innerHTML=[...data.glucose].sort((a,b)=>b.ts-a.ts).map(o=>{const orig=data.glucose.findIndex(x=>x.ts===o.ts);return `<div class="item"><div style="display:flex;gap:8px;align-items:center">${o.photo?`<img src="${o.photo}" class="thumb">`:''}<div><b>${o.v} mg/dL</b> <span class="badge">${o.moment}</span><br><small>${o.date} ${o.time||''}</small></div></div><div class="row"><button class="btn btn-sm btn-ghost" onclick="editItem('glucose',${orig})">Modif</button><button class="btn btn-sm btn-danger" onclick="delItem('glucose',${orig})">Suppr</button></div></div>`}).join('')||'<small>Aucune</small>';
+ document.getElementById('fList').innerHTML=data.foods.map((o,i)=>`<div class="item"><div><b>${o.title||o.v}</b></div><div class="row"><button class="btn btn-sm btn-ghost" onclick="editItem('foods',${i})">Modif</button><button class="btn btn-sm btn-danger" onclick="delItem('foods',${i})">Suppr</button></div></div>`).join('');
+ [['tension','tList'],['meds','mList'],['sport','sList'],['notes','nList']].forEach(([cat,listId])=>{document.getElementById(listId).innerHTML=(data[cat]||[]).map((o,i)=>`<div class="item"><div><b>${o.v}</b></div><div class="row"><button class="btn btn-sm btn-ghost" onclick="editItem('${cat}',${i})">Modif</button><button class="btn btn-sm btn-danger" onclick="delItem('${cat}',${i})">Suppr</button></div></div>`).join('');});
+ drawChart();
+}
+function drawChart(){const c=document.getElementById('gChart');if(!c)return;const ctx=c.getContext('2d');const W=c.width=c.clientWidth*2;const H=c.height=320;ctx.clearRect(0,0,W,H);const vals=[...data.glucose].sort((a,b)=>a.ts-b.ts).slice(-20);if(vals.length<2){ctx.fillStyle='#999';ctx.font='22px sans-serif';ctx.fillText('Ajoute 2 glycémies',20,160);return;}const min=Math.min(...vals.map(o=>o.v),70)-10,max=Math.max(...vals.map(o=>o.v),180)+10;ctx.strokeStyle='#eee';for(let y=0;y<=4;y++){const yy=20+y*(H-40)/4;ctx.beginPath();ctx.moveTo(60,yy);ctx.lineTo(W-20,yy);ctx.stroke();}ctx.strokeStyle='#6c5ce7';ctx.lineWidth=4;ctx.beginPath();vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);ctx.fillStyle=o.v>180?'#d63031':o.v<70?'#fdcb6e':'#00b894';ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fill();});}
+function exportData(){const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='carnet.json';a.click();}
+function handleQuery(){const p=new URLSearchParams(location.search);const gv=p.get('glycemie')||p.get('value');if(gv){const v=parseInt(gv.replace(/\D/g,''));if(v){document.getElementById('gVal').value=v;document.getElementById('det-gly').open=true;toast(`Valeur reçue: ${v}`);document.getElementById('gForm').scrollIntoView({behavior:'smooth'});}history.replaceState({},'',location.pathname);}}
+window.addEventListener('load',()=>{foodTypeChanged();render();handleQuery();});
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
