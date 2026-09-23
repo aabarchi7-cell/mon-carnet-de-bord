@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carnet Mounir - 14 recettes originales UNIQUES - FIX GLYCÉMIE</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--acc:#0ea5e9;--text:#2d3436}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding-bottom:120px}
+header{padding:10px 16px;background:var(--card);position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+h1{font-size:16px;margin:0;display:flex;align-items:center;gap:8px}
+.btn{border:0;border-radius:10px;padding:12px 18px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer;font-size:15px}
+.btn-sm{padding:6px 10px;font-size:11px}
+.btn-ghost{background:#eee;color:#333}
+.btn-big{background:#00b894;color:#fff;font-size:18px;padding:14px 20px;width:100%;margin-top:10px}
+.card{background:var(--card);margin:10px;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;box-sizing:border-box}
+label{font-size:11px;font-weight:600;margin:5px 0 2px;display:block;color:#64748b}
+.item{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;background:#fff;display:flex;gap:10px;align-items:center}
+img.thumb{width:80px;height:60px;object-fit:cover;border-radius:8px;border:2px solid #0ea5e9;cursor:pointer;display:block}
+.badge{background:#eef2ff;padding:2px 8px;border-radius:20px;font-size:10px}
+.badge-ig{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+canvas{width:100%!important;height:140px!important;background:#fff;border-radius:10px;border:1px solid #e5e7eb}
+details summary{cursor:pointer;font-weight:700;padding:8px 0;font-size:14px}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:14px 18px;border-radius:24px;display:none;z-index:99;font-size:14px;max-width:90%;text-align:center}
+.form-box{border:1px solid #e5e7eb;padding:12px;border-radius:12px;margin-top:8px;background:#fafafa}
+.preview-box{margin-top:6px;padding:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;display:none}
+.preview-box.has-photo{display:block}
+#imgModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);z-index:100;justify-content:center;align-items:center;flex-direction:column;padding:20px;box-sizing:border-box}
+#imgModal img{max-width:95%;max-height:70%;border-radius:12px}
+.user-badge{background:#e0f2fe;border:1px solid #bae6fd;color:#0369a1;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.shortcut-btn{background:linear-gradient(135deg,#6c5ce7,#0ea5e9);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.no-photo{width:80px;height:60px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#94a3b8;border:1px dashed #cbd5e1}
+.item-head{display:flex;justify-content:space-between;gap:8px;align-items:center;cursor:pointer;padding:2px;width:100%}
+.item-body{display:none;margin-top:10px;padding:12px;border-top:1px solid #e5e7eb;background:#f9fafb;border-radius:8px;font-size:13px;line-height:1.6;width:100%}
+.item.open .item-body{display:block}
+.recipe-tip{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:8px;margin-top:8px;font-size:11px}
+#stickySave{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -4px 12px rgba(0,0,0,.1);z-index:50;display:none;border-top:1px solid #e5e7eb}
+#stickySave.show{display:block}
+</style>
+</head>
+<body>
+<header><h1>📒 Carnet <span class="user-badge">Mounir - 14 recettes</span></h1><div class="row"><button class="btn btn-sm btn-ghost" onclick="clearAllPhotos()" style="font-size:10px">🧹 Libérer</button><button class="btn btn-sm btn-ghost" onclick="exportData()">⬇️</button></div></header>
+<div id="toast"></div>
+<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg"><div style="margin-top:10px"><button class="btn btn-sm" onclick="document.getElementById('imgModal').style.display='none'">Fermer</button> <button class="btn btn-sm" style="background:#00b894" onclick="downloadCurrentPhoto()">⬇️ Récupérer</button></div></div>
+<div id="stickySave"><button class="btn btn-big" onclick="saveGly(false)">💾 ENREGISTRER → Entrée ⏎</button></div>
+<main style="max-width:720px;margin:auto;padding-bottom:20px">
+<div class="card"><details open id="det-gly"><summary>🩸 Glycémie <span id="g-count" class="badge">0</span></summary>
+<div style="margin:8px 0"><a href="shortcuts://run-shortcut?name=Test%20glycémie%20photo" class="shortcut-btn">📸 Test glycémie photo</a></div>
+<div id="alert-pending"></div>
+<div id="alert-setup" style="display:none;background:#fff7e6;border:1px solid #fde68a;border-radius:10px;padding:8px;margin:8px 0;font-size:12px">Rappel 2h ?<div class="row" style="margin-top:6px"><button class="btn btn-sm" style="background:#00b894" onclick="activateAlert(120)">Oui 2h</button><button class="btn btn-sm btn-ghost" onclick="activateAlert(60)">1h</button><button class="btn btn-sm btn-ghost" onclick="document.getElementById('alert-setup').style.display='none'">Non</button></div></div>
+<canvas id="gChart"></canvas>
+<div class="form-box">
+<label>Valeur mg/dL * - Entrée ⏎</label><input id="gVal" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="ex: 134 puis Entrée" autocomplete="off">
+<div class="row"><div style="flex:1"><label>Moment</label><select id="gMoment"><option value="à jeun">À jeun</option><option value="avant repas">Avant repas</option><option value="après repas">2h après repas</option><option value="coucher">Coucher</option></select></div><div style="flex:1"><label>Date</label><input id="gDate" type="date"></div><div style="flex:1"><label>Heure</label><input id="gTime" type="time"></div></div>
+<label>Photo lecteur</label><input id="gPhoto" type="file" accept="image/*">
+<div id="gPreview" class="preview-box"></div>
+<div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearPhoto('g')">❌ Sans photo</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('g')">🖼️ Voir / récupérer</button><label style="font-weight:400;display:flex;align-items:center;gap:4px;font-size:11px"><input type="checkbox" id="chkAlert" checked style="width:auto"> 2h</label></div>
+<label>Note</label><input id="gNote">
+<div class="row" style="margin-top:8px"><button class="btn btn-big" onclick="saveGly(false)">💾 ENREGISTRER</button></div>
+<div id="storage-info" style="font-size:10px;color:#94a3b8;margin-top:6px"></div>
+</div>
+<div id="gList"></div>
+</details></div>
+
+<div class="card"><details open id="det-food"><summary>🍽️ Tes 14 recettes IG bas - cholestérol + glycémie <span id="f-count" class="badge">0</span></summary>
+<div class="form-box">
+<label>Titre recette *</label><input id="fTitle">
+<label>Type</label><select id="fType"><option value="recette">Recette TM7</option><option value="repas">Repas IG bas</option></select>
+<label>Ingrédients</label><textarea id="fIng" rows="4"></textarea>
+<label>Étapes</label><textarea id="fStep" rows="5"></textarea>
+<label>Photo</label><input id="fPhoto" type="file" accept="image/*">
+<div id="fPreview" class="preview-box"></div>
+<div class="row" style="margin-top:8px"><button class="btn" onclick="saveFood()">Enregistrer recette</button><button class="btn btn-ghost" onclick="clearFoodForm()">Annuler</button></div>
+</div>
+<div id="fList"></div>
+</details></div>
+
+<div class="card"><details open id="det-tens"><summary>❤️ Tension <span id="t-count" class="badge">0</span></summary>
+<div class="form-box">
+<div class="row"><div style="flex:1"><label>SYS/DIA Pouls *</label><input id="tVal" placeholder="120/80 72"></div><div style="flex:1"><label>Date</label><input id="tDate" type="date"></div><div style="flex:1"><label>Heure</label><input id="tTime" type="time"></div></div>
+<label>Photo</label><input id="tPhoto" type="file" accept="image/*">
+<div id="tPreview" class="preview-box"><div id="tPreviewInner">Aucune</div></div>
+<div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearPhoto('t')">❌</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('t')">🖼️ Voir / récupérer</button></div>
+<label>Note</label><input id="tNote">
+<div class="row" style="margin-top:8px"><button class="btn" style="background:#0ea5e9" onclick="saveTension()">Enregistrer tension</button></div>
+</div>
+<div id="tList"></div>
+</details></div>
+
+<div class="card"><details open id="det-sport"><summary>🏃 Sport <span id="s-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:2"><label>Activité *</label><input id="sVal" placeholder="Marche 30min"></div><div style="flex:1"><label>Date</label><input id="sDate" type="date"></div><div style="flex:1"><label>Durée</label><input id="sDur" placeholder="30min"></div></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveSport()">Enregistrer</button></div></div><div id="sList"></div></details></div>
+<div class="card"><details id="det-sommeil"><summary>😴 Sommeil <span id="sl-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:1"><label>Date</label><input id="slDate" type="date"></div><div style="flex:1"><label>Total</label><input id="slTotal" placeholder="7h13"></div></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveSommeil()">Enregistrer nuit</button></div></div><div id="slList"></div></details></div>
+<div class="card"><details id="det-meds"><summary>💊 Médicaments <span id="m-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:1"><label>Nom</label><input id="mVal"></div><div style="flex:1"><label>Date</label><input id="mDate" type="date"></div></div><label>Photo</label><input id="mPhoto" type="file" accept="image/*"><div id="mPreview" class="preview-box"></div><div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearPhoto('m')">❌</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('m')">🖼️</button></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveMeds()">Enregistrer</button></div></div><div id="mList"></div></details></div>
+<div class="card"><details id="det-analyses"><summary>🧪 Analyses <span id="a-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:1"><label>Type</label><input id="aVal"></div><div style="flex:1"><label>Résultat</label><input id="aResult"></div><div style="flex:1"><label>Date</label><input id="aDate" type="date"></div></div><label>Photo</label><input id="aPhoto" type="file" accept="image/*"><div id="aPreview" class="preview-box"></div><div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearPhoto('a')">❌</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('a')">🖼️</button></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveAnalyses()">Enregistrer</button></div></div><div id="aList"></div></details></div>
+</main>
+<script>
+const KEY='carnet_v12_final_MOUNIR';
+const DEFAULT_RECIPES=[
+{
+title:"🍞 Pain aux amandes, lin, orge et psyllium — TM7",
+type:"recette",
+ing:"Pour 12 petits pains IG bas + 0 cholestérol:\n* 200 g d'amandes\n* 100 g de graines de lin\n* 80 g de farine d'orge complète\n* 30 g de psyllium blond\n* 7 g de levure boulangère sèche\n* 1 c. à café de sel\n* 350 à 380 g d'eau tiède\n* 2 c. à café d'huile d'olive — facultatif",
+steps:"1. Moudre amandes: 10 sec / vitesse 8. Réserver.\n2. Moudre lin: 10 sec / vitesse 8. Ajouter amandes, farine d'orge, psyllium, sel. 10 sec / vitesse 4.\n3. Préparer levure: 7 g levure + 100 g eau tiède, reposer 5 min.\n4. Pétrir: ajouter levure-eau + reste eau + huile. 30 sec / vitesse 4, puis 2 min / mode Pétrin.\n5. Repos 30-45 min.\n6. Former 12 petits pains plats 2-3 cm.\n7. Cuisson: 25 min 180°C, puis 30-40 min 140-150°C.\n8. Refroidir complètement.",
+photo:null,ts:1,
+meta:"2026-09-08 | TM7 | 12 pains | IG très bas | 0 cholestérol",
+tip:"💚 IG TRÈS BAS + ANTI-CHOLESTÉROL: Amandes + lin = fibres qui baissent LDL. Orge complète IG 25. 1 pain = ~8g glucides lents."
+},
+{
+title:"🍞 Pain cholestérol + glycémie - 6 petits pains",
+type:"recette",
+ing:"Pour 6 petits pains IG bas + 0 cholestérol:\n* 100 g d'amandes moulues\n* 50 g de graines de lin moulues\n* 40 g de farine d'orge complète\n* 15 g de psyllium blond\n* 1 c. à café levure\n* ½ c. à café sel\n* 180-200 ml eau tiède\n* 1 c. à café huile olive facultatif\n* 1 c. à café graines sésame/tournesol facultatif",
+steps:"1. Mélanger amandes, lin, orge, psyllium, sel, levure.\n2. Ajouter eau progressivement. Pâte épaisse malléable.\n3. Reposer 10-15 min.\n4. Former 6 petits pains plats.\n5. Cuire 180°C 25 min, puis 140-150°C 30-40 min porte entrouverte pour sécher.\n6. Refroidir complètement.",
+photo:null,ts:2,
+meta:"2026-09-08 | TM7 | 6 pains | IG très bas | Voyage",
+tip:"💚 Version voyage: bien séchés = conserve plusieurs jours sans frigo."
+},
+{
+title:"🥖 Pain de voyage — version sèche",
+type:"recette",
+ing:"Pour 8 petits pains IG bas + 0 cholestérol:\n* 100 g d'amandes\n* 80 g de graines de lin\n* 100 g de farine d'orge\n* 20 g de psyllium\n* 1 c. à café sel\n* 1 c. à café levure\n* 220-240 g d'eau\n* 1 c. à soupe huile olive facultative",
+steps:"1. Amandes + lin mixer fin.\n2. Ajouter farine d'orge, psyllium, sel, levure. Mélanger.\n3. Ajouter 220 g eau et pétrir. Attendre 5-10 min psyllium absorbe.\n4. Si trop ferme, ajouter 20 g eau. Pâte légèrement plus ferme.\n5. Former 8 petits pains 60-70 g aplatis.\n6. Lever 45-60 min.\n7. Cuisson spéciale voyage: 180°C 25 min, puis 120°C 45-60 min, puis four éteint porte entrouverte 20-30 min. Bien plus secs et fermes.\n8. Transport: refroidis complètement, quelques heures à température ambiante, emballer individuellement papier cuisson + boîte sèche.",
+photo:null,ts:3,
+meta:"2026-09-08 | TM7 | 1h30 | 8 pains | IG très bas | Voyage",
+tip:"💚 Pain voyage: cuisson 2 temps + séchage = conserve plusieurs jours."
+},
+{
+title:"🇲🇦 Kefta grillée façon barbecue marocain & légumes grillés",
+type:"recette",
+ing:"Pour 2 pers IG bas 390 kcal/pers:\n🥩 Kefta:\n* 300 g kefta maigre (5% ou poulet)\n* 1 petit oignon haché\n* 2 c. à soupe persil et coriandre hachés\n* 1 c. à café cumin\n* 1 c. à café paprika\n* ½ c. à café poivre\n* ½ c. à café gingembre\n* Petite pincée sel\n* ½ c. à café huile olive\n🥒 Légumes grillés:\n* 1 courgette\n* 1 poivron\n* ½ oignon\n* ½ c. à café huile olive\n* Pincée cumin, paprika, poivre, sel\n* Quelques gouttes citron\n\nValeurs par pers: ~390 kcal | Protéines ~43 g | Glucides ~12 g | Lipides ~19 g | Fibres ~4 g",
+steps:"1. Préparer kefta: mélanger kefta + oignon + herbes + épices, travailler 1-2 min.\n2. Former petits steaks plats.\n3. Préparer légumes: courgette rondelles, poivron lanières, oignon morceaux.\n4. Préchauffer plaque forte température 5 min.\n5. Griller légumes: ½ c.à café huile, griller 8-10 min, épices.\n6. Cuire kefta: retirer légumes, déposer keftas 4-5 min chaque côté à cœur.\n7. Remettre légumes avec kefta 1-2 min, citron + herbes fraîches.\n\nIG BAS + PAUVRE MAUVAIS CHOLESTÉROL: 12 g glucides seulement, 43 g protéines. Grillé pas frit, ½ c.à café huile seulement. Choisir kefta maigre 5% ou poulet, pas 20% gras.",
+photo:null,ts:4,
+meta:"2026-09-04 | TM7 | Déjeuner | 25 min | 390 kcal | IG bas | 12 g glucides",
+tip:"💚 IG BAS: 12 g glucides, 43 g protéines, 4 g fibres. Grillé pas frit. Pour cholestérol: kefta poulet ou boeuf 5% maigre."
+},
+{
+title:"🍖 Pain de viande léger vapeur & sauce tomate – TM7",
+type:"recette",
+ing:"Pour 2 pers IG bas + pauvre mauvais cholestérol:\n* 250 g viande hachée maigre (5%)\n* 60 g courgette\n* 30 g oignon\n* Persil ou coriandre\n* 1/2 c. à café cumin\n* 1/2 c. à café paprika doux\n* Poivre, très peu de sel\nSauce:\n* 250 g tomates\n* 40 g oignon\n* 1 petite gousse d'ail facultative\n* 1 c. à café huile d'olive\n* 80 g eau\n* Épices",
+steps:"1. Courgette + 30 g oignon + persil/coriandre: 4 sec / vit. 5. Égoutter légèrement si nécessaire.\n2. Ajouter viande + cumin + paprika + poivre + sel: 15 sec / sens inverse / vit. 3.\n3. Former un pain allongé et le placer dans le Varoma sur papier cuisson humidifié, en laissant passer la vapeur.\n4. Sauce: mettre 40 g oignon + ail dans le bol: 5 sec / vit. 5.\n5. Ajouter 1 c. à café d'huile: 3 min / 120°C / vit. 1.\n6. Ajouter tomates + 80 g eau + épices. Installer le Varoma.\n7. Cuire: 25 min / Varoma / vit. 1. Vérifier cuisson; prolonger 5 min si nécessaire.\n8. Retirer le Varoma. Mixer la sauce: 15 sec / vit. 6.\n9. Couper le pain de viande en tranches et servir avec la sauce tomate.\n\nIG BAS + PAUVRE CHOLESTÉROL: Viande maigre 5% + courgette qui apporte fibres et moelleux sans gras. Vapeur Varoma = pas de friture, pas de mauvais gras. Sauce tomate sans sucre. 1 c.à café huile seulement.",
+photo:null,ts:5,
+meta:"2026-08-29 | TM7 | IG bas | Vapeur | Pauvre cholestérol | 2 pers",
+tip:"💚 PAIN DE VIANDE VAPEUR: 250 g viande maigre + courgette = moins de cholestérol, plus de fibres. Varoma = pas de friture. Sauce tomate maison sans sucre, IG bas. 1 c.à café huile seulement."
+},
+{
+title:"🍲 Soupe protéinée légère TM7 – poulet lentilles corail",
+type:"recette",
+ing:"Pour 2 à 3 pers IG très bas + 0 cholestérol + anti-cholestérol:\n* 200 g de blanc de poulet fermier cuit ou cru en petits morceaux\n* 1 courgette\n* 1 petite carotte\n* 1 petit oignon\n* 1 petite tomate\n* 100 g de chou-fleur\n* 50 g de lentilles corail (IG 25, fibres anti-LDL)\n* 1 c. à café d'huile d'olive\n* ½ c. à café de curcuma\n* Poivre, coriandre ou persil\n* 700 g d'eau\n* Un peu de sel facultatif\n\nIG très bas: lentilles corail IG 25 + légumes IG très bas. 0 farine, 0 crème. Poulet blanc maigre = peu cholestérol.",
+steps:"1. Mettre l'oignon dans le bol: 5 sec / vitesse 5.\n2. Ajouter l'huile d'olive: 3 min / 120°C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le chou-fleur: 5 sec / vitesse 4.\n4. Ajouter les lentilles corail, le curcuma, le poivre et 700 g d'eau.\n5. Si le poulet est cru, l'ajouter maintenant.\n6. Cuire 30 à 35 min / 100°C / sens inverse / vitesse mijotage.\n7. Si le poulet est déjà cuit, l'ajouter seulement pour les 5 dernières minutes.\n8. Prélever une petite partie des légumes et du bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l'épaissir légèrement.\n9. Ajouter coriandre ou persil et mélanger doucement.\n\nIG TRÈS BAS + ANTI-CHOLESTÉROL: Lentilles corail IG 25 + fibres solubles qui baissent LDL (mauvais cholestérol) de 10-15%. Légumes à volonté IG très bas. Blanc poulet maigre = peu cholestérol. 1 c.à café huile seulement. Sans crème, sans farine.",
+photo:null,ts:6,
+meta:"2026-08-18 | TM7 | 35 min | 2-3 pers | IG très bas | Anti-cholestérol",
+tip:"💚 SOUPE PROTÉINÉE IG TRÈS BAS: Lentilles corail IG 25 + fibres anti-LDL + légumes IG très bas + blanc poulet maigre. 700 g eau = rassasiant, peu calorique. 1 c.à café huile seulement. Idéal soir diabète + cholestérol. Mixer partiellement pour épaissir sans farine."
+}
+,
+{
+title:"🍗 Poulet façon tajine léger TM7",
+type:"recette",
+ing:`Pour 2 pers IG bas + pauvre mauvais cholestérol + version poulet congelé:
+* 500 à 600 g de poulet fermier congelé (de préférence en morceaux)
+* 500 g d'eau pour le bol
+* Courgette, carotte, poivron, oignon et/ou aubergine, coupés en morceaux réguliers
+* Sel, poivre, origan ou paprika doux, selon goût
+* Facultatif: 1 c. à café d'huile d'olive par personne après cuisson
+
+IG très bas: poulet blanc + légumes vapeur IG très bas. Vapeur Varoma = pas de friture, pas de mauvais gras. Poulet fermier sans peau = peu cholestérol.`,
+steps:`1. Mettre 500 g d'eau dans le bol du TM7.
+2. Installer le poulet fermier encore congelé dans le Varoma, en laissant circuler la vapeur. Répartir les légumes autour sans boucher toutes les ouvertures.
+3. Cuire 35 min / Varoma / vitesse 1.
+4. Vérifier la cuisson du poulet. S'il est encore insuffisamment cuit près de l'os, poursuivre 10 à 15 min / Varoma / vitesse 1.
+5. Vérifier que le poulet est bien cuit à cœur avant de servir.
+6. Assaisonner après cuisson. Ajouter éventuellement un peu d'huile d'olive au moment de servir.
+
+Version adaptée au poulet fermier congelé. Le temps final dépend de la taille et de l'épaisseur des morceaux.
+
+IG BAS + PAUVRE CHOLESTÉROL: Poulet vapeur Varoma = pas de friture, 0 mauvais gras. Légumes vapeur IG très bas. 1 c.à café huile olive après cuisson seulement. Sans peau = peu cholestérol.`,
+photo:null,ts:7,
+meta:"2026-08-18 | TM7 | 45-50 min | 2 pers | IG très bas | Vapeur | Poulet congelé",
+tip:"💚 POULET CONGELÉ VAROMA IG BAS: Poulet fermier congelé direct au Varoma 35 min + 10-15 min si besoin, légumes autour vapeur. Pas de décongélation, pas de friture, 0 mauvais gras. Assaisonner après cuisson. 1 c.à café huile olive max après. Poulet sans peau = peu cholestérol, légumes IG très bas."
+}
+
+,
+{
+title:"🍲 Couscous d'orge TM7 très léger",
+type:"recette",
+ing:`Pour 3 pers IG bas + pauvre mauvais cholestérol:
+* 120 g de couscous d'orge sec (orge IG bas 25 vs semoule blanche 70)
+* 250 g de blanc de poulet ou de dinde (sans peau = peu cholestérol)
+* 1 courgette
+* 1 carotte
+* 1 petite aubergine
+* 1 tomate
+* ½ poivron
+* 1 petit oignon
+* 100 g de navet, facultatif
+* 1 c. à café d'huile d'olive
+* ½ c. à café de curcuma
+* ½ c. à café de gingembre
+* ½ c. à café de paprika doux
+* Poivre, coriandre ou persil
+* 600 g d'eau
+* Un peu de sel facultatif
+
+IG bas: orge complète IG 25 vs couscous blanc 65. Petite portion 120g pour 3 pers = 40g/pers = ~20g glucides lents. Poulet/dinde blanc sans peau = peu cholestérol. Légumes IG très bas. 1 c.à café huile seulement.`,
+steps:`1. Mettre l'oignon et la tomate dans le bol: 5 sec / vitesse 5.
+2. Ajouter l'huile d'olive: 3 min / 120°C / vitesse 1.
+3. Ajouter le curcuma, le gingembre, le paprika, le poivre et 600 g d'eau.
+4. Ajouter la carotte, le navet, l'aubergine, le poivron et les morceaux de poulet.
+5. Cuire: 25 min / 100°C / sens inverse / vitesse mijotage.
+6. Ajouter la courgette et poursuivre: 10 min / 100°C / sens inverse / vitesse mijotage.
+7. Pendant ce temps, humidifier légèrement les 120 g de couscous d'orge avec un peu d'eau, l'égrainer puis le mettre dans le Varoma.
+8. Poser le Varoma pour les 15 dernières minutes de cuisson afin de cuire l'orge à la vapeur.
+9. Égrainer l'orge après cuisson. Servir une petite portion avec beaucoup de légumes, le poulet et un peu de bouillon.
+
+IG BAS + PAUVRE CHOLESTÉROL: Couscous d'orge IG 25 vs semoule blanche IG 65 = 2x moins de pic glycémique. Petite portion 40g/pers = 20g glucides lents + beaucoup légumes fibres qui ralentissent pic. Blanc poulet/dinde sans peau = peu mauvais cholestérol. Vapeur Varoma = pas de friture. 1 c.à café huile seulement.`,
+photo:null,ts:8,
+meta:"2026-08-18 | TM7 | 50 min | 3 pers | Orge IG 25 | 120g orge | IG bas",
+tip:"💚 COUSCOUS ORGE IG BAS: Orge IG 25 vs couscous blanc 65. Petite portion 40g = 20g glucides lents + beaucoup légumes + poulet maigre. Vapeur Varoma 15 dernières min. 1 c.à café huile seulement. Idéal vendredi version IG bas pauvre cholestérol."
+}
+
+,
+{
+title:"🥩 Boulettes de viande maigre en sauce légère",
+type:"recette",
+ing:`Pour 2 à 3 pers IG bas + pauvre mauvais cholestérol:
+* 300 g de viande hachée maigre (5%)
+* 1 petit oignon
+* 1 petite gousse d'ail
+* 1 tomate
+* ½ courgette
+* ½ poivron
+* 1 c. à café d'huile d'olive
+* ½ c. à café de cumin
+* ½ c. à café de paprika doux
+* ½ c. à café de curcuma
+* Poivre, coriandre ou persil
+* 250 g d'eau
+* Un peu de sel facultatif
+
+IG bas + pauvre cholestérol: viande maigre 5% + légumes sauce = peu mauvais gras. Vapeur Varoma = pas de friture. Sauce tomate maison sans sucre IG bas. 1 c.à café huile seulement.`,
+steps:`1. Mettre l'oignon, l'ail, la coriandre ou le persil dans le bol: 5 sec / vitesse 5.
+2. Prélever la moitié de ce mélange et l'ajouter à la viande hachée avec le cumin, le paprika, le curcuma et le poivre.
+3. Former de petites boulettes avec les mains légèrement humides.
+4. Ajouter l'huile d'olive au reste d'oignon dans le bol: 3 min / 120°C / vitesse 1.
+5. Ajouter la tomate, la courgette, le poivron et 250 g d'eau: 10 min / 100°C / vitesse 1.
+6. Mixer la sauce: 20 sec / vitesse 7.
+7. Déposer les boulettes dans le Varoma.
+8. Cuire: 15 à 18 min / Varoma / vitesse 1.
+9. Servir les boulettes nappées de sauce légère.
+
+IG BAS + PAUVRE CHOLESTÉROL: Boulettes viande maigre 5% + courgette/poivron = fibres + peu gras. Varoma vapeur = pas de friture. Sauce tomate maison mixée = IG bas, sans sucre. 1 c.à café huile seulement. 300 g pour 2-3 pers = portion modérée.`,
+photo:null,ts:9,
+meta:"2026-08-18 | TM7 | 35 min | 2-3 pers | IG bas | Vapeur | Viande maigre",
+tip:"💚 BOULETTES VAPEUR IG BAS: Viande hachée maigre 5% + oignon/ail/herbes, boulettes Varoma 15-18 min = pas de friture, peu cholestérol. Sauce tomate + courgette + poivron mixée = IG bas, fibres. 1 c.à café huile seulement. Servir avec légumes ou 3 c.à s orge."
+}
+
+,
+{
+title:"🥘 Tajine de légumes TM7",
+type:"recette",
+ing:`Pour 2 à 3 pers IG très bas + 0 cholestérol + anti-cholestérol:
+* 1 courgette
+* 1 petite aubergine
+* 1 carotte
+* 1 tomate
+* ½ poivron
+* 1 petit oignon
+* 1 petite gousse d'ail
+* 100 g de pois chiches cuits, facultatif (IG 28, fibres anti-LDL)
+* 1 c. à café d'huile d'olive
+* ½ c. à café de curcuma
+* ½ c. à café de paprika doux
+* ½ c. à café de cumin
+* Poivre, un peu de sel facultatif
+* 250 g d'eau
+* Coriandre ou persil
+
+IG très bas: tous légumes IG très bas <15 + pois chiches IG 28 fibres qui baissent LDL. 0 viande = 0 cholestérol. 1 c.à café huile seulement.`,
+steps:`1. Mettre l'oignon et l'ail dans le bol: 5 sec / vitesse 5.
+2. Ajouter l'huile d'olive: 3 min / 120°C / vitesse 1.
+3. Ajouter la tomate, le paprika, le curcuma, le cumin et le poivre: 5 min / 100°C / vitesse 1.
+4. Ajouter la carotte, la courgette, l'aubergine, le poivron et 250 g d'eau.
+5. Cuire: 20 min / 100°C / sens inverse / vitesse mijotage.
+6. Ajouter les pois chiches cuits si vous en mettez.
+7. Poursuivre: 5 min / 100°C / sens inverse / vitesse mijotage.
+8. Ajouter coriandre ou persil en fin de cuisson et mélanger doucement.
+
+IG TRÈS BAS + 0 CHOLESTÉROL: Tous légumes IG très bas + pois chiches IG 28 fibres solubles anti-LDL. Végétarien = 0 cholestérol. Curcuma + cumin + paprika anti-inflammatoire. 1 c.à café huile seulement. Servir avec 1 de tes pains amandes-lin-orge ou 3 c.à s orge.`,
+photo:null,ts:10,
+meta:"2026-08-18 | TM7 | 40 min | 2-3 pers | IG très bas | 0 cholestérol | Légumes",
+tip:"💚 TAJINE LÉGUMES IG TRÈS BAS + 0 CHOLESTÉROL: Tous légumes IG <15 + pois chiches IG 28 fibres qui baissent mauvais cholestérol. Végétarien = 0 cholestérol. Curcuma/paprika/cumin anti-inflammatoire. 1 c.à café huile. Servir avec pain amandes-lin-orge ou orge. À volonté IG bas."
+}
+
+,
+{
+title:"🐟 Poisson TM7 en sauce légère",
+type:"recette",
+ing:`Pour 2 pers IG très bas + pauvre mauvais cholestérol + oméga 3:
+* 300 à 350 g de poisson blanc (merlan, cabillaud, colin ou lotte) - maigre, peu cholestérol, protéines
+* 1 petite courgette
+* 1 petite carotte
+* 1 tomate
+* ½ poivron
+* 1 petit oignon
+* 1 petite gousse d'ail
+* 1 c. à café d'huile d'olive
+* ½ c. à café de curcuma
+* ½ c. à café de paprika doux
+* Un peu de cumin facultatif
+* Poivre
+* Jus de ½ citron
+* 300 g d'eau
+
+IG très bas + anti-cholestérol: poisson blanc maigre IG 0 + légumes IG très bas. Oméga 3 poisson qui baisse mauvais cholestérol. Sauce tomate légumes sans farine sans crème. 1 c.à café huile seulement.`,
+steps:`1. Mettre l'oignon et l'ail dans le bol: 5 sec / vitesse 5.
+2. Ajouter l'huile d'olive: 3 min / 120°C / vitesse 1.
+3. Ajouter la tomate, la courgette, la carotte et le poivron: 5 sec / vitesse 4.
+4. Ajouter 300 g d'eau, le curcuma, le paprika, le cumin et le poivre.
+5. Cuire la sauce: 12 min / 100°C / vitesse 1.
+6. Mixer la sauce: 20 sec / vitesse 7 pour la rendre légère et homogène.
+7. Mettre le poisson dans le Varoma avec le jus de citron.
+8. Cuire: 15 à 18 min / Varoma / vitesse 1.
+9. Servir le poisson nappé de la sauce légère.
+
+IG TRÈS BAS + PAUVRE MAUVAIS CHOLESTÉROL: Poisson blanc maigre IG 0 + légumes IG très bas <15. Poisson blanc = peu cholestérol vs viande rouge. Oméga 3 + citron anti-cholestérol. Varoma vapeur = pas de friture, pas de mauvais gras. Sauce légumes mixée IG bas sans crème sans farine. 1 c.à café huile seulement.`,
+photo:null,ts:11,
+meta:"2026-08-18 | TM7 | 35 min | 2 pers | IG très bas | Poisson maigre | Oméga 3",
+tip:"💚 POISSON VAPEUR IG TRÈS BAS: Poisson blanc maigre IG 0 + légumes IG très bas + sauce légère mixée sans farine. Varoma 15-18 min = pas de friture, peu cholestérol, oméga 3. Citron + curcuma anti-inflammatoire. 1 c.à café huile seulement. Servir avec 3 c.à s orge ou 1 pain amandes-lin."
+}
+
+,
+{
+title:"🍲 Harira très modérée en glucides - TM7",
+type:"recette",
+ing:`Pour 4 bols environ IG très bas + pauvre mauvais cholestérol - sans farine, sans vermicelles, sans riz:
+* 250 g de tomates
+* 100 g de courgette
+* 80 g de chou-fleur
+* 1 petit oignon
+* 1 branche de céleri avec feuilles
+* Coriandre et persil
+* 80 à 100 g de viande maigre en petits morceaux, facultatif
+* 30 g de lentilles sèches (IG 25, fibres anti-LDL)
+* 20 g de pois chiches cuits, facultatif (IG 28)
+* 1 c. à café d'huile d'olive
+* 1 c. à café de curcuma
+* ½ c. à café de gingembre
+* Poivre, un peu de cannelle facultatif, sel modéré
+* Environ 700 g d'eau
+* Pas de farine, pas de vermicelles, pas de riz
+
+IG très bas: 30g lentilles + 20g pois chiches seulement pour 4 bols = ~8g glucides/bowl vs harira classique 30g. Sans farine, sans vermicelles, sans riz = 0 pic. Légumes IG très bas + épices anti-inflammatoires.`,
+steps:`1. Mettre l'oignon, le céleri, le persil et la coriandre dans le bol: 5 sec / vitesse 5.
+2. Ajouter l'huile d'olive: 3 min / 120°C / vitesse 1.
+3. Ajouter les tomates, la courgette et le chou-fleur: 8 sec / vitesse 5.
+4. Ajouter les lentilles, les pois chiches, la viande si utilisée, les épices et 700 g d'eau.
+5. Cuire: 30 min / 100°C / sens inverse / vitesse mijotage.
+6. À la fin, prélever environ 1 louche de légumes et de bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l'épaissir naturellement (sans farine).
+7. Mélanger 20 sec / sens inverse / vitesse 2.
+8. Goûter et ajuster légèrement le sel et les épices.
+
+IG TRÈS BAS + PAUVRE CHOLESTÉROL: Harira classique = farine + vermicelles + riz = IG haut + 30g glucides/bowl. Ici 0 farine, 0 vermicelles, 0 riz, 30g lentilles + 20g pois chiches pour 4 bols = 8g glucides/bowl seulement. Légumes IG très bas + lentilles fibres anti-LDL + viande maigre facultative 80-100g = peu cholestérol. Épaissir en mixant 1 louche légumes/bouillon, pas de farine.`,
+photo:null,ts:13,
+meta:"2026-08-18 | TM7 | 40 min | 4 bols | IG très bas | Sans farine vermicelles riz | Modérée glucides",
+tip:"💚 HARIRA MODÉRÉE GLUCIDES: Version IG très bas sans farine, sans vermicelles, sans riz. 30g lentilles + 20g pois chiches pour 4 bols = 8g glucides/bowl vs 30g classique. Légumes IG très bas + viande maigre facultative 80-100g = peu cholestérol. Épaissir en mixant 1 louche, pas farine. Idéal Ramadan IG bas pauvre cholestérol."
+}
+
+,
+{
+title:"🍞 Pain amandes & lin low carb",
+type:"recette",
+ing:`Pour 1 pain (environ 8-10 petits pains) IG très bas + low carb + 0 farine + pauvre mauvais cholestérol:
+* 200 g d'amandes entières à moudre
+* 80 g de graines de lin à moudre
+* 20 g de psyllium
+* 10 g de levure chimique (pas boulangère, levure chimique)
+* 4 œufs
+* 120 g de yaourt nature ou skyr (protéines, IG bas)
+* 60 à 80 g d'eau seulement, à ajouter progressivement
+* 1 c. à soupe d'huile d'olive
+* ½ c. à café de sel
+
+IG très bas + low carb: 200g amandes + 80g lin + psyllium = 0 farine, 0 sucre, fibres + bonnes graisses. Œufs + yaourt/skyr = protéines IG bas. 60-80g eau seulement = pâte ferme. 1 c.à soupe huile olive = peu gras.`,
+steps:`1. Mettre les amandes dans le bol: 10 sec / vitesse 10. Réserver.
+2. Mettre les graines de lin: 10 sec / vitesse 10.
+3. Ajouter les amandes moulues, le psyllium, la levure chimique et le sel: 10 sec / vitesse 4.
+4. Ajouter les œufs, le yaourt et l'huile d'olive: 20 sec / vitesse 4.
+5. Ajouter 60 g d'eau puis mélanger 20 sec / vitesse 4.
+6. Laisser reposer la pâte 5 à 10 min pour que le psyllium absorbe l'humidité.
+7. Si elle est trop sèche, ajouter l'eau restante petit à petit. La pâte doit rester souple mais assez ferme pour être façonnée.
+8. Former de petits pains aplatis avec les mains légèrement humides.
+9. Les déposer sur une plaque avec papier cuisson.
+10. Cuire au four préchauffé à 180°C pendant environ 25 à 30 min, jusqu'à ce qu'ils soient bien pris.
+
+IG TRÈS BAS + LOW CARB + PAUVRE CHOLESTÉROL: Amandes + lin + psyllium = 0 farine, fibres qui baissent LDL, IG très bas. Œufs + skyr = protéines qui ralentissent pic glycémique. Low carb = très peu glucides vs pain normal. 60-80g eau seulement = pâte ferme, bien séché.`,
+photo:null,ts:14,
+meta:"2026-08-18 | TM7 | 1h | 1 pain | Low carb | IG très bas | 0 farine",
+tip:"💚 PAIN LOW CARB: 200g amandes + 80g lin + psyllium + levure chimique + 4 œufs + yaourt/skyr. 0 farine, IG très bas, low carb, fibres anti-cholestérol. 60-80g eau seulement, pâte ferme façonnable. 25-30 min 180°C. Version œufs/skyr = plus protéiné, plus moelleux que version 100% orge."
+}
+
+,
+{
+title:"🥕 Soupe de légumes TM7",
+type:"recette",
+ing:`Pour 4 pers IG très bas + 0 cholestérol:
+* 1 courgette
+* 2 carottes
+* 1 poireau
+* 1 oignon
+* 10 g d'huile d'olive (1 c. à café)
+* 750 g d'eau
+* Poivre, curcuma
+* Bouillon réduit en sel, facultatif
+
+IG très bas: courgette + carottes + poireau + oignon IG très bas. 0 viande = 0 cholestérol. 10g huile olive seulement. 750g eau = rassasiant, peu calorique.`,
+steps:`1. Mettre l'oignon dans le bol: 5 sec / vitesse 5.
+2. Ajouter l'huile d'olive: 3 min / 120°C / vitesse 1.
+3. Ajouter la courgette, les carottes, le poireau, l'eau, le poivre et le curcuma.
+4. Cuire: 25 min / 100°C / vitesse 1.
+5. Mixer progressivement: 1 min, en montant jusqu'à vitesse 9-10.
+
+IG TRÈS BAS + 0 CHOLESTÉROL: Tous légumes IG très bas <15. Végétarien = 0 cholestérol. 10g huile seulement = peu gras. Curcuma anti-inflammatoire. Mixer 1 min vitesse 9-10 = velouté sans crème sans farine.`,
+photo:null,ts:15,
+meta:"2026-08-18 | TM7 | 35 mn | 4 pers | IG très bas | 0 cholestérol | Velouté",
+tip:"💚 SOUPE LÉGUMES IG TRÈS BAS + 0 CHOLESTÉROL: Courgette + 2 carottes + poireau + oignon = IG très bas. 0 viande = 0 cholestérol. 10g huile seulement. 750g eau = rassasiant. Mixer vitesse 9-10 = velouté sans crème. Idéal soir diabète + cholestérol."
+}
+];
+let stored=JSON.parse(localStorage.getItem(KEY)||'null');
+let data=stored?stored:{glucose:[],foods:JSON.parse(JSON.stringify(DEFAULT_RECIPES)),tension:[],meds:[],analyses:[],sommeil:[],sport:[],notes:[]};
+if(!data.tension)data.tension=[];if(!data.meds)data.meds=[];if(!data.analyses)data.analyses=[];if(!data.sommeil)data.sommeil=[];if(!data.sport)data.sport=[];if(!data.notes)data.notes=[];
+if(!data.foods||data.foods.length===0) data.foods=JSON.parse(JSON.stringify(DEFAULT_RECIPES));
+DEFAULT_RECIPES.forEach(r=>{if(!data.foods.some(f=>f.title===r.title)){data.foods.unshift(r);}});
+let alerts=JSON.parse(localStorage.getItem(KEY+'_alerts')||'[]');
+let photos={g:null,t:null,m:null,a:null,f:null};
+let currentModal=null;
+let editFoodIndex=null;
+function getSize(){try{const s=localStorage.getItem(KEY);return s?Math.round(s.length/1024)+' Ko':'0';}catch(e){return '?';}}
+function saveWithFallback(){
+ try{localStorage.setItem(KEY,JSON.stringify(data));return true;}
+ catch(e){let c=0;data.glucose.forEach(o=>{if(o.photo){o.photo=null;c++;}});data.tension.forEach(o=>{if(o.photo){o.photo=null;c++;}});try{localStorage.setItem(KEY,JSON.stringify(data));toast(`🧹 ${c} photos libérées`);return true;}catch(e2){return false;}}
+}
+function save(){const ok=saveWithFallback();render();return ok;}
+function saveAlerts(){localStorage.setItem(KEY+'_alerts',JSON.stringify(alerts));renderAlerts();}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+function todayStr(){return new Date().toISOString().slice(0,10);}function nowStr(){return new Date().toTimeString().slice(0,5);}
+['gDate','tDate','mDate','aDate','slDate','sDate'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=todayStr();});
+['gTime','tTime'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=nowStr();});
+function compress(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;const max=500;if(w>max||h>max){const s=Math.min(max/w,max/h);w*=s;h*=s;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',0.4));};img.onerror=()=>cb(e.target.result);img.src=e.target.result;};r.readAsDataURL(file);}
+function setupPhoto(id,key,prev){const inp=document.getElementById(id);if(!inp)return;inp.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;compress(f,url=>{photos[key]=url;const b=document.getElementById(prev);if(b){b.classList.add('has-photo');b.innerHTML=`<img src="${url}" style="width:80px;height:60px;object-fit:cover;border-radius:8px"> <small>✓ ${Math.round(url.length/1024)}Ko</small>`;}});});}
+setupPhoto('gPhoto','g','gPreview');setupPhoto('tPhoto','t','tPreview');setupPhoto('mPhoto','m','mPreview');setupPhoto('aPhoto','a','aPreview');setupPhoto('fPhoto','f','fPreview');
+function clearPhoto(k){photos[k]=null;const b=document.getElementById(k+'Preview');if(b){b.classList.remove('has-photo');b.innerHTML=k==='t'?'<div id="tPreviewInner">Aucune</div>':'';}const inp=document.getElementById(k+'Photo');if(inp)inp.value='';}
+function showImg(s){if(!s||s.length<100)return;currentModal=s;document.getElementById('modalImg').src=s;document.getElementById('imgModal').style.display='flex';}
+function downloadCurrentPhoto(){if(!currentModal)return;const a=document.createElement('a');a.href=currentModal;a.download='photo_'+Date.now()+'.jpg';a.click();}
+function openPhoto(k){if(photos[k]&&photos[k].length>100){showImg(photos[k]);return;}let last=null;if(k==='t') last=[...data.tension].reverse().find(x=>x.photo);if(k==='g') last=[...data.glucose].reverse().find(x=>x.photo);if(k==='m') last=[...data.meds].reverse().find(x=>x.photo);if(k==='a') last=[...data.analyses].reverse().find(x=>x.photo);if(last&&last.photo)showImg(last.photo);else toast('Aucune photo');}
+function saveGly(fromAuto){const el=document.getElementById('gVal');let raw=el.value.trim().replace(',','.');let v=parseInt(raw);if(!v||isNaN(v)){toast('❌ Tape valeur ex: 134 puis Entrée');el.style.border='2px solid red';el.focus();setTimeout(()=>el.style.border='1px solid #ddd',2000);return false;}const o={v:v,moment:document.getElementById('gMoment').value,date:document.getElementById('gDate').value||todayStr(),time:document.getElementById('gTime').value||nowStr(),note:document.getElementById('gNote').value,photo:photos.g,ts:Date.now()};data.glucose.push(o);if(save()){el.value='';document.getElementById('gNote').value='';clearPhoto('g');toast(`✅ ${v} ENREGISTRÉ - total ${data.glucose.length}`);if(document.getElementById('chkAlert').checked && (o.moment==='avant repas'||o.moment==='à jeun')) document.getElementById('alert-setup').style.display='block';document.getElementById('stickySave').classList.remove('show');return true;}else{data.glucose.pop();return false;}}
+function saveTension(){const v=document.getElementById('tVal').value.trim();if(!v){toast('Tension ?');return;}const o={v:v,date:document.getElementById('tDate').value||todayStr(),time:document.getElementById('tTime').value||nowStr(),note:document.getElementById('tNote').value,photo:photos.t,ts:Date.now()};data.tension.push(o);if(save()){document.getElementById('tVal').value='';document.getElementById('tNote').value='';clearPhoto('t');toast(`✅ Tension ${v}`);}else{data.tension.pop();}}
+function saveSport(){const v=document.getElementById('sVal').value.trim();if(!v){toast('Activité ?');return;}const o={v:v+' '+(document.getElementById('sDur').value||''),date:document.getElementById('sDate').value||todayStr(),ts:Date.now()};data.sport.push(o);if(save()){document.getElementById('sVal').value='';document.getElementById('sDur').value='';toast('Sport');}else{data.sport.pop();}}
+function saveMeds(){const v=document.getElementById('mVal').value.trim();if(!v)return;const o={v:v,date:document.getElementById('mDate').value||todayStr(),photo:photos.m,ts:Date.now()};data.meds.push(o);if(save()){document.getElementById('mVal').value='';clearPhoto('m');}else{data.meds.pop();}}
+function saveAnalyses(){const v=document.getElementById('aVal').value.trim();if(!v)return;const o={v:v,result:document.getElementById('aResult').value,date:document.getElementById('aDate').value||todayStr(),photo:photos.a,ts:Date.now()};data.analyses.push(o);if(save()){document.getElementById('aVal').value='';document.getElementById('aResult').value='';clearPhoto('a');}else{data.analyses.pop();}}
+function saveSommeil(){const o={date:document.getElementById('slDate').value||todayStr(),total:document.getElementById('slTotal').value,s1d:document.getElementById('slS1D').value,s1f:document.getElementById('slS1F').value,s1dur:document.getElementById('slS1Dur').value,ts:Date.now()};data.sommeil.push(o);if(save()){toast('Nuit enregistrée');}else{data.sommeil.pop();}}
+function saveFood(){
+ const title=document.getElementById('fTitle').value.trim();
+ if(!title){toast('Titre ?');return;}
+ const ing=document.getElementById('fIng').value.trim();
+ const steps=document.getElementById('fStep').value.trim();
+ const type=document.getElementById('fType').value;
+ const o={title:title,type:type,ing:ing,steps:steps,photo:photos.f,ts:Date.now(),meta:"IG bas | 0 cholestérol | TM7",tip:"💚 IG bas + pauvre mauvais cholestérol"};
+ if(editFoodIndex!==null){data.foods[editFoodIndex]=o;editFoodIndex=null;}
+ else{data.foods.unshift(o);}
+ if(save()){clearFoodForm();toast(`✅ Recette ${title} enregistrée`);}
+ else{if(editFoodIndex===null) data.foods.shift();}
+}
+function clearFoodForm(){document.getElementById('fTitle').value='';document.getElementById('fIng').value='';document.getElementById('fStep').value='';clearPhoto('f');editFoodIndex=null;}
+function editFood(i){const o=data.foods[i];document.getElementById('fTitle').value=o.title;document.getElementById('fIng').value=o.ing||'';document.getElementById('fStep').value=o.steps||'';document.getElementById('fType').value=o.type||'recette';editFoodIndex=i;document.getElementById('det-food').open=true;window.scrollTo(0,0);}
+function clearAllPhotos(){if(!confirm('Libérer place en supprimant vieilles photos ? Valeurs restent.')) return;let c=0;data.glucose.forEach(o=>{if(o.photo){o.photo=null;c++;}});data.tension.forEach(o=>{if(o.photo){o.photo=null;c++;}});save();toast(`🧹 ${c} photos supprimées`);}
+function activateAlert(mins){const due=Date.now()+mins*60000;const id='al_'+Date.now();alerts.push({id:id,due:due,label:`Reprendre glycémie`,mins:mins});saveAlerts();document.getElementById('alert-setup').style.display='none';toast(`⏰ ${mins}min`);setTimeout(()=>triggerAlert(id),mins*60000);}
+function triggerAlert(id){const idx=alerts.findIndex(x=>x.id===id);if(idx===-1)return;alert('⏰ Reprendre glycémie (2h après repas)');alerts.splice(idx,1);saveAlerts();}
+function renderAlerts(){const c=document.getElementById('alert-pending');if(!c)return;if(alerts.length===0){c.innerHTML='';document.getElementById('alert-ind').style.display='none';return;}document.getElementById('alert-ind').style.display='inline-block';c.innerHTML=alerts.map(a=>{const rem=Math.max(0,Math.ceil((a.due-Date.now())/60000));return `<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:6px;margin:6px 0;font-size:11px;display:flex;justify-content:space-between"><span>⏰ ${a.label} dans ${rem}min</span><div class="row"><button class="btn btn-sm" style="background:#00b894" onclick="triggerAlert('${a.id}')">OK</button><button class="btn btn-sm btn-ghost" onclick="cancelAlert('${a.id}')">X</button></div></div>`;}).join('');}
+function cancelAlert(id){alerts=alerts.filter(x=>x.id!==id);saveAlerts();}
+function saveAlerts(){localStorage.setItem(KEY+'_alerts',JSON.stringify(alerts));renderAlerts();}
+function exportData(){const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='carnet_MOUNIR_'+todayStr()+'.json';a.click();}
+function render(){
+ document.getElementById('g-count').textContent=data.glucose.length;
+ document.getElementById('f-count').textContent=data.foods.length;
+ document.getElementById('t-count').textContent=data.tension.length;
+ document.getElementById('m-count').textContent=data.meds.length;
+ document.getElementById('a-count').textContent=data.analyses.length;
+ document.getElementById('s-count').textContent=(data.sport||[]).length;
+ document.getElementById('sl-count').textContent=(data.sommeil||[]).length;
+ document.getElementById('gList').innerHTML=data.glucose.slice().sort((a,b)=>b.ts-a.ts).slice(0,30).map(o=>{
+  const orig=data.glucose.findIndex(x=>x.ts===o.ts);
+  const photoHtml=o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo.replace(/'/g,'')}')">`:`<div class="no-photo">📷</div>`;
+  return `<div class="item"><div style="display:flex;gap:10px;align-items:center;width:100%">${photoHtml}<div style="flex:1"><b style="font-size:16px">${o.v} mg/dL</b> <span class="badge">${o.moment}</span><br><small style="color:#64748b">${o.date} ${o.time||''}</small>${o.photo?`<br><small style="color:#059669">✅ Photo ${Math.round(o.photo.length/1024)}Ko</small>`:''}</div><button class="btn btn-sm btn-ghost" onclick="delItem('glucose',${orig})">Suppr</button></div></div>`;
+ }).join('')||'<small style="color:#94a3b8">Aucune glycémie - tape 134 + Entrée ⏎</small>';
+ document.getElementById('fList').innerHTML=data.foods.map((o,i)=>`<div class="item" id="food-${i}" style="display:block"><div class="item-head" onclick="toggleRecipe(${i})"><div style="flex:1"><b>${o.title}</b><br><div class="recipe-meta"><span class="badge-ig">${o.meta||'IG bas | 0 cholestérol'}</span></div><small style="color:#6b7280">👆 tap pour voir ingrédients & étapes TM7</small></div><span>▼</span></div><div class="item-body"><div style="white-space:pre-wrap;background:#f9fafb;padding:10px;border-radius:8px;margin:6px 0"><b>📋 Ingrédients IG bas + 0 cholestérol:</b><br>${(o.ing||'—').replace(/</g,'&lt;')}</div><div style="white-space:pre-wrap;background:#f0fdf4;padding:10px;border-radius:8px;margin:6px 0"><b>👩‍🍳 Étapes TM7:</b><br>${(o.steps||'—').replace(/</g,'&lt;')}</div>${o.tip?`<div class="recipe-tip">${o.tip}</div>`:''}<div class="row" style="margin-top:8px"><button class="btn btn-sm btn-ghost" onclick="editFood(${i})">✏️ Modifier</button><button class="btn btn-sm btn-ghost" style="background:#fee2e2;color:#991b1b" onclick="delItem('foods',${i})">🗑️ Suppr</button></div></div></div>`).join('')||'<small style="color:#94a3b8">Aucune recette</small>';
+ document.getElementById('tList').innerHTML=data.tension.slice().reverse().map((o,idx)=>{
+  const realIdx=data.tension.length-1-idx;
+  const photoHtml=o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo.replace(/'/g,'')}')">`:`<div class="no-photo">📷</div>`;
+  return `<div class="item"><div style="display:flex;gap:10px;align-items:center;width:100%">${photoHtml}<div style="flex:1"><b>${o.v}</b><br><small>${o.date} ${o.time||''}</small></div><button class="btn btn-sm btn-ghost" onclick="delItem('tension',${realIdx})">Suppr</button></div></div>`;
+ }).join('')||'<small style="color:#94a3b8">Aucune tension</small>';
+ document.getElementById('mList').innerHTML=data.meds.map((o,i)=>`<div class="item" style="display:block"><div style="display:flex;gap:10px;align-items:center">${o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo.replace(/'/g,'')}')">`:`<div class="no-photo">💊</div>`}<div style="flex:1"><b>${o.v}</b><br><small>${o.date}</small></div><button class="btn btn-sm btn-ghost" onclick="delItem('meds',${i})">Suppr</button></div></div>`).join('')||'<small style="color:#94a3b8">Aucun</small>';
+ document.getElementById('aList').innerHTML=data.analyses.map((o,i)=>`<div class="item" style="display:block"><div style="display:flex;gap:10px;align-items:center">${o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo.replace(/'/g,'')}')">`:`<div class="no-photo">🧪</div>`}<div style="flex:1"><b>${o.v} ${o.result||''}</b><br><small>${o.date}</small></div><button class="btn btn-sm btn-ghost" onclick="delItem('analyses',${i})">Suppr</button></div></div>`).join('')||'<small style="color:#94a3b8">Aucune</small>';
+ document.getElementById('sList').innerHTML=(data.sport||[]).sort((a,b)=>b.ts-a.ts).map((o,i)=>`<div class="item" style="display:block"><div><b>🏃 ${o.v}</b><br><small>${o.date}</small></div><button class="btn btn-sm btn-ghost" onclick="delItem('sport',${i})">Suppr</button></div>`).join('')||'<small style="color:#94a3b8">Aucun</small>';
+ document.getElementById('slList').innerHTML=(data.sommeil||[]).map((o,i)=>`<div class="item" style="display:block"><div><b>😴 ${o.date} - ${o.total||''}</b><br><small>${o.s1d||''}→${o.s1f||''} ${o.s1dur||''}</small></div><button class="btn btn-sm btn-ghost" onclick="delItem('sommeil',${i})">Suppr</button></div>`).join('')||'<small>Aucune nuit</small>';
+ drawChart();renderAlerts();
+ document.getElementById('storage-info').textContent='Stockage: '+getSize();
+}
+function drawChart(){const c=document.getElementById('gChart');if(!c)return;const ctx=c.getContext('2d');const W=c.width=c.clientWidth*2;const H=c.height=280;ctx.clearRect(0,0,W,H);const vals=data.glucose.slice().sort((a,b)=>a.ts-b.ts).slice(-20);if(vals.length<2){ctx.fillStyle='#94a3b8';ctx.font='18px sans-serif';ctx.fillText('Courbe - ajoute 2 glycémies',20,70);return;}const min=Math.min(...vals.map(o=>o.v),70)-10,max=Math.max(...vals.map(o=>o.v),180)+10;ctx.strokeStyle='#f1f5f9';for(let y=0;y<=4;y++){const yy=20+y*(H-40)/4;ctx.beginPath();ctx.moveTo(60,yy);ctx.lineTo(W-20,yy);ctx.stroke();}ctx.strokeStyle='#0ea5e9';ctx.lineWidth=6;ctx.beginPath();vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();ctx.fillStyle='#0ea5e9';vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();});}
+function delItem(cat,i){if(!confirm('Supprimer ?'))return;data[cat].splice(i,1);save();}
+function handleQuery(){const p=new URLSearchParams(location.search);const gv=p.get('glycemie')||p.get('value');if(gv){const v=parseInt(gv.replace(/\D/g,''));if(v){document.getElementById('gVal').value=v;document.getElementById('det-gly').open=true;setTimeout(()=>{saveGly(true);history.replaceState({},'',location.pathname);},600);}}}
+window.addEventListener('load',()=>{
+ render();handleQuery();
+ const gInput=document.getElementById('gVal');
+ gInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveGly(false);}});
+ gInput.addEventListener('focus',()=>{document.getElementById('stickySave').classList.add('show');});
+ gInput.addEventListener('input',()=>{if(gInput.value.trim().length>0) document.getElementById('stickySave').classList.add('show');else document.getElementById('stickySave').classList.remove('show');});
+ gInput.addEventListener('blur',()=>{setTimeout(()=>{if(document.activeElement!==gInput) document.getElementById('stickySave').classList.remove('show');},300);});
+ ['gDate','tDate','mDate','aDate','slDate','sDate'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=todayStr();});
+ ['gTime','tTime'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=nowStr();});
+ setInterval(()=>renderAlerts(),10000);
+});
+function toggleRecipe(i){const el=document.getElementById('food-'+i);if(el)el.classList.toggle('open');}
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
