@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carnet Mounir fix entrée</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--acc:#0ea5e9;--text:#2d3436}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding-bottom:120px}
+header{padding:10px 16px;background:var(--card);position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+h1{font-size:17px;margin:0;display:flex;align-items:center;gap:8px}
+.btn{border:0;border-radius:12px;padding:12px 18px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer;font-size:15px}
+.btn-sm{padding:6px 10px;font-size:11px}
+.btn-ghost{background:#eee;color:#333}
+.btn-big{background:#00b894;color:#fff;font-size:18px;padding:14px 20px;width:100%;margin-top:10px;box-shadow:0 4px 12px rgba(0,184,148,.3)}
+.card{background:var(--card);margin:10px;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px;box-sizing:border-box}
+input:focus{border-color:var(--acc);outline:none;box-shadow:0 0 0 2px rgba(14,165,233,.2)}
+label{font-size:11px;font-weight:600;margin:5px 0 2px;display:block;color:#64748b}
+.item{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;background:#fff;display:flex;gap:10px;align-items:center}
+img.thumb{width:80px;height:60px;object-fit:cover;border-radius:8px;border:2px solid #0ea5e9;cursor:pointer;display:block}
+.badge{background:#eef2ff;padding:2px 8px;border-radius:20px;font-size:10px}
+canvas{width:100%!important;height:140px!important;background:#fff;border-radius:10px;border:1px solid #e5e7eb}
+details summary{cursor:pointer;font-weight:700;padding:8px 0;font-size:14px}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:14px 18px;border-radius:24px;display:none;z-index:99;font-size:14px;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.form-box{border:1px solid #e5e7eb;padding:12px;border-radius:12px;margin-top:8px;background:#fafafa}
+.preview-box{margin-top:6px;padding:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;display:none}
+.preview-box.has-photo{display:block}
+#imgModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);z-index:100;justify-content:center;align-items:center;flex-direction:column;padding:20px;box-sizing:border-box}
+#imgModal img{max-width:95%;max-height:70%;border-radius:12px}
+.user-badge{background:#e0f2fe;border:1px solid #bae6fd;color:#0369a1;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.shortcut-btn{background:linear-gradient(135deg,#6c5ce7,#0ea5e9);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.no-photo{width:80px;height:60px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#94a3b8;border:1px dashed #cbd5e1}
+#stickySave{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -4px 12px rgba(0,0,0,.1);z-index:50;display:none;border-top:1px solid #e5e7eb}
+#stickySave.show{display:block}
+</style>
+</head>
+<body>
+<header><h1>📒 Carnet <span class="user-badge">Mounir</span></h1><div class="row"><button class="btn btn-sm btn-ghost" onclick="clearAllPhotos()" style="font-size:10px">🧹 Libérer place</button><button class="btn btn-sm btn-ghost" onclick="exportData()">⬇️</button></div></header>
+<div id="toast"></div>
+<div id="imgModal" onclick="this.style.display='none'"><img id="modalImg"><div style="margin-top:10px"><button class="btn btn-sm" onclick="document.getElementById('imgModal').style.display='none'">Fermer</button> <button class="btn btn-sm" style="background:#00b894" onclick="downloadCurrentPhoto()">⬇️ Récupérer</button></div></div>
+<div id="stickySave"><button class="btn btn-big" onclick="saveGly(false)">💾 ENREGISTRER  → Tape Entrée aussi marche</button></div>
+
+<main style="max-width:720px;margin:auto;padding-bottom:20px">
+
+<div class="card"><details open id="det-gly"><summary>🩸 Glycémie <span id="g-count" class="badge">0</span> <span id="alert-ind" class="badge" style="display:none;background:#00b894;color:#fff">⏰</span></summary>
+<div style="margin:8px 0"><a href="shortcuts://run-shortcut?name=Test%20glyc%C3%A9mie%20photo" class="shortcut-btn">📸 Test glycémie photo</a> <span style="font-size:11px;color:#64748b">→ tape valeur → Entrée = enregistre</span></div>
+<div id="alert-pending"></div>
+<div id="alert-setup" style="display:none;background:#fff7e6;border:1px solid #fde68a;border-radius:10px;padding:8px;margin:8px 0;font-size:12px">Rappel 2h ?<div class="row" style="margin-top:6px"><button class="btn btn-sm" style="background:#00b894" onclick="activateAlert(120)">Oui 2h</button><button class="btn btn-sm btn-ghost" onclick="activateAlert(60)">1h</button><button class="btn btn-sm btn-ghost" onclick="document.getElementById('alert-setup').style.display='none'">Non</button></div></div>
+<canvas id="gChart"></canvas>
+<div class="form-box">
+<label>Valeur mg/dL * - tape puis touche Entrée ⏎ ou bouton vert</label><input id="gVal" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="ex: 134 puis Entrée" autocomplete="off">
+<div class="row"><div style="flex:1"><label>Moment</label><select id="gMoment"><option value="à jeun">À jeun</option><option value="avant repas">Avant repas</option><option value="après repas">2h après repas</option><option value="coucher">Coucher</option></select></div><div style="flex:1"><label>Date</label><input id="gDate" type="date"></div><div style="flex:1"><label>Heure</label><input id="gTime" type="time"></div></div>
+<label>Photo lecteur (optionnelle)</label><input id="gPhoto" type="file" accept="image/*">
+<div id="gPreview" class="preview-box"></div>
+<div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearPhoto('g')">❌ Sans photo</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('g')">🖼️ Voir / récupérer</button><label style="font-weight:400;display:flex;align-items:center;gap:4px;font-size:11px"><input type="checkbox" id="chkAlert" checked style="width:auto"> 2h</label></div>
+<label>Note</label><input id="gNote" placeholder="optionnel">
+<div class="row" style="margin-top:8px"><button class="btn btn-big" onclick="saveGly(false)">💾 ENREGISTRER GLYCÉMIE - ou touche Entrée ⏎</button><span id="gAutoMsg" style="font-size:11px;color:#00b894"></span></div>
+<div id="storage-info" style="font-size:10px;color:#94a3b8;margin-top:6px"></div>
+</div>
+<div id="gList"></div>
+</details></div>
+
+<div class="card"><details open id="det-food"><summary>🍽️ Recettes <span id="f-count" class="badge">0</span></summary><div id="fList"></div></details></div>
+
+<div class="card"><details open id="det-tens"><summary>❤️ Tension <span id="t-count" class="badge">0</span></summary>
+<div class="form-box">
+<div class="row"><div style="flex:1"><label>SYS/DIA Pouls *</label><input id="tVal" placeholder="120/80 72"></div><div style="flex:1"><label>Date</label><input id="tDate" type="date"></div><div style="flex:1"><label>Heure</label><input id="tTime" type="time"></div></div>
+<label>Photo tensiomètre</label><input id="tPhoto" type="file" accept="image/*">
+<div id="tPreview" class="preview-box"><div id="tPreviewInner">Aucune photo</div></div>
+<div class="row" style="margin-top:6px"><button class="btn btn-sm btn-ghost" onclick="clearPhoto('t')">❌</button><button class="btn btn-sm" style="background:#0ea5e9" onclick="openPhoto('t')">🖼️ Voir / récupérer</button></div>
+<label>Note</label><input id="tNote">
+<div class="row" style="margin-top:8px"><button class="btn" style="background:#0ea5e9" onclick="saveTension()">Enregistrer tension</button></div>
+</div>
+<div id="tList"></div>
+</details></div>
+
+<div class="card"><details open id="det-sport"><summary>🏃 Sport <span id="s-count" class="badge">0</span></summary><div class="form-box"><div class="row"><div style="flex:2"><label>Activité *</label><input id="sVal" placeholder="Marche 30min"></div><div style="flex:1"><label>Date</label><input id="sDate" type="date"></div><div style="flex:1"><label>Durée</label><input id="sDur" placeholder="30min"></div></div><div class="row" style="margin-top:8px"><button class="btn" onclick="saveSport()">Enregistrer</button></div></div><div id="sList"></div></details></div>
+
+</main>
+<script>
+const KEY='carnet_v12_final_MOUNIR';
+const DEFAULT_RECIPES=[
+{title:"Harira",ing:"• Tomates 500g\n• Pois chiches 200g trempés 12h\n• Lentilles 100g\n• Oignon 1\n• Céleri 1 + coriandre + persil\n• Viande 200g\n• Concentré 2cs\n• Farine 1cs + eau 100ml\n• Curcuma 1cc, gingembre 1cc, cannelle 1/2cc\n• Huile 2cs + eau 1,5L",steps:"1. Mixer tomates.\n2. Huile + viande + oignon 5min.\n3. Tomates + pois chiches + lentilles + eau + épices 40min.\n4. Farine + eau, verser filet.\n5. Herbes 10min.",meta:"60min | 6 pers",tip:"1 louche 200ml = ~20g glucides."},
+{title:"Tajine poulet citron olives",ing:"• Poulet 1kg\n• Oignons 2\n• Ail 3\n• Citrons confits 2\n• Olives 100g\n• Coriandre + persil 2cs\n• Gingembre 1cc, curcuma 1cc\n• Huile 3cs + eau 200ml",steps:"1. Huile + oignons + ail 5min.\n2. Poulet + épices 5min.\n3. Eau 200ml, couvrir 30min.\n4. Citrons + olives 30min.",meta:"1h15 | 4 pers",tip:"Ralentit pic."},
+{title:"Couscous 7 légumes",ing:"• Semoule 500g\n• Carottes 3, courgettes 2, navets 2, chou 1/4, courge 300g, tomates 2, pois chiches 200g\n• Oignon 1 + concentré 1cs\n• Ras el hanout 1cs\n• Huile 4cs + beurre 30g + eau 2L",steps:"1. Sauce: oignon + tomates + épices 5min. Légumes durs 20min. Tendres 15min.\n2. Semoule: vapeur 15min x3.\n3. Beurre final.",meta:"1h30 | 6 pers",tip:"4-5 cs max."},
+{title:"Chorba frik",ing:"• Viande 300g\n• Frik 100g\n• Pois chiches 100g\n• Tomates 400g\n• Oignon 1\n• Coriandre + menthe\n• Carvi 1cc\n• Huile 2cs + eau 1,5L",steps:"1. Huile + viande + oignon 5min.\n2. Tomates + pois chiches + frik + eau.\n3. 45min sous pression.",meta:"1h | IG bas",tip:"Frik meilleur."},
+{title:"Taktouka + Zaalouk",ing:"Poivrons 2 grillés + tomates 3 + ail 2 + cumin + paprika\nAubergine 1 + tomates 3 + ail + cumin",steps:"1. Griller poivrons/aubergine 20min.\n2. Ail + tomates + épices 10min, ajouter légumes 15min.\n3. Crue: dés + vinaigrette.",meta:"30min",tip:"À volonté."},
+{title:"Briouates amandes",ing:"• Brick 10\n• Amandes 250g\n• Sucre 50g + cannelle 1cc\n• Miel 150g",steps:"1. Mixer amandes + sucre + cannelle + beurre.\n2. Bandes 8cm, triangle.\n3. Four 180°C 12min.\n4. Miel 10sec.",meta:"45min",tip:"1 seule."},
+{title:"Loubia",ing:"• Haricots blancs 400g\n• Tomates 400g + concentré 1cs\n• Oignon 1 + ail 3\n• Cumin 1cc + paprika\n• Huile 2cs",steps:"1. Haricots 30min.\n2. Sauce: oignon + ail + tomates 10min.\n3. Haricots + eau 20min.",meta:"50min | IG bas",tip:"30g glucides lents."},
+{title:"Rfissa",ing:"• Msemen 500g\n• Poulet 1kg\n• Lentilles 200g + fenugrec 1cs\n• Oignons 500g\n• Ras el hanout 1cs\n• Huile 3cs",steps:"1. Poulet + oignons + lentilles + fenugrec + eau 1L 1h.\n2. Déchirer msemen.\n3. Arroser sauce.",meta:"1h20",tip:"Fenugrec aide."},
+{title:"Tajine kefta oeufs",ing:"• Kefta 500g\n• Tomates 500g\n• Oignon 1 + ail 2\n• Oeufs 4\n• Cumin 1cc",steps:"1. Sauce 15min.\n2. Boulettes 20g.\n3. Sauce 10min.\n4. 4 puits, 1 oeuf chaque 5min.",meta:"25min | IG bas",tip:"Protéines."},
+{title:"Seffa",ing:"• Vermicelles 500g\n• Beurre 100g\n• Sucre glace 60g + cannelle 1cs\n• Amandes 100g",steps:"1. Vapeur 20min x3.\n2. Beurre final.\n3. Dôme + sucre + cannelle.",meta:"1h",tip:"3 cs max."},
+{title:"Pastilla poulet",ing:"• Poulet 1kg + oignons 500g\n• Feuilles 10\n• Oeufs 4\n• Amandes 200g + sucre 50g + cannelle 2cc\n• Beurre 100g",steps:"1. Poulet + oignons 45min, effilocher.\n2. Compote oignons + oeufs.\n3. Amandes grillées + sucre + cannelle.\n4. Montage, four 180°C 20min.",meta:"1h30",tip:"1 part max."},
+{title:"Tanjia",ing:"• Boeuf 1kg\n• Ail 5\n• Cumin 2cc + sel + poivre\n• Citron confit 1\n• Smen 1cs + huile 2cs",steps:"1. Jarre: viande + ail + épices + citron + smen + huile + eau.\n2. Four 150°C 4h.\n3. Confite.",meta:"4h | IG 0",tip:"0 glucide."},
+{title:"Msemen",ing:"• Farine 500g + semoule 250g\n• Sel 1cc + levure 5g\n• Eau 400ml\n• Huile 100ml + beurre 50g",steps:"1. Mélanger + eau, pétrir 10min, 10 boules 15min.\n2. Étaler fin, huile/beurre + semoule, plier carré.\n3. Poêle 3-4min.",meta:"1h",tip:"1/2 complète."},
+{title:"Baghrir",ing:"• Semoule 250g + farine 75g\n• Levure 10g + chimique 1 sachet\n• Sucre 1cc + eau 500ml",steps:"1. Blender 2min mousseux.\n2. Reposer 10min.\n3. Poêle SANS huile, 1 louche, trous 30sec, 1 seul côté.",meta:"30min",tip:"1 = 15g."}
+];
+let stored=JSON.parse(localStorage.getItem(KEY)||'null');
+let data=stored?stored:{glucose:[],foods:JSON.parse(JSON.stringify(DEFAULT_RECIPES)),tension:[],meds:[],analyses:[],sommeil:[],sport:[],notes:[]};
+if(!data.tension)data.tension=[];if(!data.meds)data.meds=[];if(!data.analyses)data.analyses=[];if(!data.sommeil)data.sommeil=[];if(!data.sport)data.sport=[];if(!data.notes)data.notes=[];
+if(!data.foods||data.foods.length<5) data.foods=JSON.parse(JSON.stringify(DEFAULT_RECIPES));
+let alerts=JSON.parse(localStorage.getItem(KEY+'_alerts')||'[]');
+let photos={g:null,t:null,m:null,a:null};
+let currentModal=null;
+
+function getSize(){try{const s=localStorage.getItem(KEY);return s?Math.round(s.length/1024)+' Ko':'0';}catch(e){return '?';}}
+function saveWithFallback(){
+ try{localStorage.setItem(KEY,JSON.stringify(data));return true;}
+ catch(e){
+  // plein -> supprime vieilles photos
+  let c=0;
+  data.glucose.forEach(o=>{if(o.photo){o.photo=null;c++;}});
+  data.tension.forEach(o=>{if(o.photo){o.photo=null;c++;}});
+  try{localStorage.setItem(KEY,JSON.stringify(data));toast(`🧹 ${c} photos libérées - valeur sauvée`);return true;}
+  catch(e2){toast('❌ Stockage plein même sans photos');return false;}
+ }
+}
+function save(){const ok=saveWithFallback();render();return ok;}
+function saveAlerts(){localStorage.setItem(KEY+'_alerts',JSON.stringify(alerts));renderAlerts();}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+function todayStr(){return new Date().toISOString().slice(0,10);}function nowStr(){return new Date().toTimeString().slice(0,5);}
+['gDate','tDate','sDate'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=todayStr();});
+['gTime','tTime'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=nowStr();});
+function requestNotifyPermission(){if(!('Notification' in window)) return;Notification.requestPermission();}
+function sendNotification(t,b){if(Notification.permission==='granted'){try{new Notification(t,{body:b});}catch(e){}}}
+function compress(file,cb){
+ const r=new FileReader();
+ r.onload=e=>{
+  const img=new Image();
+  img.onload=()=>{
+   let w=img.width,h=img.height;const max=500;
+   if(w>max||h>max){const s=Math.min(max/w,max/h);w*=s;h*=s;}
+   const c=document.createElement('canvas');c.width=w;c.height=h;
+   c.getContext('2d').drawImage(img,0,0,w,h);
+   cb(c.toDataURL('image/jpeg',0.4));
+  };
+  img.onerror=()=>cb(e.target.result);
+  img.src=e.target.result;
+ };
+ r.readAsDataURL(file);
+}
+function setupPhoto(id,key,prev){
+ const inp=document.getElementById(id);
+ inp.addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  compress(f,url=>{
+   photos[key]=url;
+   const b=document.getElementById(prev);
+   if(b){b.classList.add('has-photo');b.innerHTML=`<img src="${url}" style="width:80px;height:60px;object-fit:cover;border-radius:8px"> <small>✓ ${Math.round(url.length/1024)}Ko</small>`;}
+  });
+ });
+}
+setupPhoto('gPhoto','g','gPreview');
+setupPhoto('tPhoto','t','tPreview');
+function clearPhoto(k){photos[k]=null;const b=document.getElementById(k+'Preview');if(b){b.classList.remove('has-photo');b.innerHTML=k==='t'?'<div id="tPreviewInner">Aucune</div>':'';}document.getElementById(k+'Photo').value='';}
+function showImg(s){if(!s||s.length<100)return;currentModal=s;document.getElementById('modalImg').src=s;document.getElementById('imgModal').style.display='flex';}
+function downloadCurrentPhoto(){if(!currentModal)return;const a=document.createElement('a');a.href=currentModal;a.download='photo_'+Date.now()+'.jpg';a.click();}
+function openPhoto(k){if(photos[k]&&photos[k].length>100){showImg(photos[k]);return;}let last=null;if(k==='t') last=[...data.tension].reverse().find(x=>x.photo);if(k==='g') last=[...data.glucose].reverse().find(x=>x.photo);if(last&&last.photo)showImg(last.photo);else toast('Aucune photo');}
+
+function saveGly(fromAuto){
+ const el=document.getElementById('gVal');
+ let raw=el.value.trim().replace(',','.');
+ let v=parseInt(raw);
+ if(!v||isNaN(v)){
+  toast('❌ Tape une valeur ex: 134 puis Entrée ⏎');
+  el.style.border='2px solid red';
+  el.focus();
+  setTimeout(()=>el.style.border='1px solid #ddd',2000);
+  return false;
+ }
+ const o={v:v,moment:document.getElementById('gMoment').value,date:document.getElementById('gDate').value||todayStr(),time:document.getElementById('gTime').value||nowStr(),note:document.getElementById('gNote').value,photo:photos.g,ts:Date.now()};
+ data.glucose.push(o);
+ if(save()){
+  el.value='';document.getElementById('gNote').value='';clearPhoto('g');
+  toast(`✅ ${v} ENREGISTRÉ - total ${data.glucose.length}`);
+  if(document.getElementById('chkAlert').checked && (o.moment==='avant repas'||o.moment==='à jeun')) document.getElementById('alert-setup').style.display='block';
+  document.getElementById('stickySave').classList.remove('show');
+  return true;
+ }else{
+  data.glucose.pop();
+  toast('❌ Échec - stockage plein');
+  return false;
+ }
+}
+function saveTension(){const v=document.getElementById('tVal').value.trim();if(!v){toast('Tension ?');return;}const o={v:v,date:document.getElementById('tDate').value||todayStr(),time:document.getElementById('tTime').value||nowStr(),note:document.getElementById('tNote').value,photo:photos.t,ts:Date.now()};data.tension.push(o);if(save()){document.getElementById('tVal').value='';document.getElementById('tNote').value='';clearPhoto('t');toast(`✅ Tension ${v}`);}else{data.tension.pop();}}
+function saveSport(){const v=document.getElementById('sVal').value.trim();if(!v){toast('Activité ?');return;}const o={v:v+' '+(document.getElementById('sDur').value||''),date:document.getElementById('sDate').value||todayStr(),ts:Date.now()};data.sport.push(o);if(save()){document.getElementById('sVal').value='';document.getElementById('sDur').value='';toast('Sport');}else{data.sport.pop();}}
+function clearAllPhotos(){
+ if(!confirm('Libérer place en supprimant toutes les vieilles photos ? Les valeurs restent.')) return;
+ let c=0;
+ data.glucose.forEach(o=>{if(o.photo){o.photo=null;c++;}});
+ data.tension.forEach(o=>{if(o.photo){o.photo=null;c++;}});
+ save();
+ toast(`🧹 ${c} photos supprimées - place libérée: ${getSize()}`);
+}
+function activateAlert(mins){const due=Date.now()+mins*60000;const id='al_'+Date.now();alerts.push({id:id,due:due,label:`Reprendre glycémie`,mins:mins});saveAlerts();document.getElementById('alert-setup').style.display='none';toast(`⏰ ${mins}min`);setTimeout(()=>triggerAlert(id),mins*60000);}
+function triggerAlert(id){const idx=alerts.findIndex(x=>x.id===id);if(idx===-1)return;alert('⏰ Reprendre glycémie (2h après repas)');alerts.splice(idx,1);saveAlerts();}
+function renderAlerts(){const c=document.getElementById('alert-pending');if(!c)return;if(alerts.length===0){c.innerHTML='';document.getElementById('alert-ind').style.display='none';return;}document.getElementById('alert-ind').style.display='inline-block';c.innerHTML=alerts.map(a=>{const rem=Math.max(0,Math.ceil((a.due-Date.now())/60000));return `<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:6px;margin:6px 0;font-size:11px;display:flex;justify-content:space-between"><span>⏰ ${a.label} dans ${rem}min</span><div class="row"><button class="btn btn-sm" style="background:#00b894" onclick="triggerAlert('${a.id}')">OK</button><button class="btn btn-sm btn-ghost" onclick="cancelAlert('${a.id}')">X</button></div></div>`}).join('');}
+function cancelAlert(id){alerts=alerts.filter(x=>x.id!==id);saveAlerts();}
+function exportData(){const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='carnet_MOUNIR_'+todayStr()+'.json';a.click();}
+function render(){
+ document.getElementById('g-count').textContent=data.glucose.length;
+ document.getElementById('f-count').textContent=data.foods.length;
+ document.getElementById('t-count').textContent=data.tension.length;
+ document.getElementById('s-count').textContent=(data.sport||[]).length;
+ document.getElementById('gList').innerHTML=data.glucose.slice().sort((a,b)=>b.ts-a.ts).slice(0,30).map(o=>{
+  const orig=data.glucose.findIndex(x=>x.ts===o.ts);
+  const photoHtml=o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo.replace(/'/g,'')}')">`:`<div class="no-photo">📷</div>`;
+  return `<div class="item"><div style="display:flex;gap:10px;align-items:center;width:100%">${photoHtml}<div style="flex:1"><b style="font-size:16px">${o.v} mg/dL</b> <span class="badge">${o.moment}</span><br><small style="color:#64748b">${o.date} ${o.time||''}</small>${o.photo?`<br><small style="color:#059669">✅ Photo ${Math.round(o.photo.length/1024)}Ko</small>`:''}</div><button class="btn btn-sm btn-ghost" onclick="delItem('glucose',${orig})">Suppr</button></div></div>`;
+ }).join('')||'<small style="color:#94a3b8">Aucune glycémie</small>';
+ document.getElementById('fList').innerHTML=data.foods.map((o,i)=>`<div class="item" id="food-${i}" style="display:block"><div class="item-head" onclick="toggleRecipe(${i})"><div style="flex:1"><b>${o.title}</b><br><small style="color:#64748b">${o.meta||''}</small></div><span>▼</span></div><div class="item-body"><div style="white-space:pre-wrap"><b>Ingrédients:</b><br>${o.ing||''}</div><div style="white-space:pre-wrap;margin-top:8px"><b>Étapes:</b><br>${o.steps||''}</div>${o.tip?`<div style="background:#fef3c7;border-radius:6px;padding:6px;margin-top:6px;font-size:11px">${o.tip}</div>`:''}</div></div>`).join('')||'';
+ document.getElementById('tList').innerHTML=data.tension.slice().reverse().map((o,idx)=>{
+  const realIdx=data.tension.length-1-idx;
+  const photoHtml=o.photo?`<img src="${o.photo}" class="thumb" onclick="showImg('${o.photo.replace(/'/g,'')}')">`:`<div class="no-photo">📷</div>`;
+  return `<div class="item"><div style="display:flex;gap:10px;align-items:center;width:100%">${photoHtml}<div style="flex:1"><b>${o.v}</b><br><small>${o.date} ${o.time||''}</small></div><button class="btn btn-sm btn-ghost" onclick="delItem('tension',${realIdx})">Suppr</button></div></div>`;
+ }).join('')||'<small style="color:#94a3b8">Aucune tension</small>';
+ document.getElementById('sList').innerHTML=(data.sport||[]).sort((a,b)=>b.ts-a.ts).map(o=>`<div class="item" style="display:block"><div><b>🏃 ${o.v}</b><br><small>${o.date}</small></div></div>`).join('')||'<small style="color:#94a3b8">Aucun</small>';
+ drawChart();renderAlerts();
+ document.getElementById('storage-info').textContent='Stockage: '+getSize();
+}
+function drawChart(){const c=document.getElementById('gChart');if(!c)return;const ctx=c.getContext('2d');const W=c.width=c.clientWidth*2;const H=c.height=280;ctx.clearRect(0,0,W,H);const vals=data.glucose.slice().sort((a,b)=>a.ts-b.ts).slice(-20);if(vals.length<2){ctx.fillStyle='#94a3b8';ctx.font='18px sans-serif';ctx.fillText('Courbe - ajoute 2 glycémies',20,70);return;}const min=Math.min(...vals.map(o=>o.v),70)-10,max=Math.max(...vals.map(o=>o.v),180)+10;ctx.strokeStyle='#f1f5f9';for(let y=0;y<=4;y++){const yy=20+y*(H-40)/4;ctx.beginPath();ctx.moveTo(60,yy);ctx.lineTo(W-20,yy);ctx.stroke();}ctx.strokeStyle='#0ea5e9';ctx.lineWidth=6;ctx.beginPath();vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();ctx.fillStyle='#0ea5e9';vals.forEach((o,i)=>{const x=60+i*(W-80)/(vals.length-1||1);const y=20+(1-(o.v-min)/(max-min||1))*(H-40);ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();});}
+function delItem(cat,i){if(!confirm('Supprimer ?'))return;data[cat].splice(i,1);save();}
+function handleQuery(){const p=new URLSearchParams(location.search);const gv=p.get('glycemie')||p.get('value');if(gv){const v=parseInt(gv.replace(/\D/g,''));if(v){document.getElementById('gVal').value=v;document.getElementById('det-gly').open=true;setTimeout(()=>{saveGly(true);history.replaceState({},'',location.pathname);},600);}}}
+window.addEventListener('load',()=>{
+ render();handleQuery();
+ const gInput=document.getElementById('gVal');
+ // Entrée = enregistre
+ gInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+   e.preventDefault();
+   saveGly(false);
+  }
+ });
+ // Quand on tape, montre bouton sticky
+ gInput.addEventListener('focus',()=>{document.getElementById('stickySave').classList.add('show');});
+ gInput.addEventListener('input',()=>{
+  if(gInput.value.trim().length>0) document.getElementById('stickySave').classList.add('show');
+  else document.getElementById('stickySave').classList.remove('show');
+ });
+ gInput.addEventListener('blur',()=>{setTimeout(()=>{if(document.activeElement!==gInput) document.getElementById('stickySave').classList.remove('show');},300);});
+ ['gDate','tDate','sDate'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=todayStr();});
+ ['gTime','tTime'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=nowStr();});
+ setInterval(()=>renderAlerts(),10000);
+});
+function toggleRecipe(i){const el=document.getElementById('food-'+i);if(el)el.classList.toggle('open');}
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
