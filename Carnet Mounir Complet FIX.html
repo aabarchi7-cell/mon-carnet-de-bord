@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carnet Mounir Complet FIX</title>
+<style>
+*{box-sizing:border-box;font-family:-apple-system,system-ui}
+body{margin:0;padding:10px;background:#f5f7fb;color:#222}
+h1{font-size:19px} h2{font-size:17px;margin:0 0 8px;color:#111}
+.card{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.07);border:1px solid #eee}
+input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin:6px 0;font-size:15px}
+button{border:0;border-radius:10px;padding:10px 12px;font-weight:600}
+.btn-green{background:#16a34a;color:#fff;width:100%;font-size:16px}
+.btn-blue{background:#2563eb;color:#fff;width:100%}
+.btn-small{background:#eef2ff;color:#334;padding:7px 9px;font-size:12px;margin:2px}
+.badge{padding:4px 8px;border-radius:20px;font-size:11px;display:inline-block}
+.badge-ok{background:#dcfce7;color:#166534}
+.list-item{border-bottom:1px solid #f0f0f0;padding:9px 0;display:flex;gap:8px}
+.vignette{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;background:#eee}
+.alert-box{background:#fff3cd;border:1px solid #facc15;padding:10px;border-radius:10px;margin:8px 0}
+.recipe-title{font-weight:700;cursor:pointer;padding:10px 0;border-bottom:1px solid #eee}
+.recipe-detail{background:#f9fafb;border-radius:10px;padding:10px;margin:6px 0;font-size:13px;white-space:pre-wrap;display:none}
+.recipe-detail.open{display:block}
+</style>
+</head>
+<body>
+<h1>📒 Carnet Mounir - Complet + Alerte 2h Fiable</h1>
+<div id="status" class="badge badge-ok">Stockage OK</div>
+<button id="btnNotif" class="btn-small" style="margin:6px 0">🔔 Activer alertes 2h - clique ici une fois</button>
+<div id="pendingAlerts"></div>
+<div id="msgRaccourci" style="display:none" class="alert-box"></div>
+
+<!-- 1 GLYCEMIE -->
+<div class="card">
+<h2>🩸 1 - Glycémie - avec alerte 2h automatique</h2>
+<input id="glyVal" type="number" inputmode="numeric" placeholder="Valeur mg/dL ex: 134 puis Entrée ⏎">
+<select id="glyMoment">
+<option value="à jeun">à jeun</option>
+<option value="avant repas" selected>avant repas</option>
+<option value="après repas 2h">après repas 2h</option>
+<option value="coucher">coucher</option>
+</select>
+<input id="glyPhoto" type="file" accept="image/*">
+<div id="glyPhotoPrev" style="font-size:12px"></div>
+<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input id="chkAlerte" type="checkbox" checked style="width:auto"> Alerte auto 2h si avant repas</label>
+<button id="btnSaveGly" class="btn-green">💾 ENREGISTRER GLYCÉMIE</button>
+<div id="glyList"></div>
+<canvas id="chartGly" height="100" style="width:100%;background:#fafafa;border-radius:8px;margin-top:8px"></canvas>
+</div>
+
+<!-- 2 TENSION -->
+<div class="card">
+<h2>❤️ 2 - Tension - photo récupérable</h2>
+<input id="tenVal" placeholder="Ex: 120/80 72">
+<input id="tenNote" placeholder="Note ex: repos bras gauche">
+<input id="tenPhoto" type="file" accept="image/*">
+<div id="tenPhotoPrev" style="font-size:12px"></div>
+<button id="btnSaveTen" class="btn-blue">💾 Enregistrer tension</button>
+<div id="tenList"></div>
+</div>
+
+<!-- 3 MEDOCS -->
+<div class="card">
+<h2>💊 3 - Médicaments - photo ordonnance</h2>
+<input id="medNom" placeholder="Nom ex: Metformine">
+<input id="medDose" placeholder="Dose ex: 1cp matin">
+<input id="medPhoto" type="file" accept="image/*">
+<div id="medPhotoPrev" style="font-size:12px"></div>
+<button id="btnSaveMed" class="btn-blue">💾 Enregistrer médicament</button>
+<div id="medList"></div>
+</div>
+
+<!-- 4 ANALYSES -->
+<div class="card">
+<h2>🧪 4 - Analyses - photo labo</h2>
+<input id="anaType" placeholder="Ex: HbA1c, LDL cholestérol">
+<input id="anaRes" placeholder="Ex: 6.2% ou 1.10 g/L">
+<input id="anaPhoto" type="file" accept="image/*">
+<div id="anaPhotoPrev" style="font-size:12px"></div>
+<button id="btnSaveAna" class="btn-blue">💾 Enregistrer analyse</button>
+<div id="anaList"></div>
+</div>
+
+<!-- 5 SOMMEIL -->
+<div class="card">
+<h2>😴 5 - Sommeil HUAWEI Fit 4</h2>
+<input id="somDate" type="date">
+<input id="somTotal" placeholder="Total ex: 7h13">
+<textarea id="somDetail" rows="4" placeholder="Sommeil 1: 01:22→04:22 (3h49) Éveil 11min Paradoxal 41min Lent 2h44 Profond 24min..."></textarea>
+<input id="somQual" placeholder="Qualité ex: Bonne - reposée">
+<button id="btnSaveSom" class="btn-blue">💾 Enregistrer nuit</button>
+<div id="somList"></div>
+</div>
+
+<!-- 6 SPORT -->
+<div class="card">
+<h2>🏃 6 - Sport</h2>
+<input id="sportType" placeholder="Ex: Marche 30min Marrakech">
+<input id="sportDate" type="datetime-local">
+<button id="btnSaveSport" class="btn-blue">💾 Enregistrer sport</button>
+<div id="sportList"></div>
+</div>
+
+<!-- 7 RECETTES -->
+<div class="card">
+<h2>🍽️ 7 - Recettes IG bas - tes 14 originales (pas d'intrus)</h2>
+<div id="recettesList"></div>
+</div>
+
+<!-- 8 NOTES -->
+<div class="card">
+<h2>📝 8 - Notes</h2>
+<textarea id="noteText" rows="3" placeholder="Note..."></textarea>
+<button id="btnSaveNote" class="btn-blue">💾 Enregistrer note</button>
+<div id="noteList"></div>
+</div>
+
+<script>
+const RECETTES=[
+{title:"🍞 Pain aux amandes, lin, orge et psyllium — TM7 - 12 pains - TON PAIN RÉGIME",meta:"IG 25 • 0 cholestérol • anti-LDL",ing:"200g amandes\n100g graines de lin\n80g farine d'orge complète\n30g psyllium blond\n7g levure boulangère sèche\n1 c.c sel\n350-380g eau tiède\n2 c.c huile olive facultatif",steps:"1. Moudre amandes 10s/v8 réserver\n2. Moudre lin 10s/v8 + amandes + orge + psyllium + sel 10s/v4\n3. Levure +100g eau tiède 5min\n4. Ajouter levure+eau + reste eau + huile 30s/v4 puis 2min pétrin - pâte épaisse humide malléable\n5. Repos 30-45min psyllium gonfle\n6. Former 12 petits pains plats 2-3cm\n7. 25min 180°C puis 30-40min 140-150°C",tip:"💚 Ton pain régime du matin avec ricotta 0% - 1 pain = ~8g glucides lents + 4g fibres qui baissent LDL"},
+{title:"🍞 Pain cholestérol + glycémie - 6 petits pains",meta:"IG très bas",ing:"100g amandes moulues\n50g lin\n40g orge\n15g psyllium\n3.5g levure\n180-200g eau\n1 c.c huile",steps:"Même méthode, 6 pains",tip:"💚"},
+{title:"🥖 Pain de voyage — version sèche - 8 pains",meta:"Conservation",ing:"100g amandes 80g lin 100g farine orge 20g psyllium 1c.c sel 1c.c levure 220-240g eau",steps:"Pâte plus ferme, 8 pains 60-70g aplatis, lever 45-60min, 180°C 25min + 120°C 45-60min + four éteint porte entrouverte 20-30min. Refroidir complet avant emballage papier cuisson.",tip:"💚"},
+{title:"🇲🇦 Kefta grillée & légumes grillés",meta:"390kcal",ing:"300g kefta 5% 1 oignon herbes cumin paprika 1 courgette 1 poivron",steps:"Griller",tip:"💚"},
+{title:"🍖 Pain de viande vapeur & sauce tomate TM7",meta:"5% MG",ing:"250g viande 5% courgette oignon 1c.c huile",steps:"Varoma",tip:"💚"},
+{title:"🍲 Soupe protéinée poulet lentilles corail IG 25",meta:"IG 25 anti-LDL",ing:"100g poulet 80g lentilles corail courgette chou-fleur",steps:"25min mijotage",tip:"💚 Lentilles fibres anti-LDL"},
+{title:"🍗 Poulet tajine léger Varoma congelé",meta:"Sans peau",ing:"400g poulet sans peau",steps:"Varoma 35min",tip:"💚"},
+{title:"🍲 Couscous d'orge très léger 120g pour 3 pers",meta:"IG 25",ing:"120g orge 7 légumes 100g pois chiches",steps:"Orge 3 fois vapeur",tip:"💚"},
+{title:"🥩 Boulettes viande maigre sauce légère",meta:"Varoma",ing:"250g viande 5%",steps:"Varoma",tip:"💚"},
+{title:"🥘 Tajine de légumes TM7 0 cholestérol",meta:"IG 28",ing:"courgette aubergine carotte tomate poivron pois chiches 1c.c huile",steps:"Oignon ail 5s/v5 huile 3min tomate épices 5min légumes eau 20min + pois chiches 5min",tip:"💚"},
+{title:"🐟 Poisson sauce légère Varoma",meta:"IG 0 oméga3",ing:"300g poisson blanc courgette carotte",steps:"Sauce 12min mixer poisson Varoma 15-18min citron",tip:"💚"},
+{title:"🍲 Harira très modérée glucides sans farine",meta:"8g/bowl",ing:"250g tomates 100g courgette 80g chou-fleur 30g lentilles 20g pois chiches 700g eau",steps:"Sans farine vermicelles riz, épaissir avec louche mixée",tip:"💚"},
+{title:"🍞 Pain amandes & lin low carb 4 œufs yaourt",meta:"IG 15",ing:"200g amandes 80g lin 20g psyllium 10g levure chimique 4 œufs 120g yaourt 60-80g eau",steps:"Moudre, mélanger, 180°C 25-30min",tip:"💚"},
+{title:"🥕 Soupe de légumes TM7 sans crème",meta:"0 cholestérol",ing:"1 courgette 2 carottes 1 poireau 1 oignon 10g huile 750g eau",steps:"25min 100°C mixer v9-10",tip:"💚"}
+];
+
+const K={gly:"carnet_mounir_gly_v3", ten:"carnet_mounir_ten_v3", med:"carnet_mounir_med_v3", ana:"carnet_mounir_ana_v3", som:"carnet_mounir_som_v3", sport:"carnet_mounir_sport_v3", note:"carnet_mounir_note_v3", alert:"carnet_mounir_alerts_v3"};
+let S={gly:JSON.parse(localStorage.getItem(K.gly)||"[]"), ten:JSON.parse(localStorage.getItem(K.ten)||"[]"), med:JSON.parse(localStorage.getItem(K.med)||"[]"), ana:JSON.parse(localStorage.getItem(K.ana)||"[]"), som:JSON.parse(localStorage.getItem(K.som)||"[]"), sport:JSON.parse(localStorage.getItem(K.sport)||"[]"), note:JSON.parse(localStorage.getItem(K.note)||"[]"), alert:JSON.parse(localStorage.getItem(K.alert)||"[]")};
+let cur={gly:null, ten:null, med:null, ana:null};
+
+function saveAll(){ Object.keys(K).forEach(k=>localStorage.setItem(K[k], JSON.stringify(S[k]))); renderAll(); }
+function compress(file, cb){ const img=new Image(); img.src=URL.createObjectURL(file); img.onload=()=>{ const c=document.createElement('canvas'); const max=400; let w=img.width,h=img.height; if(w>max||h>max){ if(w>h){h=h*max/w; w=max;} else{w=w*max/h; h=max;} } c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',0.4)); }; }
+function bindPhoto(inputId, prevId, key){ document.getElementById(inputId).addEventListener('change', e=>{ const f=e.target.files[0]; if(!f) return; document.getElementById(prevId).textContent='Compression...'; compress(f, b64=>{ cur[key]=b64; document.getElementById(prevId).innerHTML=`✓ ${Math.round(b64.length/1024)}Ko <img src="${b64}" style="width:36px;height:36px;border-radius:4px;vertical-align:middle">`; }); }); }
+bindPhoto('glyPhoto','glyPhotoPrev','gly'); bindPhoto('tenPhoto','tenPhotoPrev','ten'); bindPhoto('medPhoto','medPhotoPrev','med'); bindPhoto('anaPhoto','anaPhotoPrev','ana');
+
+function renderGly(){ const c=document.getElementById('glyList'); c.innerHTML=''; [...S.gly].reverse().slice(0,30).forEach((g,i)=>{ const real=S.gly.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${g.photo?`<img src="${g.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${g.val} mg/dL</b> ${g.moment}<br><small>${new Date(g.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('gly',${real})">🗑️</button>`; c.appendChild(div); }); const canvas=document.getElementById('chartGly'); if(canvas && S.gly.length>1){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); const vals=S.gly.slice(-20).map(x=>x.val); const min=Math.min(...vals)-10, max=Math.max(...vals)+10; ctx.beginPath(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2; vals.forEach((v,i)=>{ const x=i/(vals.length-1)*canvas.width; const y=canvas.height - (v-min)/(max-min)*canvas.height; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke(); } }
+function renderTen(){ const c=document.getElementById('tenList'); c.innerHTML=''; [...S.ten].reverse().slice(0,20).forEach((t,i)=>{ const real=S.ten.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${t.photo?`<img src="${t.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${t.val}</b> ${t.note||''}<br><small>${new Date(t.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('ten',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderMed(){ const c=document.getElementById('medList'); c.innerHTML=''; [...S.med].reverse().slice(0,20).forEach((m,i)=>{ const real=S.med.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${m.photo?`<img src="${m.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${m.nom}</b> ${m.dose}<br><small>${new Date(m.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('med',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderAna(){ const c=document.getElementById('anaList'); c.innerHTML=''; [...S.ana].reverse().slice(0,20).forEach((a,i)=>{ const real=S.ana.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${a.photo?`<img src="${a.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${a.type}</b> ${a.res}<br><small>${new Date(a.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('ana',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderSom(){ const c=document.getElementById('somList'); c.innerHTML=''; [...S.som].reverse().slice(0,20).forEach((s,i)=>{ const real=S.som.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`<div style="flex:1"><b>${s.date||''} ${s.total||''}</b><br><small style="white-space:pre-wrap">${s.detail||''} ${s.qual||''}</small></div><button class="btn-small" onclick="del('som',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderSport(){ const c=document.getElementById('sportList'); c.innerHTML=''; [...S.sport].reverse().slice(0,20).forEach((s,i)=>{ const real=S.sport.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`<div style="flex:1"><b>${s.type}</b> ${s.date||''}<br><small>${new Date(s.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('sport',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderNote(){ const c=document.getElementById('noteList'); c.innerHTML=''; [...S.note].reverse().slice(0,30).forEach((n,i)=>{ const real=S.note.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`<div style="flex:1">${n.text}<br><small>${new Date(n.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('note',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderRec(){ const c=document.getElementById('recettesList'); c.innerHTML=''; RECETTES.forEach((r,i)=>{ const d=document.createElement('div'); d.innerHTML=`<div class="recipe-title" onclick="this.nextElementSibling.classList.toggle('open')">▼ ${r.title} <span style="color:#666;font-weight:400;font-size:11px">${r.meta}</span></div><div class="recipe-detail"><b>Ingrédients:</b>\n${r.ing}\n\n<b>Étapes:</b>\n${r.steps}\n\n${r.tip}</div>`; c.appendChild(d); }); }
+function renderAlerts(){ const c=document.getElementById('pendingAlerts'); c.innerHTML=''; const pend=S.alert.filter(a=>!a.done); if(!pend.length){c.innerHTML='<span class="badge badge-ok">Aucune alerte en attente - enregistre avant repas pour programmer 2h</span>'; return;} pend.forEach(a=>{ const diff=a.time-Date.now(); const mins=Math.max(0,Math.round(diff/60000)); const over=diff<=0; const div=document.createElement('div'); div.className='alert-box'; div.style.borderColor=over?'#ef4444':'#facc15'; div.innerHTML=`${over?'🔴 <b>EN RETARD - reprends ta glycémie maintenant !</b>':'⏰ Dans '+mins+' min - avant repas de '+new Date(a.from).toLocaleTimeString()}<br><button class="btn-small" onclick="doneA('${a.id}')">✅ Fait</button> <button class="btn-small" onclick="cancelA('${a.id}')">Annuler</button>`; c.appendChild(div); }); }
+window.doneA=(id)=>{ S.alert=S.alert.map(a=>a.id===id?{...a,done:true}:a); saveAll(); };
+window.cancelA=(id)=>{ S.alert=S.alert.filter(a=>a.id!==id); saveAll(); };
+window.del=(type, idx)=>{ if(!confirm('Supprimer ?')) return; S[type].splice(idx,1); saveAll(); };
+
+function renderAll(){ renderGly(); renderTen(); renderMed(); renderAna(); renderSom(); renderSport(); renderNote(); renderRec(); renderAlerts(); }
+
+document.getElementById('btnSaveGly').onclick=()=>{
+ const v=parseInt(document.getElementById('glyVal').value); if(!v) return alert('Valeur ?');
+ const m=document.getElementById('glyMoment').value;
+ const e={val:v, moment:m, ts:Date.now(), photo:cur.gly};
+ S.gly.push(e);
+ if(m.includes('avant') && document.getElementById('chkAlerte').checked){
+  const id='a_'+Date.now(); S.alert.push({id, from:e.ts, time:Date.now()+2*3600000, done:false, notified:false});
+  if(Notification && Notification.permission==='granted'){ setTimeout(()=>{ if(S.alert.find(x=>x.id===id && !x.done)){ try{ new Notification('⏰ Glycémie 2h', {body:'Il est temps !'});}catch{} } }, 7200000); }
+ }
+ cur.gly=null; document.getElementById('glyVal').value=''; document.getElementById('glyPhotoPrev').innerHTML='';
+ saveAll();
+ document.getElementById('msgRaccourci').style.display='block';
+ document.getElementById('msgRaccourci').innerHTML=`✅ ${v} enregistré ${m} ${m.includes('avant')?'⏰ Alerte 2h programmée':''}`;
+};
+document.getElementById('glyVal').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('btnSaveGly').click(); });
+document.getElementById('btnSaveTen').onclick=()=>{ const v=document.getElementById('tenVal').value; if(!v) return alert('Valeur ?'); S.ten.push({val:v, note:document.getElementById('tenNote').value, photo:cur.ten, ts:Date.now()}); cur.ten=null; document.getElementById('tenVal').value=''; document.getElementById('tenNote').value=''; saveAll(); };
+document.getElementById('btnSaveMed').onclick=()=>{ const n=document.getElementById('medNom').value; if(!n) return alert('Nom ?'); S.med.push({nom:n, dose:document.getElementById('medDose').value, photo:cur.med, ts:Date.now()}); cur.med=null; document.getElementById('medNom').value=''; document.getElementById('medDose').value=''; saveAll(); };
+document.getElementById('btnSaveAna').onclick=()=>{ const t=document.getElementById('anaType').value; if(!t) return alert('Type ?'); S.ana.push({type:t, res:document.getElementById('anaRes').value, photo:cur.ana, ts:Date.now()}); cur.ana=null; saveAll(); };
+document.getElementById('btnSaveSom').onclick=()=>{ S.som.push({date:document.getElementById('somDate').value, total:document.getElementById('somTotal').value, detail:document.getElementById('somDetail').value, qual:document.getElementById('somQual').value, ts:Date.now()}); saveAll(); };
+document.getElementById('btnSaveSport').onclick=()=>{ const t=document.getElementById('sportType').value; if(!t) return alert('Type ?'); S.sport.push({type:t, date:document.getElementById('sportDate').value, ts:Date.now()}); saveAll(); };
+document.getElementById('btnSaveNote').onclick=()=>{ const t=document.getElementById('noteText').value; if(!t) return; S.note.push({text:t, ts:Date.now()}); document.getElementById('noteText').value=''; saveAll(); };
+
+document.getElementById('btnNotif').onclick=async()=>{
+ if(!('Notification' in window)) return alert('Non supporté');
+ const p=await Notification.requestPermission();
+ if(p==='granted'){ document.getElementById('btnNotif').textContent='✅ Alertes activées'; }
+};
+
+setInterval(()=>{
+ let ch=false;
+ S.alert.forEach(a=>{ if(!a.done && !a.notified && Date.now()>=a.time){ a.notified=true; ch=true; try{ if(Notification && Notification.permission==='granted') new Notification('⏰ Glycémie 2h', {body:'2h écoulées - reprends !'});}catch{} try{ navigator.vibrate([300,100,300]); }catch{} } });
+ if(ch) saveAll(); else renderAlerts();
+},30000);
+
+(function(){ const p=new URLSearchParams(location.search); const g=p.get('glycemie'); if(g){ document.getElementById('glyVal').value=g; document.getElementById('msgRaccourci').style.display='block'; document.getElementById('msgRaccourci').innerHTML=`📸 Valeur détectée depuis photo: <b>${g}</b> - vérifie Moment puis ENREGISTRER`; document.getElementById('glyVal').style.border='3px solid #16a34a'; }})();
+
+renderAll();
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
