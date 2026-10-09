@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carnet Mounir Complet - FIX FINAL</title>
+<style>
+*{box-sizing:border-box;font-family:-apple-system,system-ui}
+body{margin:0;padding:10px;background:#f5f7fb;color:#222}
+h1{font-size:18px} h2{font-size:16px;margin:0 0 8px}
+.card{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #e5e7eb}
+input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin:6px 0;font-size:15px}
+button{border:0;border-radius:10px;padding:10px 12px;font-weight:600}
+.btn-green{background:#16a34a;color:#fff;width:100%;font-size:16px}
+.btn-blue{background:#2563eb;color:#fff;width:100%}
+.btn-small{background:#eef2ff;color:#334;padding:7px 9px;font-size:12px;margin:2px}
+.badge{padding:5px 10px;border-radius:20px;font-size:11px;display:inline-block}
+.badge-ok{background:#dcfce7;color:#166534}
+.list-item{border-bottom:1px solid #f0f0f0;padding:9px 0;display:flex;gap:8px}
+.vignette{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ddd;background:#f3f4f6}
+.alert-box{padding:10px;border-radius:10px;margin:8px 0;font-size:13px}
+.alert-yellow{background:#fef9c3;border:1px solid #facc15}
+.alert-green{background:#dcfce7;border:1px solid #16a34a}
+.alert-red{background:#fee2e2;border:1px solid #ef4444}
+.recipe-title{font-weight:700;cursor:pointer;padding:12px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between}
+.recipe-detail{background:#f9fafb;border-radius:10px;padding:12px;margin:6px 0;font-size:13px;white-space:pre-wrap;display:none;line-height:1.5}
+.recipe-detail.open{display:block}
+</style>
+</head>
+<body>
+<h1>📒 Carnet Mounir - Complet FIX FINAL + Alerte 2h</h1>
+<div class="alert-box alert-green">
+✅ <b>FIX :</b> Alerte 2h interne marche sans notification. Même si iPhone dit "Non supporté", tu auras le bandeau rouge. Pour vraie notif iPhone, ajoute à l'écran d'accueil (Partager > Sur l'écran d'accueil) iOS 16.4+.
+</div>
+<div id="pendingAlerts"></div>
+<div id="msgRaccourci" style="display:none" class="alert-box alert-yellow"></div>
+
+<!-- GLYCEMIE -->
+<div class="card">
+<h2>🩸 1 - Glycémie - alerte 2h automatique (fiable sans notif)</h2>
+<input id="glyVal" type="number" inputmode="numeric" placeholder="Valeur mg/dL ex: 134 puis Entrée ⏎">
+<select id="glyMoment">
+<option value="à jeun">à jeun</option>
+<option value="avant repas" selected>avant repas</option>
+<option value="après repas 2h">après repas 2h</option>
+<option value="coucher">coucher</option>
+</select>
+<input id="glyPhoto" type="file" accept="image/*">
+<div id="glyPhotoPrev" style="font-size:12px"></div>
+<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0"><input id="chkAlerte" type="checkbox" checked style="width:auto"> Programmer auto alerte 2h si avant repas (marche même sans cliquer Activer)</label>
+<button id="btnSaveGly" class="btn-green">💾 ENREGISTRER GLYCÉMIE</button>
+<button id="btnNotif" class="btn-small" style="width:100%;margin-top:8px">🔔 Essayer d'activer les notifications système (optionnel)</button>
+<div id="notifInfo" style="font-size:11px;color:#666;margin-top:4px"></div>
+<div id="glyList"></div>
+<canvas id="chartGly" height="100" style="width:100%;background:#fafafa;border-radius:8px;margin-top:8px"></canvas>
+</div>
+
+<!-- TENSION -->
+<div class="card">
+<h2>❤️ 2 - Tension</h2>
+<input id="tenVal" placeholder="Ex: 120/80 72">
+<input id="tenNote" placeholder="Note">
+<input id="tenPhoto" type="file" accept="image/*">
+<div id="tenPhotoPrev" style="font-size:12px"></div>
+<button id="btnSaveTen" class="btn-blue">💾 Enregistrer tension</button>
+<div id="tenList"></div>
+</div>
+
+<!-- MEDOCS -->
+<div class="card">
+<h2>💊 3 - Médicaments</h2>
+<input id="medNom" placeholder="Nom">
+<input id="medDose" placeholder="Dose">
+<input id="medPhoto" type="file" accept="image/*">
+<div id="medPhotoPrev" style="font-size:12px"></div>
+<button id="btnSaveMed" class="btn-blue">💾 Enregistrer médicament</button>
+<div id="medList"></div>
+</div>
+
+<!-- ANALYSES -->
+<div class="card">
+<h2>🧪 4 - Analyses</h2>
+<input id="anaType" placeholder="Type ex: HbA1c, LDL">
+<input id="anaRes" placeholder="Résultat">
+<input id="anaPhoto" type="file" accept="image/*">
+<div id="anaPhotoPrev" style="font-size:12px"></div>
+<button id="btnSaveAna" class="btn-blue">💾 Enregistrer analyse</button>
+<div id="anaList"></div>
+</div>
+
+<!-- SOMMEIL -->
+<div class="card">
+<h2>😴 5 - Sommeil HUAWEI</h2>
+<input id="somDate" type="date">
+<input id="somTotal" placeholder="Total ex: 7h13">
+<textarea id="somDetail" rows="4" placeholder="Détail nuits..."></textarea>
+<input id="somQual" placeholder="Qualité">
+<button id="btnSaveSom" class="btn-blue">💾 Enregistrer nuit</button>
+<div id="somList"></div>
+</div>
+
+<!-- SPORT -->
+<div class="card">
+<h2>🏃 6 - Sport</h2>
+<input id="sportType" placeholder="Ex: Marche 30min">
+<input id="sportDate" type="datetime-local">
+<button id="btnSaveSport" class="btn-blue">💾 Enregistrer sport</button>
+<div id="sportList"></div>
+</div>
+
+<!-- RECETTES DETAILLEES -->
+<div class="card">
+<h2>🍽️ 7 - Recettes IG bas - 14 originales avec températures et étapes TM7 complètes</h2>
+<div style="font-size:12px;color:#666;margin-bottom:8px">Tape sur le titre pour voir ingrédients + étapes détaillées avec températures TM7. Plus d'intrus.</div>
+<div id="recettesList"></div>
+</div>
+
+<!-- NOTES -->
+<div class="card">
+<h2>📝 8 - Notes</h2>
+<textarea id="noteText" rows="3"></textarea>
+<button id="btnSaveNote" class="btn-blue">💾 Enregistrer note</button>
+<div id="noteList"></div>
+</div>
+
+<script>
+const RECETTES=[
+{
+title:"🍞 Pain aux amandes, lin, orge et psyllium — TM7 - 12 petits pains - TON PAIN RÉGIME",
+meta:"IG 25 • 0 cholestérol • anti-LDL",
+ing:"* 200 g d'amandes\n* 100 g de graines de lin\n* 80 g de farine d'orge complète\n* 30 g de psyllium blond\n* 7 g de levure boulangère sèche\n* 1 c. à café de sel\n* 350 à 380 g d'eau tiède\n* 2 c. à café d'huile d'olive - facultatif",
+steps:"1. Moudre les amandes\nMettre les amandes dans le bol. 10 sec / vitesse 8. Réserver.\n\n2. Moudre le lin\nMettre les graines de lin dans le bol. 10 sec / vitesse 8.\nAjouter les amandes moulues, la farine d'orge, le psyllium et le sel. 10 sec / vitesse 4.\n\n3. Préparer la levure\nDans un petit récipient, mélanger les 7 g de levure sèche avec environ 100 g d'eau tiède prélevée sur les 350-380 g. Laisser reposer 5 minutes.\n\n4. Pétrir\nAjouter le mélange levure-eau dans le bol, puis le reste de l'eau progressivement. Ajouter l'huile d'olive si vous en utilisez. 30 sec / vitesse 4, puis 2 min / mode Pétrin. La pâte doit être épaisse, humide et malléable, mais ne doit pas couler.\n\n5. Repos\nLaisser la pâte reposer dans le bol 30 à 45 minutes. Le psyllium va continuer à absorber l'eau et la pâte va légèrement gonfler.\n\n6. Former les pains\nDiviser en 12 petits pains. Les former assez plats, environ 2-3 cm d'épaisseur. Cela facilitera le séchage et la conservation.\n\n7. Cuisson\nPréchauffer le four à 180 °C. Cuire 25 minutes à 180 °C. Puis réduire à 140-150 °C et poursuivre 30 à 40 minutes pour obtenir des pains bien secs.",
+tip:"💚 Astuce diabète & cholestérol: 1 petit pain = ~8g glucides lents + 4g fibres qui baissent le mauvais cholestérol. 0 farine blanche, 0 beurre."
+},
+{
+title:"🥖 Pain de voyage — version sèche - 8 petits pains - conservation",
+meta:"IG très bas • voyage",
+ing:"Pour environ 8 petits pains:\n* 100 g d'amandes\n* 80 g de graines de lin\n* 100 g de farine d'orge\n* 20 g de psyllium\n* 1 c. à café de sel\n* 1 c. à café de levure boulangère sèche\n* environ 220-240 g d'eau\n* 1 c. à soupe d'huile d'olive facultative",
+steps:"Préparation au TM7:\n1. Amandes + lin: mixer jusqu'à obtenir une mouture assez fine.\n2. Ajouter farine d'orge, psyllium, sel et levure. Mélanger quelques secondes.\n3. Ajouter 220 g d'eau et pétrir. Attendre 5-10 minutes: le psyllium va absorber l'eau.\n4. Si la pâte est vraiment trop ferme, ajouter progressivement les 20 g d'eau restants. Pour le pain de voyage, il vaut mieux une pâte légèrement plus ferme.\n5. Former 8 petits pains de 60-70 g environ, plutôt aplatis que hauts.\n6. Laisser lever environ 45-60 min.\n\n🔥 Cuisson spéciale « voyage »:\n1. Cuisson: Four préchauffé à 180 °C - Environ 25 minutes\n2. Dessiccation: Baisser à 120 °C - Prolonger 45 à 60 minutes - Puis éteindre le four et laisser les pains 20-30 minutes porte entrouverte. Ils doivent être nettement plus secs et fermes qu'un pain normal.\n\n✈️ Pour les transporter: Une fois complètement refroidis, laissez-les encore quelques heures à température ambiante avant de les emballer. Ils ne doivent absolument pas être tièdes au moment de l'emballage. Emballer individuellement dans du papier cuisson.",
+tip:"💚 Très sec, ne moisit pas, IG très bas."
+},
+{
+title:"🥘 Tajine de légumes TM7 - 0 cholestérol",
+meta:"IG 28 • 40 min",
+ing:"1 courgette\n1 petite aubergine\n1 carotte\n1 tomate\n½ poivron\n1 petit oignon\n1 petite gousse d'ail\n100 g de pois chiches cuits, facultatif\n1 c. à café d'huile d'olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\n½ c. à café de cumin\npoivre\nun peu de sel, facultatif\n250 g d'eau\ncoriandre ou persil",
+steps:"1. Mettre l'oignon et l'ail dans le bol: 5 sec / vitesse 5.\n2. Ajouter l'huile d'olive: 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, le paprika, le curcuma, le cumin et le poivre: 5 min / 100 °C / vitesse 1.\n4. Ajouter la carotte, la courgette, l'aubergine, le poivron et 250 g d'eau.\n5. Cuire: 20 min / 100 °C / sens inverse / vitesse mijotage.\n6. Ajouter les pois chiches cuits si vous en mettez.\n7. Poursuivre: 5 min / 100 °C / sens inverse / vitesse mijotage.\n8. Ajouter coriandre ou persil en fin de cuisson et mélanger doucement.",
+tip:"💚 0 cholestérol, fibres qui baissent LDL, à volonté."
+},
+{
+title:"🐟 Poisson TM7 en sauce légère - oméga 3 anti-cholestérol",
+meta:"IG 0 • 35 min",
+ing:"300 à 350 g de poisson blanc (merlan, cabillaud, colin ou lotte)\n1 petite courgette\n1 petite carotte\n1 tomate\n½ poivron\n1 petit oignon\n1 petite gousse d'ail\n1 c. à café d'huile d'olive\n½ c. à café de curcuma\n½ c. à café de paprika doux\nun peu de cumin, facultatif\npoivre\njus de ½ citron\n300 g d'eau",
+steps:"1. Mettre l'oignon et l'ail dans le bol: 5 sec / vitesse 5.\n2. Ajouter l'huile d'olive: 3 min / 120 °C / vitesse 1.\n3. Ajouter la tomate, la courgette, la carotte et le poivron: 5 sec / vitesse 4.\n4. Ajouter 300 g d'eau, le curcuma, le paprika, le cumin et le poivre.\n5. Cuire la sauce: 12 min / 100 °C / vitesse 1.\n6. Mixer la sauce: 20 sec / vitesse 7 pour la rendre légère et homogène.\n7. Mettre le poisson dans le Varoma avec le jus de citron.\n8. Cuire: 15 à 18 min / Varoma / vitesse 1.\n9. Servir le poisson nappé de la sauce légère.",
+tip:"💚 Poisson blanc très pauvre en mauvais cholestérol, oméga 3."
+},
+{
+title:"🍲 Harira très modérée en glucides - sans farine, sans vermicelles, sans riz",
+meta:"IG bas • 8g/bowl vs 30g classique",
+ing:"* 250 g de tomates\n* 100 g de courgette\n* 80 g de chou-fleur\n* 1 petit oignon\n* 1 branche de céleri avec feuilles\n* coriandre et persil\n* 80 à 100 g de viande maigre en petits morceaux, facultatif\n* 30 g de lentilles sèches\n* 20 g de pois chiches cuits, facultatif\n* 1 c. à café d'huile d'olive\n* 1 c. à café de curcuma\n* ½ c. à café de gingembre\n* poivre\n* un peu de cannelle, facultatif\n* sel modéré\n* environ 700 g d'eau\n* pas de farine, pas de vermicelles, pas de riz",
+steps:"1. Mettre l'oignon, le céleri, le persil et la coriandre dans le bol: 5 sec / vitesse 5.\n2. Ajouter l'huile d'olive: 3 min / 120 °C / vitesse 1.\n3. Ajouter les tomates, la courgette et le chou-fleur: 8 sec / vitesse 5.\n4. Ajouter les lentilles, les pois chiches, la viande si utilisée, les épices et 700 g d'eau.\n5. Cuire: 30 min / 100 °C / sens inverse / vitesse mijotage.\n6. À la fin, prélever environ 1 louche de légumes et de bouillon, mixer 20 sec / vitesse 7, puis remettre dans la soupe pour l'épaissir naturellement.\n7. Mélanger 20 sec / sens inverse / vitesse 2.\n8. Goûter et ajuster légèrement le sel et les épices.",
+tip:"💚 Sans farine = IG très bas, fibres qui baissent LDL."
+},
+{
+title:"🍞 Pain amandes & lin low carb - 4 œufs yaourt",
+meta:"IG 15 • low carb",
+ing:"200 g d'amandes entières à moudre\n80 g de graines de lin à moudre\n20 g de psyllium\n10 g de levure chimique\n4 œufs\n120 g de yaourt nature ou skyr\n60 à 80 g d'eau seulement, à ajouter progressivement\n1 c. à soupe d'huile d'olive\n½ c. à café de sel",
+steps:"1. Mettre les amandes dans le bol: 10 sec / vitesse 10. Réserver.\n2. Mettre les graines de lin: 10 sec / vitesse 10.\n3. Ajouter les amandes moulues, le psyllium, la levure chimique et le sel: 10 sec / vitesse 4.\n4. Ajouter les œufs, le yaourt et l'huile d'olive: 20 sec / vitesse 4.\n5. Ajouter 60 g d'eau puis mélanger 20 sec / vitesse 4.\n6. Laisser reposer la pâte 5 à 10 min pour que le psyllium absorbe l'humidité.\n7. Si elle est trop sèche, ajouter l'eau restante petit à petit. La pâte doit rester souple mais assez ferme pour être façonnée.\n8. Former de petits pains aplatis avec les mains légèrement humides.\n9. Les déposer sur une plaque avec papier cuisson.\n10. Cuire au four préchauffé à 180 °C pendant environ 25 à 30 min, jusqu'à ce qu'ils soient bien pris.",
+tip:"💚 0 farine, IG 15."
+},
+{
+title:"🥕 Soupe de légumes TM7 - velouté sans crème",
+meta:"IG très bas • 35 min",
+ing:"1 courgette\n2 carottes\n1 poireau\n1 oignon\n10 g d'huile d'olive\n750 g d'eau\npoivre\ncurcuma\nbouillon réduit en sel, facultatif",
+steps:"1. Mettre l'oignon dans le bol: 5 sec / vitesse 5.\n2. Ajouter l'huile d'olive: 3 min / 120 °C / vitesse 1.\n3. Ajouter la courgette, les carottes, le poireau, l'eau, le poivre et le curcuma.\n4. Cuire: 25 min / 100 °C / vitesse 1.\n5. Mixer progressivement: 1 min, en montant jusqu'à vitesse 9-10.",
+tip:"💚 0 cholestérol, 0 crème."
+},
+{
+title:"🍞 Pain cholestérol + glycémie - 6 petits pains",
+meta:"IG très bas",
+ing:"100 g d'amandes moulues\n50 g de graines de lin\n40 g de farine d'orge complète\n15 g de psyllium\n3.5 g de levure boulangère sèche\n180-200 g d'eau tiède\n1 c. à café d'huile d'olive",
+steps:"Même méthode que pain 12: moudre amandes lin, ajouter orge psyllium sel, levure + eau, pétrir 30 sec / vitesse 4 puis 2 min pétrin, repos 30 min, 6 petits pains, cuisson 25 min 180°C puis 35 min 140°C.",
+tip:"💚 Version petite pour ton petit déj ricotta 0%."
+},
+{
+title:"🇲🇦 Kefta grillée barbecue & légumes grillés - 390 kcal",
+meta:"43g protéines 12g glucides",
+ing:"🥩 Kefta:\n300 g de kefta 5% MG\n1 petit oignon finement haché\n2 c. à soupe de persil et coriandre hachés\n1 c. à café de cumin\n1 c. à café de paprika\n½ c. à café de poivre\n½ c. à café de gingembre\n½ c. à café d'huile d'olive\n🥒 Légumes:\n1 courgette\n1 poivron\n½ oignon\n½ c. à café d'huile d'olive\ncumin paprika poivre citron",
+steps:"1. Mélanger kefta avec oignon herbes épices 1-2 min.\n2. Former petits steaks plats.\n3. Couper légumes rondelles lanières.\n4. Plaque électrique forte température 5 min.\n5. Légumes 8-10 min avec ½ c.c huile.\n6. Kefta 4-5 min chaque côté.",
+tip:"💚 Grillée pas frite."
+},
+{
+title:"🍖 Pain de viande léger vapeur & sauce tomate TM7",
+meta:"Varoma • 5% MG",
+ing:"250 g de viande hachée 5% MG\n1 courgette râpée\n1 oignon\n1 c. à café d'huile d'olive\nsauce tomate maison sans sucre",
+steps:"Varoma vapeur 30 min, sauce tomate 12 min / 100°C / vitesse 1 avec 1 c.c huile seulement.",
+tip:"💚 Vapeur = pas de graisse ajoutée."
+},
+{
+title:"🍲 Soupe protéinée légère TM7 - poulet lentilles corail IG 25",
+meta:"IG 25 • anti-LDL",
+ing:"100 g de poulet\n80 g de lentilles corail IG 25\n1 courgette\n1 chou-fleur\n1 carotte\n700 g d'eau\n1 c. à café d'huile d'olive\ncurcuma",
+steps:"Cuisson 25 min / 100°C / sens inverse / vitesse mijotage, mix partiel sans farine pour épaissir.",
+tip:"💚 Lentilles corail fibres qui baissent mauvais cholestérol 10-15%."
+},
+{
+title:"🍗 Poulet façon tajine léger TM7 - poulet congelé Varoma",
+meta:"IG bas • sans peau",
+ing:"400 g de poulet sans peau congelé\n1 petit oignon\n1 gousse d'ail\népices tajine\n250 g d'eau",
+steps:"Varoma 35 min / Varoma / vitesse 1 + 10-15 min sauce 100°C.",
+tip:"💚 Sans peau = -70% mauvais cholestérol."
+},
+{
+title:"🍲 Couscous d'orge TM7 très léger - 120g pour 3 pers",
+meta:"IG 25 • bêta-glucanes",
+ing:"120 g d'orge complète IG 25 pour 3 pers\n7 légumes au choix\n100 g de pois chiches\n1 c. à café d'huile d'olive",
+steps:"Semoule d'orge 3 fois vapeur Varoma, pas de beurre, 1 c.c huile seulement.",
+tip:"💚 Orge anti-cholestérol."
+},
+{
+title:"🥩 Boulettes de viande maigre en sauce légère Varoma",
+meta:"IG bas • vapeur",
+ing:"250 g viande 5% MG\n1 oignon\npersil coriandre\nsauce tomate légère",
+steps:"Boulettes Varoma 20 min, sauce 12 min / 100°C / vitesse 1.",
+tip:"💚"
+}
+];
+
+const K={gly:"carnet_mounir_gly_v3", ten:"carnet_mounir_ten_v3", med:"carnet_mounir_med_v3", ana:"carnet_mounir_ana_v3", som:"carnet_mounir_som_v3", sport:"carnet_mounir_sport_v3", note:"carnet_mounir_note_v3", alert:"carnet_mounir_alerts_v3"};
+let S={gly:JSON.parse(localStorage.getItem(K.gly)||"[]"), ten:JSON.parse(localStorage.getItem(K.ten)||"[]"), med:JSON.parse(localStorage.getItem(K.med)||"[]"), ana:JSON.parse(localStorage.getItem(K.ana)||"[]"), som:JSON.parse(localStorage.getItem(K.som)||"[]"), sport:JSON.parse(localStorage.getItem(K.sport)||"[]"), note:JSON.parse(localStorage.getItem(K.note)||"[]"), alert:JSON.parse(localStorage.getItem(K.alert)||"[]")};
+let cur={gly:null, ten:null, med:null, ana:null};
+
+function saveAll(){ Object.keys(K).forEach(k=>localStorage.setItem(K[k], JSON.stringify(S[k]))); renderAll(); }
+function compress(file, cb){ const img=new Image(); img.src=URL.createObjectURL(file); img.onload=()=>{ const c=document.createElement('canvas'); const max=400; let w=img.width,h=img.height; if(w>max||h>max){ if(w>h){h=h*max/w; w=max;} else{w=w*max/h; h=max;} } c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',0.4)); }; }
+function bindPhoto(inputId, key){ const el=document.getElementById(inputId); if(!el) return; el.addEventListener('change', e=>{ const f=e.target.files[0]; if(!f) return; compress(f, b64=>{ cur[key]=b64; document.getElementById(inputId.replace('Photo','PhotoPrev')).innerHTML=`✓ ${Math.round(b64.length/1024)}Ko`; }); }); }
+bindPhoto('glyPhoto','gly'); bindPhoto('tenPhoto','ten'); bindPhoto('medPhoto','med'); bindPhoto('anaPhoto','ana');
+
+function renderGly(){ const c=document.getElementById('glyList'); c.innerHTML=''; [...S.gly].reverse().slice(0,30).forEach((g,i)=>{ const real=S.gly.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${g.photo?`<img src="${g.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${g.val} mg/dL</b> ${g.moment}<br><small>${new Date(g.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('gly',${real})">🗑️</button>`; c.appendChild(div); }); const canvas=document.getElementById('chartGly'); if(canvas && S.gly.length>1){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); const vals=S.gly.slice(-20).map(x=>x.val); const min=Math.min(...vals)-10, max=Math.max(...vals)+10; ctx.beginPath(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2; vals.forEach((v,i)=>{ const x=i/(vals.length-1)*canvas.width; const y=canvas.height - (v-min)/(max-min)*canvas.height; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke(); } }
+function renderTen(){ const c=document.getElementById('tenList'); c.innerHTML=''; [...S.ten].reverse().forEach((t,i)=>{ const real=S.ten.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${t.photo?`<img src="${t.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${t.val}</b> ${t.note||''}<br><small>${new Date(t.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('ten',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderMed(){ const c=document.getElementById('medList'); c.innerHTML=''; [...S.med].reverse().forEach((m,i)=>{ const real=S.med.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${m.photo?`<img src="${m.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${m.nom}</b> ${m.dose}<br><small>${new Date(m.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('med',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderAna(){ const c=document.getElementById('anaList'); c.innerHTML=''; [...S.ana].reverse().forEach((a,i)=>{ const real=S.ana.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`${a.photo?`<img src="${a.photo}" class="vignette">`:`<div class="vignette"></div>`}<div style="flex:1"><b>${a.type}</b> ${a.res}<br><small>${new Date(a.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('ana',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderSom(){ const c=document.getElementById('somList'); c.innerHTML=''; [...S.som].reverse().forEach((s,i)=>{ const real=S.som.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`<div style="flex:1"><b>${s.date||''} ${s.total||''}</b><br><small style="white-space:pre-wrap">${s.detail||''} ${s.qual||''}</small></div><button class="btn-small" onclick="del('som',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderSport(){ const c=document.getElementById('sportList'); c.innerHTML=''; [...S.sport].reverse().forEach((s,i)=>{ const real=S.sport.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`<div style="flex:1"><b>${s.type}</b> ${s.date||''}</div><button class="btn-small" onclick="del('sport',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderNote(){ const c=document.getElementById('noteList'); c.innerHTML=''; [...S.note].reverse().forEach((n,i)=>{ const real=S.note.length-1-i; const div=document.createElement('div'); div.className='list-item'; div.innerHTML=`<div style="flex:1">${n.text}<br><small>${new Date(n.ts).toLocaleString()}</small></div><button class="btn-small" onclick="del('note',${real})">🗑️</button>`; c.appendChild(div); }); }
+function renderRec(){ const c=document.getElementById('recettesList'); c.innerHTML=''; RECETTES.forEach((r,i)=>{ const d=document.createElement('div'); d.innerHTML=`<div class="recipe-title" onclick="this.nextElementSibling.classList.toggle('open')"><span>▼ ${r.title}</span><span style="font-size:11px;color:#666">${r.meta}</span></div><div class="recipe-detail"><b>Ingrédients IG bas:</b>\n${r.ing}\n\n<b>Étapes TM7 détaillées:</b>\n${r.steps}\n\n${r.tip}</div>`; c.appendChild(d); }); }
+function renderAlerts(){ const c=document.getElementById('pendingAlerts'); c.innerHTML=''; const pend=S.alert.filter(a=>!a.done); if(!pend.length){c.innerHTML='<div class="alert-box alert-green">Aucune alerte en attente - enregistre "avant repas" et l\'alerte se programme toute seule (pas besoin de cliquer Activer)</div>'; return;} pend.forEach(a=>{ const diff=a.time-Date.now(); const mins=Math.max(0,Math.round(diff/60000)); const over=diff<=0; const div=document.createElement('div'); div.className='alert-box '+(over?'alert-red':'alert-yellow'); div.innerHTML=`${over?'🔴 <b>EN RETARD - Il est temps de reprendre ta glycémie ! Passe en Après repas 2h</b>':'⏰ Alerte dans '+mins+' min - avant repas de '+new Date(a.from).toLocaleTimeString()}<br><button class="btn-small" onclick="doneA('${a.id}')">✅ Fait</button> <button class="btn-small" onclick="cancelA('${a.id}')">Annuler</button>`; c.appendChild(div); }); }
+window.doneA=(id)=>{ S.alert=S.alert.map(a=>a.id===id?{...a,done:true}:a); saveAll(); };
+window.cancelA=(id)=>{ S.alert=S.alert.filter(a=>a.id!==id); saveAll(); };
+window.del=(type, idx)=>{ if(!confirm('Supprimer ?')) return; S[type].splice(idx,1); saveAll(); };
+function renderAll(){ renderGly(); renderTen(); renderMed(); renderAna(); renderSom(); renderSport(); renderNote(); renderRec(); renderAlerts(); }
+
+document.getElementById('btnSaveGly').onclick=()=>{
+ const v=parseInt(document.getElementById('glyVal').value); if(!v) return alert('Valeur ?');
+ const m=document.getElementById('glyMoment').value;
+ const e={val:v, moment:m, ts:Date.now(), photo:cur.gly};
+ S.gly.push(e);
+ if(m.includes('avant') && document.getElementById('chkAlerte').checked){
+  const id='a_'+Date.now(); S.alert.push({id, from:e.ts, time:Date.now()+2*3600000, done:false, notified:false});
+  // notif optionnelle si permission
+  if(typeof Notification!=='undefined' && Notification.permission==='granted'){
+   setTimeout(()=>{ if(S.alert.find(x=>x.id===id && !x.done)){ try{ new Notification('⏰ Glycémie 2h', {body:'Il est temps de reprendre !'});}catch{} } }, 7200000);
+  }
+ }
+ cur.gly=null; document.getElementById('glyVal').value=''; document.getElementById('glyPhotoPrev').innerHTML='';
+ saveAll();
+ document.getElementById('msgRaccourci').style.display='block';
+ document.getElementById('msgRaccourci').innerHTML=`✅ ${v} enregistré ${m} ${m.includes('avant')?'⏰ Alerte 2h programmée automatiquement (regarde en haut le décompte)':''}`;
+};
+document.getElementById('glyVal').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('btnSaveGly').click(); });
+document.getElementById('btnSaveTen').onclick=()=>{ const v=document.getElementById('tenVal').value; if(!v) return alert('Valeur ?'); S.ten.push({val:v, note:document.getElementById('tenNote').value, photo:cur.ten, ts:Date.now()}); cur.ten=null; document.getElementById('tenVal').value=''; saveAll(); };
+document.getElementById('btnSaveMed').onclick=()=>{ const n=document.getElementById('medNom').value; if(!n) return alert('Nom ?'); S.med.push({nom:n, dose:document.getElementById('medDose').value, photo:cur.med, ts:Date.now()}); cur.med=null; saveAll(); };
+document.getElementById('btnSaveAna').onclick=()=>{ const t=document.getElementById('anaType').value; if(!t) return alert('Type ?'); S.ana.push({type:t, res:document.getElementById('anaRes').value, photo:cur.ana, ts:Date.now()}); cur.ana=null; saveAll(); };
+document.getElementById('btnSaveSom').onclick=()=>{ S.som.push({date:document.getElementById('somDate').value, total:document.getElementById('somTotal').value, detail:document.getElementById('somDetail').value, qual:document.getElementById('somQual').value, ts:Date.now()}); saveAll(); };
+document.getElementById('btnSaveSport').onclick=()=>{ const t=document.getElementById('sportType').value; if(!t) return alert('Type ?'); S.sport.push({type:t, date:document.getElementById('sportDate').value, ts:Date.now()}); saveAll(); };
+document.getElementById('btnSaveNote').onclick=()=>{ const t=document.getElementById('noteText').value; if(!t) return; S.note.push({text:t, ts:Date.now()}); document.getElementById('noteText').value=''; saveAll(); };
+
+document.getElementById('btnNotif').onclick=async()=>{
+ const info=document.getElementById('notifInfo');
+ if(typeof Notification==='undefined'){ info.innerHTML='ℹ️ Sur cet iPhone, Notification non supportée dans ce mode. Pas grave : ton alerte interne 2h marche déjà (bandeau rouge + son quand tu rouvres). Pour vraie notif système, ajoute le carnet à l\'écran d\'accueil (Partager > Sur écran d\'accueil) avec iOS 16.4+.'; return; }
+ try{
+  const p=await Notification.requestPermission();
+  if(p==='granted'){ info.innerHTML='✅ Notifications système activées ! Tu auras la notif iPhone + bandeau.'; document.getElementById('btnNotif').textContent='✅ Activées'; }
+  else{ info.innerHTML='❌ Refusé. Va dans Réglages iPhone > Safari > Notifications > Autoriser. Ton alerte interne marche quand même.'; }
+ }catch(e){ info.innerHTML='ℹ️ Erreur: '+e.message+' - alerte interne marche quand même (bandeau rouge).'; }
+};
+
+setInterval(()=>{
+ let ch=false;
+ S.alert.forEach(a=>{ if(!a.done && !a.notified && Date.now()>=a.time){ a.notified=true; ch=true; try{ if(typeof Notification!=='undefined' && Notification.permission==='granted') new Notification('⏰ Glycémie 2h', {body:'2h écoulées !'});}catch{} try{ navigator.vibrate([300,100,300]); }catch{} } });
+ if(ch) saveAll(); else renderAlerts();
+},30000);
+
+(function(){ const p=new URLSearchParams(location.search); const g=p.get('glycemie'); if(g){ document.getElementById('glyVal').value=g; document.getElementById('msgRaccourci').style.display='block'; document.getElementById('msgRaccourci').innerHTML=`📸 Valeur détectée depuis photo: <b>${g}</b> - vérifie Moment puis ENREGISTRER`; document.getElementById('glyVal').style.border='3px solid #16a34a'; }})();
+
+renderAll();
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
